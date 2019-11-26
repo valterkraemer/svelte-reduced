@@ -242,7 +242,7 @@ export default class EachBlockWrapper extends Wrapper {
 		if (this.block.has_intro_method || this.block.has_outro_method) {
 			block.chunks.intro.push(b`
 				for (let #i = 0; #i < ${this.vars.data_length}; #i += 1) {
-					@transition_in(${this.vars.iterations}[#i]);
+					@transition_in(${this.vars.iterations}[#i], #instant);
 				}
 			`);
 		}
@@ -488,22 +488,22 @@ export default class EachBlockWrapper extends Wrapper {
 				? b`
 					if (${iterations}[#i]) {
 						${iterations}[#i].p(child_ctx, #dirty);
-						${has_transitions && b`@transition_in(${this.vars.iterations}[#i], 1);`}
+						${has_transitions && b`@transition_in(${this.vars.iterations}[#i], ${this.renderer.is_not_update}, 1);`}
 					} else {
 						${iterations}[#i] = ${create_each_block}(child_ctx);
 						${iterations}[#i].c();
-						${has_transitions && b`@transition_in(${this.vars.iterations}[#i], 1);`}
+						${has_transitions && b`@transition_in(${this.vars.iterations}[#i], ${this.renderer.is_not_update}, 1);`}
 						${iterations}[#i].m(${update_mount_node}, ${update_anchor_node});
 					}
 				`
 				: has_transitions
 					? b`
 						if (${iterations}[#i]) {
-							@transition_in(${this.vars.iterations}[#i], 1);
+							@transition_in(${this.vars.iterations}[#i], ${this.renderer.is_not_update}, 1);
 						} else {
 							${iterations}[#i] = ${create_each_block}(child_ctx);
 							${iterations}[#i].c();
-							@transition_in(${this.vars.iterations}[#i], 1);
+							@transition_in(${this.vars.iterations}[#i], ${this.renderer.is_not_update}, 1);
 							${iterations}[#i].m(${update_mount_node}, ${update_anchor_node});
 						}
 					`

@@ -232,7 +232,7 @@ export default class IfBlockWrapper extends Wrapper {
 		}
 
 		if (has_intros || has_outros) {
-			block.chunks.intro.push(b`@transition_in(${name});`);
+			block.chunks.intro.push(b`@transition_in(${name}, #instant);`);
 		}
 
 		if (needs_anchor) {
@@ -315,7 +315,7 @@ export default class IfBlockWrapper extends Wrapper {
 				${name} = ${get_block};
 				if (${name}) {
 					${name}.c();
-					${has_transitions && b`@transition_in(${name}, 1);`}
+					${has_transitions && b`@transition_in(${name}, ${this.renderer.is_not_update}, 1);`}
 					${name}.m(${update_mount_node}, ${anchor});
 				}
 			`;
@@ -448,7 +448,7 @@ export default class IfBlockWrapper extends Wrapper {
 					${name} = ${if_blocks}[${current_block_type_index}] = ${if_block_creators}[${current_block_type_index}](#ctx);
 					${name}.c();
 				}
-				${has_transitions && b`@transition_in(${name}, 1);`}
+				${has_transitions && b`@transition_in(${name}, ${this.renderer.is_not_update}, 1);`}
 				${name}.m(${update_mount_node}, ${anchor});
 			`;
 
@@ -519,11 +519,11 @@ export default class IfBlockWrapper extends Wrapper {
 				? b`
 					if (${name}) {
 						${name}.p(#ctx, #dirty);
-						${has_transitions && b`@transition_in(${name}, 1);`}
+						${has_transitions && b`@transition_in(${name}, ${this.renderer.is_not_update}, 1);`}
 					} else {
 						${name} = ${branch.block.name}(#ctx);
 						${name}.c();
-						${has_transitions && b`@transition_in(${name}, 1);`}
+						${has_transitions && b`@transition_in(${name}, ${this.renderer.is_not_update}, 1);`}
 						${name}.m(${update_mount_node}, ${anchor});
 					}
 				`
@@ -531,10 +531,10 @@ export default class IfBlockWrapper extends Wrapper {
 					if (!${name}) {
 						${name} = ${branch.block.name}(#ctx);
 						${name}.c();
-						${has_transitions && b`@transition_in(${name}, 1);`}
+						${has_transitions && b`@transition_in(${name}, ${this.renderer.is_not_update}, 1);`}
 						${name}.m(${update_mount_node}, ${anchor});
 					} else {
-						${has_transitions && b`@transition_in(${name}, 1);`}
+						${has_transitions && b`@transition_in(${name}, ${this.renderer.is_not_update}, 1);`}
 					}
 				`;
 

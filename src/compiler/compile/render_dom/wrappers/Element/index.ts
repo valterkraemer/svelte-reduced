@@ -689,7 +689,7 @@ export default class ElementWrapper extends Wrapper {
 			const fn = this.renderer.reference(intro.name);
 
 			const intro_block = b`
-				@add_render_callback(() => {
+				if (!#instant) @add_render_callback(() => {
 					if (!${name}) ${name} = @create_bidirectional_transition(${this.var}, ${fn}, ${snippet}, true);
 					${name}.run(1);
 				});
@@ -736,7 +736,7 @@ export default class ElementWrapper extends Wrapper {
 
 				if (outro) {
 					intro_block = b`
-						@add_render_callback(() => {
+						if (!#instant) @add_render_callback(() => {
 							if (${outro_name}) ${outro_name}.end(1);
 							if (!${intro_name}) ${intro_name} = @create_in_transition(${this.var}, ${fn}, ${snippet});
 							${intro_name}.start();
@@ -746,7 +746,7 @@ export default class ElementWrapper extends Wrapper {
 					block.chunks.outro.push(b`if (${intro_name}) ${intro_name}.invalidate();`);
 				} else {
 					intro_block = b`
-						if (!${intro_name}) {
+						if (!#instant && !${intro_name}) {
 							@add_render_callback(() => {
 								${intro_name} = @create_in_transition(${this.var}, ${fn}, ${snippet});
 								${intro_name}.start();

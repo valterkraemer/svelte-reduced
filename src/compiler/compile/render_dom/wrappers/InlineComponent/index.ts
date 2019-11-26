@@ -435,7 +435,7 @@ export default class InlineComponentWrapper extends Wrapper {
 						${munged_handlers}
 
 						@create_component(${name}.$$.fragment);
-						@transition_in(${name}.$$.fragment, 1);
+						@transition_in(${name}.$$.fragment, ${this.renderer.is_not_update}, 1);
 						@mount_component(${name}, ${update_mount_node}, ${anchor});
 					} else {
 						${name} = null;
@@ -446,11 +446,11 @@ export default class InlineComponentWrapper extends Wrapper {
 			`);
 
 			block.chunks.intro.push(b`
-				if (${name}) @transition_in(${name}.$$.fragment, #local);
+				if (${name}) @transition_in(${name}.$$.fragment, #instant, #local);
 			`);
 
 			block.chunks.outro.push(
-				b`if (${name}) @transition_out(${name}.$$.fragment, #local);`
+				b`if (${name}) @transition_out(${name}.$$.fragment, #instant, #local);`
 			);
 
 			block.chunks.destroy.push(b`if (${name}) @destroy_component(${name}, ${parent_node ? null : 'detaching'});`);
@@ -482,7 +482,7 @@ export default class InlineComponentWrapper extends Wrapper {
 			);
 
 			block.chunks.intro.push(b`
-				@transition_in(${name}.$$.fragment, #local);
+				@transition_in(${name}.$$.fragment, #instant, #local);
 			`);
 
 			if (updates.length) {

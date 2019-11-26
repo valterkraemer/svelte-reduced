@@ -185,7 +185,7 @@ export default class AwaitBlockWrapper extends Wrapper {
 		`);
 
 		if (has_transitions) {
-			block.chunks.intro.push(b`@transition_in(${info}.block);`);
+			block.chunks.intro.push(b`@transition_in(${info}.block, #instant);`);
 		}
 
 		const dependencies = this.node.expression.dynamic_dependencies();

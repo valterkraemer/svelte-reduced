@@ -152,8 +152,8 @@ export function init(component, options, instance, create_fragment, not_equal, p
 			$$.fragment && $$.fragment!.c();
 		}
 
-		if (options.intro) transition_in(component.$$.fragment);
 		mount_component(component, options.target, options.anchor);
+		transition_in(component.$$.fragment, !options.intro);
 		flush();
 	}
 

@@ -228,11 +228,6 @@ export default class Block {
 		if (this.has_outros) {
 			this.add_variable({ type: 'Identifier', name: '#current' });
 
-			if (this.chunks.intro.length > 0) {
-				this.chunks.intro.push(b`#current = true;`);
-				this.chunks.mount.push(b`#current = true;`);
-			}
-
 			if (this.chunks.outro.length > 0) {
 				this.chunks.outro.push(b`#current = false;`);
 			}
@@ -338,8 +333,11 @@ export default class Block {
 			if (this.chunks.intro.length === 0) {
 				properties.intro = noop;
 			} else {
-				properties.intro = x`function #intro(#local) {
-					${this.has_outros && b`if (#current) return;`}
+				properties.intro = x`function #intro(#local, #instant) {
+					${this.has_outros && b`
+						if (#current) return;
+						#current = true;
+					`}
 					${this.chunks.intro}
 				}`;
 			}

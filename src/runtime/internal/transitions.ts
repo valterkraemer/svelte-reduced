@@ -41,10 +41,10 @@ export function check_outros() {
 	outros = outros.p;
 }
 
-export function transition_in(block, local?: 0 | 1) {
+export function transition_in(block, instant?: boolean | 0 | 1, local?: 0 | 1) {
 	if (block && block.i) {
 		outroing.delete(block);
-		block.i(local);
+		block.i(local, instant);
 	}
 }
 

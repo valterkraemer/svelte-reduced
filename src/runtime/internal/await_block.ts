@@ -38,7 +38,7 @@ export function handle_promise(promise, info) {
 			}
 
 			block.c();
-			transition_in(block, 1);
+			transition_in(block, 0, 1);
 			block.m(info.mount(), info.anchor);
 
 			needs_flush = true;
