@@ -4,7 +4,7 @@ Set up the site sub-project:
 
 ```bash
 git clone https://github.com/sveltejs/svelte.git
-cd site
+cd svelte/site
 npm ci
 npm run update
 npm run dev
