@@ -4,11 +4,6 @@ export default {
 		<input>
 	`,
 
-	ssrHtml: `
-		<p>foo</p>
-		<input value=foo>
-	`,
-
 	async test({ assert, component, target, window }) {
 		const input = target.querySelector('input');
 

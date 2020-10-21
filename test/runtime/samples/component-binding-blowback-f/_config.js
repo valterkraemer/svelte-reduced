@@ -7,14 +7,6 @@ export default {
 		<p></p>
 	`,
 
-	ssrHtml: `
-		<button>click me</button>
-		<button>click me</button>
-
-		<p>{}</p>
-		<p></p>
-	`,
-
 	async test({ assert, target, window }) {
 		const button = target.querySelectorAll('button')[1];
 

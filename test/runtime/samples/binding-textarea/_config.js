@@ -8,11 +8,6 @@ export default {
 		<p>some text</p>
 	`,
 
-	ssrHtml: `
-		<textarea>some text</textarea>
-		<p>some text</p>
-	`,
-
 	async test({ assert, component, target, window }) {
 		const textarea = target.querySelector('textarea');
 		assert.equal(textarea.value, 'some text');

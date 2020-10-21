@@ -7,14 +7,6 @@ export default {
 		</ul>
 	`,
 
-	ssrHtml: `
-		<ul>
-			<li><input value=foo></li>
-			<li>bar</li>
-			<li>baz</li>
-		</ul>
-	`,
-
 	props: {
 		components: [
 			{ name: 'foo', edit: true },

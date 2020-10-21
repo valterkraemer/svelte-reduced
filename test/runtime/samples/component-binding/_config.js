@@ -1,5 +1,4 @@
 export default {
-	skip_if_ssr: true, // TODO delete this line, once binding works
 
 	html: `
 		<button>+1</button>

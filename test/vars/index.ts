@@ -14,7 +14,7 @@ describe('vars', () => {
 			throw new Error('Forgot to remove `solo: true` from test');
 		}
 
-		for (const generate of ['dom', 'ssr', false]) {
+		for (const generate of ['dom', false]) {
 			(solo ? it.only : skip ? it.skip : it)(`${dir}, generate: ${generate}`, () => {
 				const config = loadConfig(`${__dirname}/samples/${dir}/_config.js`);
 				const filename = `${__dirname}/samples/${dir}/input.svelte`;

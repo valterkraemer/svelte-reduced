@@ -8,11 +8,6 @@ export default {
 		<p>true</p>
 	`,
 
-	ssrHtml: `
-		<input type="checkbox" checked>
-		<p>true</p>
-	`,
-
 	async test({ assert, component, target, window }) {
 		const input = target.querySelector('input');
 		assert.equal(input.checked, true);

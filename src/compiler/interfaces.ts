@@ -108,7 +108,7 @@ export interface CompileOptions {
 	format?: ModuleFormat;
 	name?: string;
 	filename?: string;
-	generate?: 'dom' | 'ssr' | false;
+	generate?: 'dom' | false;
 
 	outputFilename?: string;
 	cssOutputFilename?: string;
@@ -124,7 +124,6 @@ export interface CompileOptions {
 	css?: boolean;
 	loopGuardTimeout?: number;
 
-	preserveComments?: boolean;
 	preserveWhitespace?: boolean;
 }
 
@@ -164,7 +163,7 @@ export interface Var {
 	imported?: boolean;
 }
 
-export interface CssResult { 
+export interface CssResult {
 	code: string;
 	map: SourceMap;
 }

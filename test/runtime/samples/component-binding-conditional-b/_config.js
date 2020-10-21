@@ -1,5 +1,4 @@
 export default {
-	skip_if_ssr: true, // TODO delete this line, once binding works
 
 	// This test fails, because the Bar y binding is activated before the
 	// Baz x binding, meaning that by the time Foo is created, we already

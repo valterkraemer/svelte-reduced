@@ -3,10 +3,6 @@ export default {
 		<input>
 	`,
 
-	ssrHtml: `
-		<input>
-	`,
-
 	async test({ assert, component, target, window }) {
 		const input = target.querySelector('input');
 		assert.equal(input.value, '');

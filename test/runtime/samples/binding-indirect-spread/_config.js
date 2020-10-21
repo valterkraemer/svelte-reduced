@@ -1,5 +1,4 @@
 export default {
-	skip_if_ssr: true,
 	async test({ assert, component, target, window }) {
 		const event = new window.MouseEvent('click');
 

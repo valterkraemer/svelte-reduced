@@ -5,12 +5,6 @@ export default {
 		<p>10 of 10</p>
 	`,
 
-	ssrHtml: `
-		<button></button>
-		<input type=range min=0 max=10 value=10>
-		<p>10 of 10</p>
-	`,
-
 	async test({ assert, target, window }) {
 		const input = target.querySelector('input');
 		assert.equal(input.value, '10');

@@ -6,7 +6,6 @@ const tasks = [
 ];
 
 export default {
-	skip_if_ssr: true,
 
 	props: {
 		tasks,

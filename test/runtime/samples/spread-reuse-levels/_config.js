@@ -4,11 +4,6 @@ export default {
 		<pre>{"a":false,"b":false,"c":false}</pre>
 	`,
 
-	ssrHtml: `
-		<pre>{"a":1,"b":[1],"c":42}</pre>
-		<pre>{}</pre>
-	`,
-
 	test({ assert, component, target }) {
 		component.a = 2;
 

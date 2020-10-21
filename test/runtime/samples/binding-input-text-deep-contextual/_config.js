@@ -13,12 +13,6 @@ export default {
 		<div><input><p>three</p></div>
 	`,
 
-	ssrHtml: `
-		<div><input value=one><p>one</p></div>
-		<div><input value=two><p>two</p></div>
-		<div><input value=three><p>three</p></div>
-	`,
-
 	async test({ assert, component, target, window }) {
 		const inputs = [...target.querySelectorAll('input')];
 

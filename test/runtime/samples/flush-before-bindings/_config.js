@@ -3,8 +3,6 @@
 export default {
 	skip: true, // TODO
 
-	skip_if_ssr: true,
-
 	html: `
 		<div><p>first thing (true)</p></div>
 		<div><p>second thing (true)</p></div>

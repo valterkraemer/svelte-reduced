@@ -1,5 +1,4 @@
 export default {
-	skip_if_ssr: true, // TODO would be nice to fix this in SSR as well
 
 	html: `
 		<p>selected: a</p>

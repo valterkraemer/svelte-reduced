@@ -1,7 +1,6 @@
 import Stats from '../Stats';
 import parse from '../parse/index';
 import render_dom from './render_dom/index';
-import render_ssr from './render_ssr/index';
 import { CompileOptions, Warning } from '../interfaces';
 import Component from './Component';
 import fuzzymatch from '../utils/fuzzymatch';
@@ -24,7 +23,6 @@ const valid_options = [
 	'tag',
 	'css',
 	'loopGuardTimeout',
-	'preserveComments',
 	'preserveWhitespace'
 ];
 
@@ -91,9 +89,7 @@ export default function compile(source: string, options: CompileOptions = {}) {
 
 	const result = options.generate === false
 		? null
-		: options.generate === 'ssr'
-			? render_ssr(component, options)
-			: render_dom(component, options);
+		: render_dom(component, options);
 
 	return component.generate(result);
 }

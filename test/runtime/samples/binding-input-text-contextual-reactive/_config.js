@@ -24,23 +24,6 @@ export default {
 		<p>remaining:one / done:two / remaining:three</p>
 	`,
 
-	ssrHtml: `
-		<div>
-			<input type="checkbox">
-			<input type="text" value=one><p>one</p>
-		</div>
-		<div>
-			<input type="checkbox" checked="">
-			<input type="text" value=two><p>two</p>
-		</div>
-		<div>
-			<input type="checkbox">
-			<input type="text" value=three><p>three</p>
-		</div>
-
-		<p>remaining:one / done:two / remaining:three</p>
-	`,
-
 	async test({ assert, component, target, window }) {
 		function set_text(i, text) {
 			const input = target.querySelectorAll('input[type="text"]')[i];

@@ -4,11 +4,6 @@ export default {
 		<p>value: initial</p>
 	`,
 
-	ssrHtml: `
-		<input value="initial">
-		<p>value: initial</p>
-	`,
-
 	async test({ assert, target, window }) {
 		const input = target.querySelector('input');
 		const event = new window.Event('input');

@@ -65,17 +65,8 @@ describe('css', () => {
 				Object.assign(config.compileOptions || {}, { format: 'cjs' })
 			);
 
-			const ssr = svelte.compile(
-				input,
-				Object.assign(config.compileOptions || {}, { format: 'cjs', generate: 'ssr' })
-			);
-
-			assert.equal(dom.css.code, ssr.css.code);
-
 			const dom_warnings = dom.warnings.map(normalize_warning);
-			const ssr_warnings = ssr.warnings.map(normalize_warning);
 
-			assert.deepEqual(dom_warnings, ssr_warnings);
 			assert.deepEqual(dom_warnings.map(normalize_warning), expected_warnings);
 
 			fs.writeFileSync(`${__dirname}/samples/${dir}/_actual.css`, dom.css.code);
@@ -97,19 +88,11 @@ describe('css', () => {
 			}
 
 			let ClientComponent;
-			let ServerComponent;
 
 			// we do this here, rather than in the expected.html !== null
 			// block, to verify that valid code was generated
 			try {
 				ClientComponent = create(dom.js.code);
-			} catch (err) {
-				console.log(dom.js.code);
-				throw err;
-			}
-
-			try {
-				ServerComponent = create(ssr.js.code);
 			} catch (err) {
 				console.log(dom.js.code);
 				throw err;
@@ -134,15 +117,6 @@ describe('css', () => {
 					window.document.head.innerHTML = ''; // remove added styles
 				} catch (err) {
 					console.log(dom.js.code);
-					throw err;
-				}
-
-				// ssr
-				try {
-					const actual_ssr = ServerComponent.render(config.props).html.replace(/svelte(-ref)?-[a-z0-9]+/g, (m, $1) => $1 ? m : 'svelte-xyz');
-					assert.htmlEqual(actual_ssr, expected.html);
-				} catch (err) {
-					console.log(ssr.js.code);
 					throw err;
 				}
 			}

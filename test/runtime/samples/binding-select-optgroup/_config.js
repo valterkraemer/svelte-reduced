@@ -1,16 +1,5 @@
 export default {
 
-	ssrHtml: `
-		<h1>Hello undefined!</h1>
-
-		<select>
-			<option value="Harry">Harry</option>
-			<optgroup label="Group">
-				<option value="World">World</option>
-			</optgroup>
-		</select>
-	`,
-
 	html: `
 		<h1>Hello Harry!</h1>
 

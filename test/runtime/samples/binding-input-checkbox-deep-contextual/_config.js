@@ -20,19 +20,6 @@ export default {
 		<p>1 completed</p>
 	`,
 
-	ssrHtml: `
-		<div>
-			<input type="checkbox" checked><p>one</p>
-		</div>
-		<div>
-			<input type="checkbox"><p>two</p>
-		</div>
-		<div>
-			<input type="checkbox"><p>three</p>
-		</div>
-		<p>1 completed</p>
-	`,
-
 	async test({ assert, component, target, window }) {
 		const inputs = [ ...target.querySelectorAll('input') ];
 

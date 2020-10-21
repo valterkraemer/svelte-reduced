@@ -1,5 +1,4 @@
 export default {
-	skip_if_ssr: true,
 	before_test() {
 		Object.defineProperties(window, {
 			pageYOffset: {

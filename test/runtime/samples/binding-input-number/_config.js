@@ -8,11 +8,6 @@ export default {
 		<p>number 42</p>
 	`,
 
-	ssrHtml: `
-		<input type=number value=42>
-		<p>number 42</p>
-	`,
-
 	async test({ assert, component, target, window }) {
 		const input = target.querySelector('input');
 		assert.equal(input.value, '42');

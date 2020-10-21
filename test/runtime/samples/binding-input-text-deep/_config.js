@@ -10,11 +10,6 @@ export default {
 		<p>hello alice</p>
 	`,
 
-	ssrHtml: `
-		<input value=alice>
-		<p>hello alice</p>
-	`,
-
 	async test({ assert, component, target, window }) {
 		const input = target.querySelector('input');
 

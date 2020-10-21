@@ -1,7 +1,6 @@
 const items = [ { id: 'a' }, { id: 'b' } ];
 
 export default {
-	skip_if_ssr: true,
 
 	props: {
 		foo: 'b',

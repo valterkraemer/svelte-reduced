@@ -9,11 +9,6 @@ export default {
 		<div><input><p>x</p></div>
 	`,
 
-	ssrHtml: `
-		<div><input value=a><p>a</p></div>
-		<div><input value=x><p>x</p></div>
-	`,
-
 	async test({ assert, component, target, window }) {
 		const inputs = [...target.querySelectorAll('input')];
 		const event = new window.Event('input');

@@ -1,6 +1,5 @@
 export default {
 	html: '<input> <input> <input>',
-	ssrHtml: '<input value="Blub"> <input value="Blub"> <input value="Blub">',
 
 	async test({ assert, target, component, window }) {
 		const [input1, input2, inputFallback] = target.querySelectorAll('input');

@@ -8,11 +8,6 @@ export default {
 		<p></p>
 	`,
 
-	ssrHtml: `
-		<input>
-		<p></p>
-	`,
-
 	async test({ assert, component, target, window }) {
 		const input = target.querySelector('input');
 

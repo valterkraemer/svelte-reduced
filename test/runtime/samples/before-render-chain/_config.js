@@ -1,5 +1,4 @@
 export default {
-	skip_if_ssr: true,
 
 	html: `
 		<span>3</span>

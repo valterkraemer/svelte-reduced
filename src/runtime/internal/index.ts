@@ -8,7 +8,6 @@ export * from './lifecycle';
 export * from './loop';
 export * from './scheduler';
 export * from './spread';
-export * from './ssr';
 export * from './transitions';
 export * from './utils';
 export * from './Component';

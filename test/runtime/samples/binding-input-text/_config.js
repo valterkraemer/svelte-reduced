@@ -8,11 +8,6 @@ export default {
 		<p>hello world</p>
 	`,
 
-	ssrHtml: `
-		<input value="world">
-		<p>hello world</p>
-	`,
-
 	async test({ assert, component, target, window }) {
 		const input = target.querySelector('input');
 		assert.equal(input.value, 'world');

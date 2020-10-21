@@ -6,13 +6,6 @@ export default {
 		</div>
 		<button>Button</button>
 	`,
-	ssrHtml: `
-		<div>
-			b: Hello
-			<input value="Hello" />
-		</div>
-		<button>Button</button>
-	`,
 	async test({ assert, target, window }) {
 		const input = target.querySelector('input');
 		const button = target.querySelector('button');

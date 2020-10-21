@@ -15,11 +15,6 @@ export default {
 		<pre>{"foo":"a","bar":"b","baz":"c"}</pre>
 	`,
 
-	ssrHtml: `
-		<input value=b>
-		<pre>{"foo":"a","bar":"b","baz":"c"}</pre>
-	`,
-
 	async test({ assert, component, target, window }) {
 		const input = target.querySelector('input');
 		const event = new window.Event('input');
