@@ -13,7 +13,6 @@ import map_children from './shared/map_children';
 import { dimensions } from '../../utils/patterns';
 import fuzzymatch from '../../utils/fuzzymatch';
 import list from '../../utils/list';
-import Let from './Let';
 import TemplateScope from './shared/TemplateScope';
 import { INode } from './interfaces';
 import Component from '../Component';
@@ -117,7 +116,6 @@ export default class Element extends Node {
 	bindings: Binding[] = [];
 	classes: Class[] = [];
 	handlers: EventHandler[] = [];
-	lets: Let[] = [];
 	intro?: Transition = null;
 	outro?: Transition = null;
 	animation?: Animation = null;
@@ -169,11 +167,6 @@ export default class Element extends Node {
 			}
 		}
 
-		const has_let = info.attributes.some(node => node.type === 'Let');
-		if (has_let) {
-			scope = scope.child();
-		}
-
 		// Binding relies on Attribute, defer its evaluation
 		const order = ['Binding']; // everything else is -1
 		info.attributes.sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type));
@@ -203,17 +196,6 @@ export default class Element extends Node {
 				case 'EventHandler':
 					this.handlers.push(new EventHandler(component, this, scope, node));
 					break;
-
-				case 'Let': {
-					const l = new Let(component, this, scope, node);
-					this.lets.push(l);
-					const dependencies = new Set([l.name.name]);
-
-					l.names.forEach(name => {
-						scope.add(name, dependencies, this);
-					});
-					break;
-				}
 
 				case 'Transition':
 				{
@@ -410,31 +392,6 @@ export default class Element extends Node {
 					code: 'illegal-attribute',
 					message: `'${name}' is not a valid attribute name`
 				});
-			}
-
-			if (name === 'slot') {
-				if (!attribute.is_static) {
-					component.error(attribute, {
-						code: 'invalid-slot-attribute',
-						message: 'slot attribute cannot have a dynamic value'
-					});
-				}
-
-				if (component.slot_outlets.has(name)) {
-					component.error(attribute, {
-						code: 'duplicate-slot-attribute',
-						message: `Duplicate '${name}' slot`
-					});
-
-					component.slot_outlets.add(name);
-				}
-
-				if (!(parent.type === 'InlineComponent' || within_custom_element(parent))) {
-					component.error(attribute, {
-						code: 'invalid-slotted-content',
-						message: 'Element with a slot=\'...\' attribute must be a child of a component or a descendant of a custom element'
-					});
-				}
 			}
 
 			if (name === 'is') {

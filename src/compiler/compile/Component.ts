@@ -23,7 +23,6 @@ import is_reference from 'is-reference';
 import TemplateScope from './nodes/shared/TemplateScope';
 import fuzzymatch from '../utils/fuzzymatch';
 import get_object from './utils/get_object';
-import Slot from './nodes/Slot';
 import { Node, ImportDeclaration, Identifier, Program, ExpressionStatement, AssignmentExpression, Literal } from 'estree';
 import add_to_set from './utils/add_to_set';
 import check_graph_for_cycles from './utils/check_graph_for_cycles';
@@ -92,9 +91,6 @@ export default class Component {
 	aliases: Map<string, Identifier> = new Map();
 	used_names: Set<string> = new Set();
 	globally_used_names: Set<string> = new Set();
-
-	slots: Map<string, Slot> = new Map();
-	slot_outlets: Set<string> = new Set();
 
 	constructor(
 		ast: Ast,

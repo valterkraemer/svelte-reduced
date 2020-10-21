@@ -8,19 +8,14 @@ import { sanitize } from '../../../../utils/names';
 import add_to_set from '../../../utils/add_to_set';
 import { b, x, p } from 'code-red';
 import Attribute from '../../../nodes/Attribute';
-import create_debugging_comment from '../shared/create_debugging_comment';
-import { get_slot_definition } from '../shared/get_slot_definition';
-import TemplateScope from '../../../nodes/shared/TemplateScope';
 import is_dynamic from '../shared/is_dynamic';
 import bind_this from '../shared/bind_this';
 import { Node, Identifier, ObjectExpression } from 'estree';
 import EventHandler from '../Element/EventHandler';
-import { extract_names } from 'periscopic';
 import { string_to_member_expression } from '../../../utils/string_to_member_expression';
 
 export default class InlineComponentWrapper extends Wrapper {
 	var: Identifier;
-	slots: Map<string, { block: Block; scope: TemplateScope; get_context?: Node; get_changes?: Node }> = new Map();
 	node: InlineComponent;
 	fragment: FragmentWrapper;
 
@@ -64,36 +59,6 @@ export default class InlineComponentWrapper extends Wrapper {
 			).toLowerCase()
 		};
 
-		if (this.node.children.length) {
-			this.node.lets.forEach(l => {
-				extract_names(l.value || l.name).forEach(name => {
-					renderer.add_to_context(name, true);
-				});
-			});
-
-			const default_slot = block.child({
-				comment: create_debugging_comment(node, renderer.component),
-				name: renderer.component.get_unique_name('create_default_slot'),
-				type: 'slot'
-			});
-
-			this.renderer.blocks.push(default_slot);
-
-			this.slots.set('default', get_slot_definition(default_slot, this.node.scope, this.node.lets));
-			this.fragment = new FragmentWrapper(renderer, default_slot, node.children, this, strip_whitespace, next_sibling);
-
-			const dependencies: Set<string> = new Set();
-
-			// TODO is this filtering necessary? (I *think* so)
-			default_slot.dependencies.forEach(name => {
-				if (!this.node.scope.is_let(name)) {
-					dependencies.add(name);
-				}
-			});
-
-			block.add_dependencies(dependencies);
-		}
-
 		block.add_outro();
 	}
 
@@ -132,11 +97,6 @@ export default class InlineComponentWrapper extends Wrapper {
 
 		if (this.fragment) {
 			this.renderer.add_to_context('$$scope', true);
-			const default_slot = this.slots.get('default');
-
-			this.fragment.nodes.forEach((child) => {
-				child.render(default_slot.block, null, x`#nodes` as unknown as Identifier);
-			});
 		}
 
 		let props;
@@ -144,26 +104,7 @@ export default class InlineComponentWrapper extends Wrapper {
 
 		const uses_spread = !!this.node.attributes.find(a => a.is_spread);
 
-		// removing empty slot
-		for (const slot of this.slots.keys()) {
-			if (!this.slots.get(slot).block.has_content()) {
-				this.renderer.remove_block(this.slots.get(slot).block);
-				this.slots.delete(slot);
-			}
-		}
-
-		const initial_props = this.slots.size > 0
-			? [
-				p`$$slots: {
-					${Array.from(this.slots).map(([name, slot]) => {
-						return p`${name}: [${slot.block.name}, ${slot.get_context || null}, ${slot.get_changes || null}]`;
-					})}
-				}`,
-				p`$$scope: {
-					ctx: #ctx
-				}`
-			]
-			: [];
+		const initial_props = [];
 
 		const attribute_object = uses_spread
 			? x`{ ${initial_props} }`
@@ -190,14 +131,6 @@ export default class InlineComponentWrapper extends Wrapper {
 		}
 
 		const fragment_dependencies = new Set(this.fragment ? ['$$scope'] : []);
-		this.slots.forEach(slot => {
-			slot.block.dependencies.forEach(name => {
-				const is_let = slot.scope.is_let(name);
-				const variable = renderer.component.var_lookup.get(name);
-
-				if (is_let || is_dynamic(variable)) fragment_dependencies.add(name);
-			});
-		});
 
 		const dynamic_attributes = this.node.attributes.filter(a => a.get_dependencies().length > 0);
 

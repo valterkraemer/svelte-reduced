@@ -14,11 +14,9 @@ import Fragment from './Fragment';
 import Head from './Head';
 import IfBlock from './IfBlock';
 import InlineComponent from './InlineComponent';
-import Let from './Let';
 import MustacheTag from './MustacheTag';
 import Options from './Options';
 import RawMustacheTag from './RawMustacheTag';
-import Slot from './Slot';
 import Text from './Text';
 import Title from './Title';
 import Transition from './Transition';
@@ -41,11 +39,9 @@ export type INode = Action
 | Head
 | IfBlock
 | InlineComponent
-| Let
 | MustacheTag
 | Options
 | RawMustacheTag
-| Slot
 | Tag
 | Text
 | Title

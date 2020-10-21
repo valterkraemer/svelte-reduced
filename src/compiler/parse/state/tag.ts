@@ -108,7 +108,7 @@ export default function tag(parser: Parser) {
 		? meta_tags.get(name)
 		: (/[A-Z]/.test(name[0]) || name === 'svelte:self' || name === 'svelte:component') ? 'InlineComponent'
 			: name === 'title' && parent_is_head(parser.stack) ? 'Title'
-				: name === 'slot' && !parser.customElement ? 'Slot' : 'Element';
+				: 'Element';
 
 	const element: TemplateNode = {
 		start,
@@ -256,7 +256,7 @@ function read_tag_name(parser: Parser) {
 		if (!legal) {
 			parser.error({
 				code: 'invalid-self-placement',
-				message: '<svelte:self> components can only exist inside {#if} blocks or slots passed to components'
+				message: '<svelte:self> components can only exist inside {#if} blocks'
 			}, start);
 		}
 
@@ -433,7 +433,6 @@ function get_directive_type(name: string): DirectiveType {
 	if (name === 'bind') return 'Binding';
 	if (name === 'class') return 'Class';
 	if (name === 'on') return 'EventHandler';
-	if (name === 'let') return 'Let';
 	if (name === 'in' || name === 'out' || name === 'transition') return 'Transition';
 }
 

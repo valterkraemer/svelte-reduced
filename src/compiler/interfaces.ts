@@ -29,7 +29,6 @@ export type DirectiveType = 'Action'
 | 'Binding'
 | 'Class'
 | 'EventHandler'
-| 'Let'
 | 'Transition';
 
 interface BaseDirective extends BaseNode {
@@ -134,11 +133,6 @@ export interface ParserOptions {
 export interface Visitor {
 	enter: (node: Node) => void;
 	leave?: (node: Node) => void;
-}
-
-export interface AppendTarget {
-	slots: Record<string, string>;
-	slot_stack: string[];
 }
 
 export interface Var {

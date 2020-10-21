@@ -70,15 +70,6 @@ export default function dom(
 		);
 	}
 
-	const uses_slots = component.var_lookup.has('$$slots');
-	let compute_slots;
-	if (uses_slots) {
-		compute_slots = b`
-			const $$slots = @compute_slots(#slots);
-		`;
-	}
-
-
 	const uses_props = component.var_lookup.has('$$props');
 	const uses_rest = component.var_lookup.has('$$restProps');
 	const $$props = uses_props || uses_rest ? '$$new_props' : '$$props';
@@ -92,7 +83,7 @@ export default function dom(
 		let $$restProps = ${compute_rest};
 	` : null;
 
-	const set = (uses_props || uses_rest || writable_props.length > 0 || component.slots.size > 0)
+	const set = (uses_props || uses_rest || writable_props.length > 0)
 		? x`
 			${$$props} => {
 				${uses_props && renderer.invalidate('$$props', x`$$props = @assign(@assign({}, $$props), @exclude_internal_props($$new_props))`)}
@@ -101,8 +92,6 @@ export default function dom(
 				${writable_props.map(prop =>
 					b`if ('${prop.export_name}' in ${$$props}) ${renderer.invalidate(prop.name, x`${prop.name} = ${$$props}.${prop.export_name}`)};`
 				)}
-				${component.slots.size > 0 &&
-				b`if ('$$scope' in ${$$props}) ${renderer.invalidate('$$scope', x`$$scope = ${$$props}.$$scope`)};`}
 			}
 		`
 		: null;
@@ -273,7 +262,6 @@ export default function dom(
 	const args = [x`$$self`];
 	const has_invalidate = props.length > 0 ||
 		component.has_reactive_assignments ||
-		component.slots.size > 0 ||
 		capture_state ||
 		inject_state;
 	if (has_invalidate) {
@@ -417,9 +405,7 @@ export default function dom(
 
 				${resubscribable_reactive_store_unsubscribers}
 
-				${component.slots.size || component.compile_options.dev || uses_slots ? b`let { $$slots: #slots = {}, $$scope } = $$props;` : null}
-				${component.compile_options.dev && b`@validate_slots('${component.tag}', #slots, [${[...component.slots.keys()].map(key => `'${key}'`).join(',')}]);`}
-				${compute_slots}
+				${component.compile_options.dev ? b`let { $$scope } = $$props;` : null}
 
 				${instance_javascript}
 

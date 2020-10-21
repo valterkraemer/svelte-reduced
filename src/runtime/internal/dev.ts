@@ -79,14 +79,6 @@ export function set_data_dev(text, data) {
 	text.data = data;
 }
 
-export function validate_slots(name, slot, keys) {
-	for (const slot_key of Object.keys(slot)) {
-		if (!~keys.indexOf(slot_key)) {
-			console.warn(`<${name}> received an unexpected slot "${slot_key}".`);
-		}
-	}
-}
-
 type Props = Record<string, any>;
 export interface SvelteComponentDev {
 	$set(props?: Props): void;

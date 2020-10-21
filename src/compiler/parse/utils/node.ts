@@ -12,7 +12,6 @@ export function to_string(node: TemplateNode) {
 			return '{@debug} block';
 		case 'Element':
 		case 'InlineComponent':
-		case 'Slot':
 		case 'Title':
 			return `<${node.name}> tag`;
 		default:

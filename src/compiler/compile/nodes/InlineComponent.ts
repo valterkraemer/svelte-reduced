@@ -5,7 +5,6 @@ import Binding from './Binding';
 import EventHandler from './EventHandler';
 import Expression from './shared/Expression';
 import Component from '../Component';
-import Let from './Let';
 import TemplateScope from './shared/TemplateScope';
 import { INode } from './interfaces';
 
@@ -16,7 +15,6 @@ export default class InlineComponent extends Node {
 	attributes: Attribute[] = [];
 	bindings: Binding[] = [];
 	handlers: EventHandler[] = [];
-	lets: Let[] = [];
 	children: INode[];
 	scope: TemplateScope;
 
@@ -45,13 +43,6 @@ export default class InlineComponent extends Node {
 					});
 
 				case 'Attribute':
-					if (node.name === 'slot') {
-						component.error(node, {
-							code: 'invalid-prop',
-							message: "'slot' is reserved for future use in named slots"
-						});
-					}
-					// fallthrough
 				case 'Spread':
 					this.attributes.push(new Attribute(component, this, scope, node));
 					break;
@@ -70,10 +61,6 @@ export default class InlineComponent extends Node {
 					this.handlers.push(new EventHandler(component, this, scope, node));
 					break;
 
-				case 'Let':
-					this.lets.push(new Let(component, this, scope, node));
-					break;
-
 				case 'Transition':
 					component.error(node, {
 						code: 'invalid-transition',
@@ -86,19 +73,7 @@ export default class InlineComponent extends Node {
 			/* eslint-enable no-fallthrough */
 		});
 
-		if (this.lets.length > 0) {
-			this.scope = scope.child();
-
-			this.lets.forEach(l => {
-				const dependencies = new Set([l.name.name]);
-
-				l.names.forEach(name => {
-					this.scope.add(name, dependencies, this);
-				});
-			});
-		} else {
-			this.scope = scope;
-		}
+		this.scope = scope;
 
 		this.handlers.forEach(handler => {
 			handler.modifiers.forEach(modifier => {
