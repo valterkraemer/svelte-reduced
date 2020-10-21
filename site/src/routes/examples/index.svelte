@@ -1,27 +1,12 @@
-<!-- FIXME sometimes it adds a trailing slash when landing -->
-<script context="module">
-	export async function preload() {
-		const sections = await this.fetch(`examples.json`).then(r => r.json());
-		const title_by_slug = sections.reduce((acc, {examples}) => {
-			examples.forEach(({slug, title}) => {
-				acc[slug] = title;
-			});
-
-			return acc;
-		}, {});
-
-		return {sections, title_by_slug};
-	}
-</script>
-
 <script>
+	import { sections, examples, get_example } from "./_examples";
+
 	import { onMount } from 'svelte';
 	import { goto } from '@sapper/app';
 	import Repl from '@sveltejs/svelte-repl';
 
 	import ScreenToggle from '../../components/ScreenToggle.svelte';
 	import {
-		mapbox_setup, // see site/content/examples/15-context/00-context-api
 		rollupUrl,
 		svelteUrl
 	} from '../../config';
@@ -29,47 +14,24 @@
 	import { getFragment } from '@sveltejs/site-kit/utils/navigation';
 	import TableOfContents from './_TableOfContents.svelte';
 
-	export let sections;
-	export let title_by_slug;
-
-	let active_slug;
+	let example;
 	let width;
 	let offset = 1;
 	let repl;
-	let isLoading = false;
-	const cache = {};
+	let active_slug;
 
 	function showExampleCodeOnChange() {
 		offset = 1;
 	}
 
-	$: title = title_by_slug[active_slug] || '';
-	$: first_slug = sections[0].examples[0].slug;
+	$: title = example ? example.title : '';
 	$: mobile = width < 768; // note: same as per media query below
 	$: replOrientation = (mobile || width > 1080) ? 'columns' : 'rows';
 	$: if (repl && active_slug) {
-		if (active_slug in cache) {
-			repl.set({ components: cache[active_slug] });
-			showExampleCodeOnChange();
-		} else {
-			isLoading = true;
-			fetch(`examples/${active_slug}.json`)
-				.then(async response => {
-					if (response.ok) {
-						const {files} = await response.json();
-						return process_example(files);
-					}
-				})
-				.then(components => {
-					cache[active_slug] = components;
-					repl.set({components});
-					showExampleCodeOnChange();
-					isLoading = false;
-				})
-				.catch(() => {
-					isLoading = false;
-				});
-		}
+		const example = get_example(active_slug);
+
+		repl.set({ components: example.files });
+		showExampleCodeOnChange();
 	}
 
 	onMount(() => {
@@ -82,7 +44,7 @@
 		if (fragment) {
 			active_slug = fragment;
 		} else {
-			active_slug = first_slug;
+			active_slug = examples[0].slug;
 			goto(`examples#${active_slug}`);
 		}
 
@@ -102,8 +64,8 @@
 
 <div class='examples-container' bind:clientWidth={width}>
 	<div class="viewport offset-{offset}">
-		<TableOfContents {sections} active_section={active_slug} {isLoading} />
-		<div class="repl-container" class:loading={isLoading}>
+		<TableOfContents sections={sections} active_section={active_slug} isLoading={false} />
+		<div class="repl-container">
 			<Repl
 				bind:this={repl}
 				workersUrl="workers"
@@ -112,7 +74,6 @@
 				orientation={replOrientation}
 				fixed={mobile}
 				relaxed
-				injectedJS={mapbox_setup}
 			/>
 		</div>
 	</div>

@@ -1,37 +1,40 @@
-import polka from 'polka';
-import send from '@polka/send';
 import sirv from 'sirv';
+import polka from 'polka';
+import compression from 'compression';
 import * as sapper from '@sapper/server';
-import { sanitize_user, authenticate } from './utils/auth';
+import { createReadStream } from 'fs';
 
-const { PORT = 3000 } = process.env;
 
-const app = polka({
-	onError: (err, req, res) => {
-		const error = err.message || err;
-		const code = err.code || err.status || 500;
-		res.headersSent || send(res, code, { error });
+const { PORT, NODE_ENV } = process.env;
+const dev = NODE_ENV === 'development';
+
+polka() // You can also use Express
+	.get('/repl/local/*', getFile)
+	.use(
+		compression({ threshold: 0 }),
+		sirv('static', { dev }),
+		sapper.middleware()
+	)
+	.listen(PORT, err => {
+		if (err) console.log('error', err);
+	});
+
+function getFile(req, res) {
+
+	const file = req.params.wild;
+
+	if (process.env.NODE_ENV !== 'development' || file.includes('/.')) {
+		res.writeHead(403);
+		res.end();
+		return;
 	}
-});
 
-if (process.env.PGHOST) {
-	app.use(authenticate());
-}
-
-app.use(
-	sirv('static', {
-		dev: process.env.NODE_ENV === 'development',
-		setHeaders(res) {
-			res.setHeader('Access-Control-Allow-Origin', '*');
-			res.hasHeader('Cache-Control') || res.setHeader('Cache-Control', 'max-age=600'); // 10min default
-		}
-	}),
-
-	sapper.middleware({
-		session: req => ({
-			user: sanitize_user(req.user)
+	createReadStream('../' + file)
+		.on('error', () => {
+			res.writeHead(403);
+			res.end();
 		})
-	})
-);
+		.pipe(res);
 
-app.listen(PORT);
+	res.writeHead(200, { 'Content-Type': 'text/javascript' });
+}
