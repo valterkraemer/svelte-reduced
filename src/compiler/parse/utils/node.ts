@@ -4,15 +4,8 @@ export function to_string(node: TemplateNode) {
 	switch (node.type) {
 		case 'IfBlock':
 			return '{#if} block';
-		case 'ThenBlock':
-			return '{:then} block';
 		case 'ElseBlock':
 			return '{:else} block';
-		case 'PendingBlock':
-		case 'AwaitBlock':
-			return '{#await} block';
-		case 'CatchBlock':
-			return '{:catch} block';
 		case 'RawMustacheTag':
 			return '{@html} block';
 		case 'DebugTag':

@@ -1,4 +1,3 @@
-import read_context from '../read/context';
 import read_expression from '../read/expression';
 import { closing_tag_omitted } from '../utils/html';
 import { whitespace } from '../../utils/patterns';
@@ -8,7 +7,7 @@ import { Parser } from '../index';
 import { TemplateNode } from '../../interfaces';
 
 function trim_whitespace(block: TemplateNode, trim_before: boolean, trim_after: boolean) {
-	if (!block.children || block.children.length === 0) return; // AwaitBlock
+	if (!block.children || block.children.length === 0) return;
 
 	const first_child = block.children[0];
 	const last_child = block.children[block.children.length - 1];
@@ -38,7 +37,7 @@ export default function mustache(parser: Parser) {
 
 	parser.allow_whitespace();
 
-	// {/if}, {/each}, {/await} or {/key}
+	// {/if}, {/each} or {/key}
 	if (parser.eat('/')) {
 		let block = parser.current();
 		let expected;
@@ -49,18 +48,14 @@ export default function mustache(parser: Parser) {
 			block = parser.current();
 		}
 
-		if (block.type === 'ElseBlock' || block.type === 'PendingBlock' || block.type === 'ThenBlock' || block.type === 'CatchBlock') {
+		if (block.type === 'ElseBlock') {
 			block.end = start;
 			parser.stack.pop();
 			block = parser.current();
-
-			expected = 'await';
 		}
 
 		if (block.type === 'IfBlock') {
 			expected = 'if';
-		} else if (block.type === 'AwaitBlock') {
-			expected = 'await';
 		} else if (block.type === 'KeyBlock') {
 			expected = 'key';
 		} else {
@@ -166,65 +161,18 @@ export default function mustache(parser: Parser) {
 
 			parser.stack.push(block.else);
 		}
-	} else if (parser.match(':then') || parser.match(':catch')) {
-		const block = parser.current();
-		const is_then = parser.eat(':then') || !parser.eat(':catch');
-
-		if (is_then) {
-			if (block.type !== 'PendingBlock') {
-				parser.error({
-					code: 'invalid-then-placement',
-					message: parser.stack.some(block => block.type === 'PendingBlock')
-						? `Expected to close ${to_string(block)} before seeing {:then} block`
-						: 'Cannot have an {:then} block outside an {#await ...} block'
-				});
-			}
-		} else {
-			if (block.type !== 'ThenBlock' && block.type !== 'PendingBlock') {
-				parser.error({
-					code: 'invalid-catch-placement',
-					message: parser.stack.some(block => block.type === 'ThenBlock' || block.type === 'PendingBlock')
-						? `Expected to close ${to_string(block)} before seeing {:catch} block`
-						: 'Cannot have an {:catch} block outside an {#await ...} block'
-				});
-			}
-		}
-
-		block.end = start;
-		parser.stack.pop();
-		const await_block = parser.current();
-
-		if (!parser.eat('}')) {
-			parser.require_whitespace();
-			await_block[is_then ? 'value': 'error'] = read_context(parser);
-			parser.allow_whitespace();
-			parser.eat('}', true);
-		}
-
-		const new_block: TemplateNode = {
-			start,
-			end: null,
-			type: is_then ? 'ThenBlock': 'CatchBlock',
-			children: [],
-			skip: false
-		};
-
-		await_block[is_then ? 'then' : 'catch'] = new_block;
-		parser.stack.push(new_block);
 	} else if (parser.eat('#')) {
-		// {#if foo}, {#each foo} or {#await foo}
+		// {#if foo}
 		let type;
 
 		if (parser.eat('if')) {
 			type = 'IfBlock';
-		} else if (parser.eat('await')) {
-			type = 'AwaitBlock';
 		} else if (parser.eat('key')) {
 			type = 'KeyBlock';
 		} else {
 			parser.error({
 				code: 'expected-block-type',
-				message: 'Expected if, each, await or key'
+				message: 'Expected if or key'
 			});
 		}
 
@@ -232,81 +180,20 @@ export default function mustache(parser: Parser) {
 
 		const expression = read_expression(parser);
 
-		const block: TemplateNode = type === 'AwaitBlock' ?
-			{
-				start,
-				end: null,
-				type,
-				expression,
-				value: null,
-				error: null,
-				pending: {
-					start: null,
-					end: null,
-					type: 'PendingBlock',
-					children: [],
-					skip: true
-				},
-				then: {
-					start: null,
-					end: null,
-					type: 'ThenBlock',
-					children: [],
-					skip: true
-				},
-				catch: {
-					start: null,
-					end: null,
-					type: 'CatchBlock',
-					children: [],
-					skip: true
-				}
-			} :
-			{
-				start,
-				end: null,
-				type,
-				expression,
-				children: []
-			};
+		const block: TemplateNode = {
+			start,
+			end: null,
+			type,
+			expression,
+			children: []
+		};
 
 		parser.allow_whitespace();
-
-		const await_block_shorthand = type === 'AwaitBlock' && parser.eat('then');
-		if (await_block_shorthand) {
-			parser.require_whitespace();
-			block.value = read_context(parser);
-			parser.allow_whitespace();
-		}
-
-		const await_block_catch_shorthand = !await_block_shorthand && type === 'AwaitBlock' && parser.eat('catch');
-		if (await_block_catch_shorthand) {
-			parser.require_whitespace();
-			block.error = read_context(parser);
-			parser.allow_whitespace();
-		}
 
 		parser.eat('}', true);
 
 		parser.current().children.push(block);
 		parser.stack.push(block);
-
-		if (type === 'AwaitBlock') {
-			let child_block;
-			if (await_block_shorthand) {
-				block.then.skip = false;
-				child_block = block.then;
-			} else if (await_block_catch_shorthand) {
-				block.catch.skip = false;
-				child_block = block.catch;
-			} else {
-				block.pending.skip = false;
-				child_block = block.pending;
-			}
-
-			child_block.start = parser.index;
-			parser.stack.push(child_block);
-		}
 	} else if (parser.eat('@html')) {
 		// {@html content} tag
 		parser.require_whitespace();

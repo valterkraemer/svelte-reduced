@@ -51,13 +51,6 @@ export default class Binding extends Node {
 				message: 'Cannot bind to a variable declared with the let: directive'
 			});
 		} else if (scope.names.has(name)) {
-			if (scope.is_await(name)) {
-				component.error(this, {
-					code: 'invalid-binding',
-					message: 'Cannot bind to a variable declared with {#await ... then} or {:catch} blocks'
-				});
-			}
-
 			scope.dependencies_for_name.get(name).forEach(name => {
 				const variable = component.var_lookup.get(name);
 				if (variable) {

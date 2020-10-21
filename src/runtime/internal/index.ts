@@ -1,5 +1,4 @@
 export * from './animations';
-export * from './await_block';
 export * from './dom';
 export * from './environment';
 export * from './globals';

@@ -1,4 +1,3 @@
-import AwaitBlock from '../AwaitBlock';
 import Body from '../Body';
 import Comment from '../Comment';
 import Element from '../Element';
@@ -20,7 +19,6 @@ export type Children = ReturnType<typeof map_children>;
 
 function get_constructor(type) {
 	switch (type) {
-		case 'AwaitBlock': return AwaitBlock;
 		case 'Body': return Body;
 		case 'Comment': return Comment;
 		case 'Element': return Element;

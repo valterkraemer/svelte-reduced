@@ -10,10 +10,6 @@ export function assign<T, S>(tar: T, src: S): T & S {
 	return tar as T & S;
 }
 
-export function is_promise<T = any>(value: any): value is PromiseLike<T> {
-	return value && typeof value === 'object' && typeof value.then === 'function';
-}
-
 export function add_location(element, file, line, column, char) {
 	element.__svelte_meta = {
 		loc: { file, line, column, char }
@@ -155,8 +151,6 @@ export function set_store_value(store, ret, value = ret) {
 	store.set(value);
 	return ret;
 }
-
-export const has_prop = (obj, prop) => Object.prototype.hasOwnProperty.call(obj, prop);
 
 export function action_destroyer(action_result) {
 	return action_result && is_function(action_result.destroy) ? action_result.destroy : noop;
