@@ -2,7 +2,7 @@ import Node from './Node';
 import Expression from './Expression';
 
 export default class Tag extends Node {
-	type: 'MustacheTag' | 'RawMustacheTag';
+	type: 'MustacheTag';
 	expression: Expression;
 	should_cache: boolean;
 

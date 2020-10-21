@@ -14,7 +14,6 @@ import IfBlock from './IfBlock';
 import InlineComponent from './InlineComponent';
 import MustacheTag from './MustacheTag';
 import Options from './Options';
-import RawMustacheTag from './RawMustacheTag';
 import Text from './Text';
 import Title from './Title';
 import Transition from './Transition';
@@ -37,7 +36,6 @@ export type INode = Animation
 | InlineComponent
 | MustacheTag
 | Options
-| RawMustacheTag
 | Tag
 | Text
 | Title

@@ -21,7 +21,6 @@ import { is_head } from '../shared/is_head';
 import { Identifier } from 'estree';
 import EventHandler from './EventHandler';
 import MustacheTagWrapper from '../MustacheTag';
-import RawMustacheTagWrapper from '../RawMustacheTag';
 
 interface BindingGroup {
 	events: string[];
@@ -854,7 +853,7 @@ export default class ElementWrapper extends Wrapper {
 	}
 }
 
-function to_html(wrappers: Array<ElementWrapper | TextWrapper | MustacheTagWrapper | RawMustacheTagWrapper>, block: Block, literal: any, state: any, can_use_raw_text?: boolean) {
+function to_html(wrappers: Array<ElementWrapper | TextWrapper | MustacheTagWrapper>, block: Block, literal: any, state: any, can_use_raw_text?: boolean) {
 	wrappers.forEach(wrapper => {
 		if (wrapper instanceof TextWrapper) {
 			if ((wrapper as TextWrapper).use_space()) state.quasi.value.raw += ' ';
@@ -873,7 +872,7 @@ function to_html(wrappers: Array<ElementWrapper | TextWrapper | MustacheTagWrapp
 				.replace(/\$/g, '\\$');
 		}
 
-		else if (wrapper instanceof MustacheTagWrapper || wrapper instanceof RawMustacheTagWrapper) {
+		else if (wrapper instanceof MustacheTagWrapper) {
 			literal.quasis.push(state.quasi);
 			literal.expressions.push(wrapper.node.expression.manipulate(block));
 			state.quasi = {

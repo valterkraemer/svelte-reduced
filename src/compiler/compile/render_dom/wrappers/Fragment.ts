@@ -5,7 +5,6 @@ import Head from './Head';
 import IfBlock from './IfBlock';
 import InlineComponent from './InlineComponent/index';
 import MustacheTag from './MustacheTag';
-import RawMustacheTag from './RawMustacheTag';
 import Text from './Text';
 import Title from './Title';
 import Window from './Window';
@@ -25,7 +24,6 @@ const wrappers = {
 	InlineComponent,
 	MustacheTag,
 	Options: null,
-	RawMustacheTag,
 	Text,
 	Title,
 	Window

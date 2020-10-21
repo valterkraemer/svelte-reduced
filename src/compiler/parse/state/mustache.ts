@@ -190,21 +190,6 @@ export default function mustache(parser: Parser) {
 
 		parser.current().children.push(block);
 		parser.stack.push(block);
-	} else if (parser.eat('@html')) {
-		// {@html content} tag
-		parser.require_whitespace();
-
-		const expression = read_expression(parser);
-
-		parser.allow_whitespace();
-		parser.eat('}', true);
-
-		parser.current().children.push({
-			start,
-			end: parser.index,
-			type: 'RawMustacheTag',
-			expression
-		});
 	} else {
 		const expression = read_expression(parser);
 

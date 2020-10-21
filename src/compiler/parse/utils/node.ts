@@ -6,8 +6,6 @@ export function to_string(node: TemplateNode) {
 			return '{#if} block';
 		case 'ElseBlock':
 			return '{:else} block';
-		case 'RawMustacheTag':
-			return '{@html} block';
 		case 'Element':
 		case 'InlineComponent':
 		case 'Title':
