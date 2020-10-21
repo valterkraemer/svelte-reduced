@@ -16,12 +16,10 @@ import { dimensions } from '../../../../utils/patterns';
 import Binding from './Binding';
 import add_to_set from '../../../utils/add_to_set';
 import { add_event_handler } from '../shared/add_event_handlers';
-import { add_action } from '../shared/add_actions';
 import bind_this from '../shared/bind_this';
 import { is_head } from '../shared/is_head';
 import { Identifier } from 'estree';
 import EventHandler from './EventHandler';
-import Action from '../../../nodes/Action';
 import MustacheTagWrapper from '../MustacheTag';
 import RawMustacheTagWrapper from '../RawMustacheTag';
 
@@ -189,7 +187,7 @@ export default class ElementWrapper extends Wrapper {
 		}
 
 		// add directive and handler dependencies
-		[node.animation, node.outro, ...node.actions, ...node.classes].forEach(directive => {
+		[node.animation, node.outro, ...node.classes].forEach(directive => {
 			if (directive && directive.expression) {
 				block.add_dependencies(directive.expression.dependencies);
 			}
@@ -202,8 +200,7 @@ export default class ElementWrapper extends Wrapper {
 		});
 
 		if (this.parent) {
-			if (node.actions.length > 0 ||
-				node.animation ||
+			if (node.animation ||
 				node.bindings.length > 0 ||
 				node.classes.length > 0 ||
 				node.intro || node.outro ||
@@ -308,8 +305,7 @@ export default class ElementWrapper extends Wrapper {
 
 		const event_handler_or_binding_uses_context = (
 			this.bindings.some(binding => binding.handler.uses_context) ||
-			this.node.handlers.some(handler => handler.uses_context) ||
-			this.node.actions.some(action => action.uses_context)
+			this.node.handlers.some(handler => handler.uses_context)
 		);
 
 		if (event_handler_or_binding_uses_context) {
@@ -363,7 +359,7 @@ export default class ElementWrapper extends Wrapper {
 	}
 
 	add_directives_in_order (block: Block) {
-		type OrderedAttribute = EventHandler | BindingGroup | Binding | Action;
+		type OrderedAttribute = EventHandler | BindingGroup | Binding;
 
 		const binding_groups = events
 			.map(event => ({
@@ -381,8 +377,6 @@ export default class ElementWrapper extends Wrapper {
 				return item.node.start;
 			} else if (item instanceof Binding) {
 				return item.node.start;
-			} else if (item instanceof Action) {
-				return item.start;
 			} else {
 				return item.bindings[0].node.start;
 			}
@@ -391,8 +385,7 @@ export default class ElementWrapper extends Wrapper {
 		([
 			...binding_groups,
 			...this.event_handlers,
-			this_binding,
-			...this.node.actions
+			this_binding
 		] as OrderedAttribute[])
 			.filter(Boolean)
 			.sort((a, b) => getOrder(a) - getOrder(b))
@@ -401,8 +394,6 @@ export default class ElementWrapper extends Wrapper {
 					add_event_handler(block, this.var, item);
 				} else if (item instanceof Binding) {
 					this.add_this_binding(block, item);
-				} else if (item instanceof Action) {
-					add_action(block, this.var, item);
 				} else {
 					this.add_bindings(block, item);
 				}

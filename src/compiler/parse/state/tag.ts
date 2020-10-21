@@ -428,7 +428,6 @@ function read_attribute(parser: Parser, unique_names: Set<string>) {
 }
 
 function get_directive_type(name: string): DirectiveType {
-	if (name === 'use') return 'Action';
 	if (name === 'animate') return 'Animation';
 	if (name === 'bind') return 'Binding';
 	if (name === 'class') return 'Class';

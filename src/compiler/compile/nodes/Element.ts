@@ -5,7 +5,6 @@ import Binding from './Binding';
 import EventHandler from './EventHandler';
 import Transition from './Transition';
 import Animation from './Animation';
-import Action from './Action';
 import Class from './Class';
 import Text from './Text';
 import { namespaces } from '../../utils/namespaces';
@@ -112,7 +111,6 @@ export default class Element extends Node {
 	name: string;
 	scope: TemplateScope;
 	attributes: Attribute[] = [];
-	actions: Action[] = [];
 	bindings: Binding[] = [];
 	classes: Class[] = [];
 	handlers: EventHandler[] = [];
@@ -173,10 +171,6 @@ export default class Element extends Node {
 
 		info.attributes.forEach(node => {
 			switch (node.type) {
-				case 'Action':
-					this.actions.push(new Action(component, this, scope, node));
-					break;
-
 				case 'Attribute':
 				case 'Spread':
 					// special case

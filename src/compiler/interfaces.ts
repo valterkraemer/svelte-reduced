@@ -24,8 +24,7 @@ export interface MustacheTag extends BaseNode {
 	expression: Node;
 }
 
-export type DirectiveType = 'Action'
-| 'Animation'
+export type DirectiveType = 'Animation'
 | 'Binding'
 | 'Class'
 | 'EventHandler'

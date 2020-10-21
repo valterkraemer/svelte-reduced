@@ -36,12 +36,6 @@ export default class InlineComponent extends Node {
 		info.attributes.forEach(node => {
 			/* eslint-disable no-fallthrough */
 			switch (node.type) {
-				case 'Action':
-					component.error(node, {
-						code: 'invalid-action',
-						message: 'Actions can only be applied to DOM elements, not components'
-					});
-
 				case 'Attribute':
 				case 'Spread':
 					this.attributes.push(new Attribute(component, this, scope, node));

@@ -4,7 +4,6 @@ import EventHandler from './EventHandler';
 import flatten_reference from '../utils/flatten_reference';
 import fuzzymatch from '../../utils/fuzzymatch';
 import list from '../../utils/list';
-import Action from './Action';
 
 const valid_bindings = [
 	'innerWidth',
@@ -20,7 +19,6 @@ export default class Window extends Node {
 	type: 'Window';
 	handlers: EventHandler[] = [];
 	bindings: Binding[] = [];
-	actions: Action[] = [];
 
 	constructor(component, parent, scope, info) {
 		super(component, parent, scope, info);
@@ -64,10 +62,6 @@ export default class Window extends Node {
 				}
 
 				this.bindings.push(new Binding(component, this, scope, node));
-			}
-
-			else if (node.type === 'Action') {
-				this.actions.push(new Action(component, this, scope, node));
 			}
 
 			else {

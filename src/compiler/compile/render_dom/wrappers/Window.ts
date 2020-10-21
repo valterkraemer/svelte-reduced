@@ -4,7 +4,6 @@ import Wrapper from './shared/Wrapper';
 import { b, x } from 'code-red';
 import add_event_handlers from './shared/add_event_handlers';
 import Window from '../../nodes/Window';
-import add_actions from './shared/add_actions';
 import { Identifier } from 'estree';
 import { TemplateNode } from '../../../interfaces';
 import EventHandler from './Element/EventHandler';
@@ -48,7 +47,6 @@ export default class WindowWrapper extends Wrapper {
 		const events = {};
 		const bindings: Record<string, string> = {};
 
-		add_actions(block, '@_window', this.node.actions);
 		add_event_handlers(block, '@_window', this.handlers);
 
 		this.node.bindings.forEach(binding => {
