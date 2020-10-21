@@ -56,8 +56,6 @@ export default function mustache(parser: Parser) {
 
 		if (block.type === 'IfBlock') {
 			expected = 'if';
-		} else if (block.type === 'KeyBlock') {
-			expected = 'key';
 		} else {
 			parser.error({
 				code: 'unexpected-block-close',
@@ -167,12 +165,10 @@ export default function mustache(parser: Parser) {
 
 		if (parser.eat('if')) {
 			type = 'IfBlock';
-		} else if (parser.eat('key')) {
-			type = 'KeyBlock';
 		} else {
 			parser.error({
 				code: 'expected-block-type',
-				message: 'Expected if or key'
+				message: 'Expected if'
 			});
 		}
 

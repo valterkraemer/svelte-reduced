@@ -14,7 +14,6 @@ import Fragment from './Fragment';
 import Head from './Head';
 import IfBlock from './IfBlock';
 import InlineComponent from './InlineComponent';
-import KeyBlock from './KeyBlock';
 import Let from './Let';
 import MustacheTag from './MustacheTag';
 import Options from './Options';
@@ -42,7 +41,6 @@ export type INode = Action
 | Head
 | IfBlock
 | InlineComponent
-| KeyBlock
 | Let
 | MustacheTag
 | Options

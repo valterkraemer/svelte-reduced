@@ -4,7 +4,6 @@ import Element from '../Element';
 import Head from '../Head';
 import IfBlock from '../IfBlock';
 import InlineComponent from '../InlineComponent';
-import KeyBlock from '../KeyBlock';
 import MustacheTag from '../MustacheTag';
 import Options from '../Options';
 import RawMustacheTag from '../RawMustacheTag';
@@ -25,7 +24,6 @@ function get_constructor(type) {
 		case 'Head': return Head;
 		case 'IfBlock': return IfBlock;
 		case 'InlineComponent': return InlineComponent;
-		case 'KeyBlock': return KeyBlock;
 		case 'MustacheTag': return MustacheTag;
 		case 'Options': return Options;
 		case 'RawMustacheTag': return RawMustacheTag;
