@@ -6,7 +6,7 @@ import { walk } from 'estree-walker';
 import { extract_names, Scope } from '../utils/scope';
 import { invalidate } from './invalidate';
 import Block from './Block';
-import { ClassDeclaration, FunctionExpression, Node, Statement, ObjectExpression, Expression } from 'estree';
+import { ClassDeclaration, Node, Statement, ObjectExpression, Expression } from 'estree';
 
 export default function dom(
 	component: Component,
@@ -21,15 +21,8 @@ export default function dom(
 
 	const body = [];
 
-	if (renderer.file_var) {
-		const file = component.file ? x`"${component.file}"` : x`undefined`;
-		body.push(b`const ${renderer.file_var} = ${file};`);
-	}
-
 	const css = component.stylesheet.render(options.filename, true);
-	const styles = component.stylesheet.has_styles && options.dev
-		? `${css.code}\n/*# sourceMappingURL=${css.map.toUrl()} */`
-		: css.code;
+	const styles = css.code;
 
 	const add_css = component.get_unique_name('add_css');
 
@@ -60,12 +53,6 @@ export default function dom(
 		return block;
 	}));
 
-	if (options.dev && !options.hydratable) {
-		block.chunks.claim.push(
-			b`throw new @_Error("options.hydrate only works if the component was compiled with the \`hydratable: true\` option");`
-		);
-	}
-
 	const uses_props = component.var_lookup.has('$$props');
 	const uses_rest = component.var_lookup.has('$$restProps');
 	const $$props = uses_props || uses_rest ? '$$new_props' : '$$props';
@@ -95,7 +82,6 @@ export default function dom(
 	const accessors = [];
 
 	const not_equal = component.component_options.immutable ? x`@not_equal` : x`@safe_not_equal`;
-	let dev_props_check: Node[] | Node;
 	let inject_state: Expression;
 	let capture_state: Expression;
 	let props_inject: Node[] | Node;
@@ -112,15 +98,6 @@ export default function dom(
 					return ${prop.hoistable ? prop.name : x`this.$$.ctx[${renderer.context_lookup.get(prop.name).index}]`}
 				}`
 			});
-		} else if (component.compile_options.dev) {
-			accessors.push({
-				type: 'MethodDefinition',
-				kind: 'get',
-				key: { type: 'Identifier', name: prop.export_name },
-				value: x`function() {
-					throw new @_Error("<${component.tag}>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-				}`
-			});
 		}
 
 		if (component.component_options.accessors) {
@@ -134,68 +111,9 @@ export default function dom(
 						@flush();
 					}`
 				});
-			} else if (component.compile_options.dev) {
-				accessors.push({
-					type: 'MethodDefinition',
-					kind: 'set',
-					key: { type: 'Identifier', name: prop.export_name },
-					value: x`function(value) {
-						throw new @_Error("<${component.tag}>: Cannot set read-only property '${prop.export_name}'");
-					}`
-				});
 			}
-		} else if (component.compile_options.dev) {
-			accessors.push({
-				type: 'MethodDefinition',
-				kind: 'set',
-				key: { type: 'Identifier', name: prop.export_name },
-				value: x`function(value) {
-					throw new @_Error("<${component.tag}>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-				}`
-			});
 		}
 	});
-
-	if (component.compile_options.dev) {
-		// checking that expected ones were passed
-		const expected = props.filter(prop => prop.writable && !prop.initialised);
-
-		if (expected.length) {
-			dev_props_check = b`
-				const { ctx: #ctx } = this.$$;
-				const props = ${x`options.props || {}`};
-				${expected.map(prop => b`
-				if (${renderer.reference(prop.name)} === undefined && !('${prop.export_name}' in props)) {
-					@_console.warn("<${component.tag}> was created without expected prop '${prop.export_name}'");
-				}`)}
-			`;
-		}
-
-		const capturable_vars = component.vars.filter(v => !v.internal && !v.global && !v.name.startsWith('$$'));
-
-		if (capturable_vars.length > 0) {
-			capture_state = x`() => ({ ${capturable_vars.map(prop => p`${prop.name}`)} })`;
-		}
-
-		const injectable_vars = capturable_vars.filter(v => !v.module && v.writable && v.name[0] !== '$');
-
-		if (uses_props || injectable_vars.length > 0) {
-			inject_state = x`
-				${$$props} => {
-					${uses_props && renderer.invalidate('$$props', x`$$props = @assign(@assign({}, $$props), $$new_props)`)}
-					${injectable_vars.map(
-						v => b`if ('${v.name}' in $$props) ${renderer.invalidate(v.name, x`${v.name} = ${$$props}.${v.name}`)};`
-					)}
-				}
-			`;
-
-			props_inject = b`
-				if ($$props && "$$inject" in $$props) {
-					$$self.$inject_state($$props.$$inject);
-				}
-			`;
-		}
-	}
 
 	// instrument assignments
 	if (component.ast.instance) {
@@ -247,10 +165,6 @@ export default function dom(
 				? b`${`$$subscribe_${name}`}()`
 				: b`@component_subscribe($$self, ${name}, #value => $$invalidate(${i}, ${value} = #value))`;
 
-			if (component.compile_options.dev) {
-				return b`@validate_store(${name}, '${name}'); ${insert}`;
-			}
-
 			return insert;
 		});
 	}
@@ -262,12 +176,9 @@ export default function dom(
 		inject_state;
 	if (has_invalidate) {
 		args.push(x`$$props`, x`$$invalidate`);
-	} else if (component.compile_options.dev) {
-		// $$props arg is still needed for unknown prop check
-		args.push(x`$$props`);
 	}
 
-	const has_create_fragment = component.compile_options.dev || block.has_content();
+	const has_create_fragment = block.has_content();
 	if (has_create_fragment) {
 		body.push(b`
 			function create_fragment(#ctx) {
@@ -294,7 +205,6 @@ export default function dom(
 	const instance_javascript = component.extract_javascript(component.ast.instance);
 
 	const has_definition = (
-		component.compile_options.dev ||
 		(instance_javascript && instance_javascript.length > 0) ||
 		filtered_props.length > 0 ||
 		uses_props ||
@@ -315,7 +225,6 @@ export default function dom(
 			return !variable || variable.hoistable;
 		})
 		.map(({ name }) => b`
-			${component.compile_options.dev && b`@validate_store(${name.slice(1)}, '${name.slice(1)}');`}
 			@component_subscribe($$self, ${name.slice(1)}, $$value => $$invalidate(${renderer.context_lookup.get(name).index}, ${name} = $$value));
 		`);
 
@@ -374,14 +283,6 @@ export default function dom(
 		});
 
 		let unknown_props_check;
-		if (component.compile_options.dev && !(uses_props || uses_rest)) {
-			unknown_props_check = b`
-				const writable_props = [${writable_props.map(prop => x`'${prop.export_name}'`)}];
-				@_Object.keys($$props).forEach(key => {
-					if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$') @_console.warn(\`<${component.tag}> was created with unknown prop '\${key}'\`);
-				});
-			`;
-		}
 
 		const return_value = {
 			type: 'ArrayExpression',
@@ -400,8 +301,6 @@ export default function dom(
 				${reactive_store_subscriptions}
 
 				${resubscribable_reactive_store_unsubscribers}
-
-				${component.compile_options.dev ? b`let { $$scope } = $$props;` : null}
 
 				${instance_javascript}
 
@@ -450,18 +349,15 @@ export default function dom(
 
 	const superclass = {
 		type: 'Identifier',
-		name: options.dev ? '@SvelteComponentDev' : '@SvelteComponent'
+		name: '@SvelteComponent'
 	};
 
 	const declaration = b`
 		class ${name} extends ${superclass} {
 			constructor(options) {
-				super(${options.dev && 'options'});
+				super();
 				${should_add_css && b`if (!@_document.getElementById("${component.stylesheet.id}-style")) ${add_css}();`}
 				@init(this, options, ${definition}, ${has_create_fragment ? 'create_fragment': 'null'}, ${not_equal}, ${prop_indexes}, ${dirty});
-				${options.dev && b`@dispatch_dev("SvelteRegisterComponent", { component: this, tagName: "${name.name}", options, id: create_fragment.name });`}
-
-				${dev_props_check}
 			}
 		}
 	`[0] as ClassDeclaration;

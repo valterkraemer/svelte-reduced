@@ -223,8 +223,6 @@ export default class Block {
 	}
 
 	get_contents(key?: any) {
-		const { dev } = this.renderer.options;
-
 		if (this.has_outros) {
 			this.add_variable({ type: 'Identifier', name: '#current' });
 
@@ -358,12 +356,9 @@ export default class Block {
 			}`;
 		}
 
-		if (!this.renderer.component.compile_options.dev) {
-			// allow shorthand names
-			for (const name in properties) {
-				const property = properties[name];
-				if (property) property.id = null;
-			}
+		for (const name in properties) {
+			const property = properties[name];
+			if (property) property.id = null;
 		}
 
 		const return_value: any = x`{
@@ -382,8 +377,6 @@ export default class Block {
 			d: ${properties.destroy}
 		}`;
 
-		const block = dev && this.get_unique_name('block');
-
 		const body = b`
 			${this.chunks.declarations}
 
@@ -395,18 +388,7 @@ export default class Block {
 
 			${this.chunks.init}
 
-			${dev
-				? b`
-					const ${block} = ${return_value};
-					@dispatch_dev("SvelteRegisterBlock", {
-						block: ${block},
-						id: ${this.name || 'create_fragment'}.name,
-						type: "${this.type}",
-						source: "${this.comment ? this.comment.replace(/"/g, '\\"') : ''}",
-						ctx: #ctx
-					});
-					return ${block};`
-				: b`
+			${b`
 					return ${return_value};`
 			}
 		`;

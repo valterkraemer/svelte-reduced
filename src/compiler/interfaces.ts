@@ -112,13 +112,11 @@ export interface CompileOptions {
 	cssOutputFilename?: string;
 	sveltePath?: string;
 
-	dev?: boolean;
 	accessors?: boolean;
 	immutable?: boolean;
 	hydratable?: boolean;
 	legacy?: boolean;
 	css?: boolean;
-	loopGuardTimeout?: number;
 
 	preserveWhitespace?: boolean;
 }

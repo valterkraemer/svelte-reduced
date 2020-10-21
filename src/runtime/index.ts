@@ -1,5 +1,3 @@
-import './ambient';
-
 export {
 	onMount,
 	onDestroy,
@@ -8,6 +6,5 @@ export {
 	setContext,
 	getContext,
 	tick,
-	createEventDispatcher,
-	SvelteComponentDev as SvelteComponent
+	createEventDispatcher
 } from 'svelte/internal';

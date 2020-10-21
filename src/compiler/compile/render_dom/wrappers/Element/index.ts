@@ -21,7 +21,6 @@ import bind_this from '../shared/bind_this';
 import { is_head } from '../shared/is_head';
 import { Identifier } from 'estree';
 import EventHandler from './EventHandler';
-import { extract_names } from 'periscopic';
 import Action from '../../../nodes/Action';
 import MustacheTagWrapper from '../MustacheTag';
 import RawMustacheTagWrapper from '../RawMustacheTag';
@@ -209,8 +208,7 @@ export default class ElementWrapper extends Wrapper {
 				node.classes.length > 0 ||
 				node.intro || node.outro ||
 				node.handlers.length > 0 ||
-				this.node.name === 'option' ||
-				renderer.options.dev
+				this.node.name === 'option'
 			) {
 				this.parent.cannot_use_innerhtml(); // need to use add_location
 				this.parent.not_static_content();
@@ -328,13 +326,6 @@ export default class ElementWrapper extends Wrapper {
 		if (nodes && this.renderer.options.hydratable && !this.void) {
 			block.chunks.claim.push(
 				b`${this.node.children.length > 0 ? nodes : children}.forEach(@detach);`
-			);
-		}
-
-		if (renderer.options.dev) {
-			const loc = renderer.locate(this.node.start);
-			block.chunks.hydrate.push(
-				b`@add_location(${this.var}, ${renderer.file_var}, ${loc.line - 1}, ${loc.column}, ${this.node.start});`
 			);
 		}
 	}

@@ -128,8 +128,7 @@ export default class Component {
 		this.stylesheet = new Stylesheet(
 			source,
 			ast,
-			compile_options.filename,
-			compile_options.dev
+			compile_options.filename
 		);
 		this.stylesheet.validate(this);
 
@@ -229,15 +228,7 @@ export default class Component {
 								const alias = this.global(node.name.slice(2));
 								node.name = alias.name;
 							} else {
-								let name = node.name.slice(1);
-
-								if (compile_options.dev) {
-									if (internal_exports.has(`${name}_dev`)) {
-										name += '_dev';
-									} else if (internal_exports.has(`${name}Dev`)) {
-										name += 'Dev';
-									}
-								}
+								const name = node.name.slice(1);
 
 								const alias = this.alias(name);
 								this.helpers.set(name, alias);
@@ -694,16 +685,9 @@ export default class Component {
 		const remove = (parent, prop, index) => {
 			to_remove.unshift([parent, prop, index]);
 		};
-		let scope_updated = false;
-
-		let generator_count = 0;
 
 		walk(content, {
 			enter(node: Node, parent, prop, index) {
-				if ((node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression') && node.generator === true) {
-					generator_count++;
-				}
-
 				if (map.has(node)) {
 					scope = map.get(node);
 				}
@@ -730,19 +714,6 @@ export default class Component {
 			},
 
 			leave(node: Node) {
-				if ((node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression') && node.generator === true) {
-					generator_count--;
-				}
-
-				// do it on leave, to prevent infinite loop
-				if (component.compile_options.dev && component.compile_options.loopGuardTimeout > 0 && generator_count <= 0) {
-					const to_replace_for_loop_protect = component.loop_protect(node, scope, component.compile_options.loopGuardTimeout);
-					if (to_replace_for_loop_protect) {
-						this.replace(to_replace_for_loop_protect);
-						scope_updated = true;
-					}
-				}
-
 				if (map.has(node)) {
 					scope = scope.parent;
 				}
@@ -757,12 +728,6 @@ export default class Component {
 					delete parent[prop];
 				}
 			}
-		}
-
-		if (scope_updated) {
-			const { scope, map } = create_scopes(script.content);
-			this.instance_scope = scope;
-			this.instance_scope_map = map;
 		}
 	}
 
@@ -999,7 +964,6 @@ export default class Component {
 
 					// everything except const values can be changed by e.g. svelte devtools
 					// which means we can't hoist it
-					if (node.kind !== 'const' && this.compile_options.dev) return false;
 
 					const { name } = d.id as Identifier;
 

@@ -55,13 +55,13 @@ class Rule {
 		this.selectors.forEach(selector => selector.apply(node)); // TODO move the logic in here?
 	}
 
-	is_used(dev: boolean) {
+	is_used() {
 		if (this.parent && this.parent.node.type === 'Atrule' && is_keyframes_node(this.parent.node)) return true;
-		if (this.declarations.length === 0) return dev;
+		if (this.declarations.length === 0) return false;
 		return this.selectors.some(s => s.used);
 	}
 
-	minify(code: MagicString, _dev: boolean) {
+	minify(code: MagicString) {
 		let c = this.node.start;
 		let started = false;
 
@@ -178,11 +178,11 @@ class Atrule {
 		}
 	}
 
-	is_used(_dev: boolean) {
+	is_used() {
 		return true; // TODO
 	}
 
-	minify(code: MagicString, dev: boolean) {
+	minify(code: MagicString) {
 		if (this.node.name === 'media') {
 			const expression_char = code.original[this.node.expression.start];
 			let c = this.node.start + (expression_char === '(' ? 6 : 7);
@@ -224,9 +224,9 @@ class Atrule {
 			}
 
 			this.children.forEach(child => {
-				if (child.is_used(dev)) {
+				if (child.is_used()) {
 					code.remove(c, child.node.start);
-					child.minify(code, dev);
+					child.minify(code);
 					c = child.node.end;
 				}
 			});
@@ -281,7 +281,6 @@ export default class Stylesheet {
 	source: string;
 	ast: Ast;
 	filename: string;
-	dev: boolean;
 
 	has_styles: boolean;
 	id: string;
@@ -291,11 +290,10 @@ export default class Stylesheet {
 
 	nodes_with_css_class: Set<CssNode> = new Set();
 
-	constructor(source: string, ast: Ast, filename: string, dev: boolean) {
+	constructor(source: string, ast: Ast, filename: string) {
 		this.source = source;
 		this.ast = ast;
 		this.filename = filename;
-		this.dev = dev;
 
 		if (ast.css && ast.css.children.length) {
 			this.id = `svelte-${hash(ast.css.content.styles)}`;
@@ -399,9 +397,9 @@ export default class Stylesheet {
 
 		let c = 0;
 		this.children.forEach(child => {
-			if (child.is_used(this.dev)) {
+			if (child.is_used()) {
 				code.remove(c, child.node.start);
-				child.minify(code, this.dev);
+				child.minify(code);
 				c = child.node.end;
 			}
 		});

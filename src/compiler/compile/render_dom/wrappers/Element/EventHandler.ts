@@ -5,7 +5,6 @@ import { b, x, p } from 'code-red';
 import { Expression } from 'estree';
 
 const TRUE = x`true`;
-const FALSE = x`false`;
 
 export default class EventHandlerWrapper {
 	node: EventHandler;
@@ -56,13 +55,6 @@ export default class EventHandlerWrapper {
 						: p`${opt}: true`
 				) } }`);
 			}
-		} else if (block.renderer.options.dev) {
-			args.push(FALSE);
-		}
-
-		if (block.renderer.options.dev) {
-			args.push(this.node.modifiers.has('preventDefault') ? TRUE : FALSE);
-			args.push(this.node.modifiers.has('stopPropagation') ? TRUE : FALSE);
 		}
 
 		block.event_listeners.push(

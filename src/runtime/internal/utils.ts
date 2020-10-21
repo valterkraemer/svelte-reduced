@@ -10,12 +10,6 @@ export function assign<T, S>(tar: T, src: S): T & S {
 	return tar as T & S;
 }
 
-export function add_location(element, file, line, column, char) {
-	element.__svelte_meta = {
-		loc: { file, line, column, char }
-	};
-}
-
 export function run(fn) {
 	return fn();
 }

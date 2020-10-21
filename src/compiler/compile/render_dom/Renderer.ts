@@ -37,15 +37,12 @@ export default class Renderer {
 	block: Block;
 	fragment: FragmentWrapper;
 
-	file_var: Identifier;
 	locate: (c: number) => { line: number; column: number };
 
 	constructor(component: Component, options: CompileOptions) {
 		this.component = component;
 		this.options = options;
 		this.locate = component.locate; // TODO messy
-
-		this.file_var = options.dev && this.component.get_unique_name('file');
 
 		component.vars.filter(v => !v.hoistable || (v.export_name && !v.module)).forEach(v => this.add_to_context(v.name));
 

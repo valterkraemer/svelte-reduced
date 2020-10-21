@@ -26,7 +26,6 @@ describe('validate', () => {
 
 			try {
 				const { warnings } = svelte.compile(input, {
-					dev: config.dev,
 					legacy: config.legacy,
 					generate: false,
 					...options

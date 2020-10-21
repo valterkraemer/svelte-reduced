@@ -14,18 +14,16 @@ const valid_options = [
 	'outputFilename',
 	'cssOutputFilename',
 	'sveltePath',
-	'dev',
 	'accessors',
 	'immutable',
 	'hydratable',
 	'legacy',
 	'css',
-	'loopGuardTimeout',
 	'preserveWhitespace'
 ];
 
 function validate_options(options: CompileOptions, warnings: Warning[]) {
-	const { name, filename, loopGuardTimeout, dev } = options;
+	const { name, filename } = options;
 
 	Object.keys(options).forEach(key => {
 		if (!valid_options.includes(key)) {
@@ -50,20 +48,10 @@ function validate_options(options: CompileOptions, warnings: Warning[]) {
 			toString: () => message
 		});
 	}
-
-	if (loopGuardTimeout && !dev) {
-		const message = 'options.loopGuardTimeout is for options.dev = true only';
-		warnings.push({
-			code: 'options-loop-guard-timeout',
-			message,
-			filename,
-			toString: () => message
-		});
-	}
 }
 
 export default function compile(source: string, options: CompileOptions = {}) {
-	options = Object.assign({ generate: 'dom', dev: false }, options);
+	options = Object.assign({ generate: 'dom' }, options);
 
 	const stats = new Stats();
 	const warnings = [];

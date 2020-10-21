@@ -8,7 +8,6 @@ import { sanitize } from '../../../../utils/names';
 import add_to_set from '../../../utils/add_to_set';
 import { b, x, p } from 'code-red';
 import Attribute from '../../../nodes/Attribute';
-import is_dynamic from '../shared/is_dynamic';
 import bind_this from '../shared/bind_this';
 import { Node, Identifier, ObjectExpression } from 'estree';
 import EventHandler from '../Element/EventHandler';
@@ -23,9 +22,7 @@ export default class InlineComponentWrapper extends Wrapper {
 		renderer: Renderer,
 		block: Block,
 		parent: Wrapper,
-		node: InlineComponent,
-		strip_whitespace: boolean,
-		next_sibling: Wrapper
+		node: InlineComponent
 	) {
 		super(renderer, block, parent, node);
 
@@ -120,14 +117,6 @@ export default class InlineComponentWrapper extends Wrapper {
 				props = block.get_unique_name(`${name.name}_props`);
 				component_opts.properties.push(p`props: ${props}`);
 			}
-		}
-
-		if (component.compile_options.dev) {
-			// TODO this is a terrible hack, but without it the component
-			// will complain that options.target is missing. This would
-			// work better if components had separate public and private
-			// APIs
-			component_opts.properties.push(p`$$inline: true`);
 		}
 
 		const fragment_dependencies = new Set(this.fragment ? ['$$scope'] : []);

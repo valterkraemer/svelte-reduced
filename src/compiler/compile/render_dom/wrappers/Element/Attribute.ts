@@ -124,9 +124,7 @@ export default class AttributeWrapper extends BaseAttributeWrapper {
 			block.chunks.hydrate.push(
 				b`${element.var}.${property_name} = ${init};`
 			);
-			updater = block.renderer.options.dev
-				? b`@prop_dev(${element.var}, "${property_name}", ${should_cache ? this.last : value});`
-				: b`${element.var}.${property_name} = ${should_cache ? this.last : value};`;
+			updater = b`${element.var}.${property_name} = ${should_cache ? this.last : value};`;
 		} else {
 			block.chunks.hydrate.push(
 				b`${method}(${element.var}, "${name}", ${init});`
