@@ -27,7 +27,6 @@ function create_else_block(ctx) {
 	};
 }
 
-// (5:0) {#if foo}
 function create_if_block(ctx) {
 	let p;
 

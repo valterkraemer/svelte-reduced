@@ -5,7 +5,6 @@ import Binding from './Binding';
 import Body from './Body';
 import Class from './Class';
 import Comment from './Comment';
-import DebugTag from './DebugTag';
 import Element from './Element';
 import ElseBlock from './ElseBlock';
 import EventHandler from './EventHandler';
@@ -29,7 +28,6 @@ export type INode = Animation
 | Body
 | Class
 | Comment
-| DebugTag
 | Element
 | ElseBlock
 | EventHandler

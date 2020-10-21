@@ -7,7 +7,6 @@ import InlineComponent from '../InlineComponent';
 import MustacheTag from '../MustacheTag';
 import Options from '../Options';
 import RawMustacheTag from '../RawMustacheTag';
-import DebugTag from '../DebugTag';
 import Text from '../Text';
 import Title from '../Title';
 import Window from '../Window';
@@ -26,7 +25,6 @@ function get_constructor(type) {
 		case 'MustacheTag': return MustacheTag;
 		case 'Options': return Options;
 		case 'RawMustacheTag': return RawMustacheTag;
-		case 'DebugTag': return DebugTag;
 		case 'Text': return Text;
 		case 'Title': return Title;
 		case 'Window': return Window;

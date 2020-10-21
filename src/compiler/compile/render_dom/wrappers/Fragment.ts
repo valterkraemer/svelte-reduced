@@ -1,6 +1,5 @@
 import Wrapper from './shared/Wrapper';
 import Body from './Body';
-import DebugTag from './DebugTag';
 import Element from './Element/index';
 import Head from './Head';
 import IfBlock from './IfBlock';
@@ -20,7 +19,6 @@ import { Identifier } from 'estree';
 const wrappers = {
 	Body,
 	Comment: null,
-	DebugTag,
 	Element,
 	Head,
 	IfBlock,

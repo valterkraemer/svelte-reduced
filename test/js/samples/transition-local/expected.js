@@ -50,7 +50,6 @@ function create_if_block(ctx) {
 	};
 }
 
-// (9:1) {#if y}
 function create_if_block_1(ctx) {
 	let div;
 	let div_intro;

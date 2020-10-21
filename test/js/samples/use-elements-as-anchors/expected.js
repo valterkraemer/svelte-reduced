@@ -29,7 +29,6 @@ function create_if_block_4(ctx) {
 	};
 }
 
-// (16:1) {#if b}
 function create_if_block_3(ctx) {
 	let p;
 
@@ -47,7 +46,6 @@ function create_if_block_3(ctx) {
 	};
 }
 
-// (20:1) {#if c}
 function create_if_block_2(ctx) {
 	let p;
 
@@ -65,7 +63,6 @@ function create_if_block_2(ctx) {
 	};
 }
 
-// (26:1) {#if d}
 function create_if_block_1(ctx) {
 	let p;
 
@@ -83,7 +80,6 @@ function create_if_block_1(ctx) {
 	};
 }
 
-// (33:0) {#if e}
 function create_if_block(ctx) {
 	let p;
 

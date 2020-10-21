@@ -2,7 +2,6 @@ import Wrapper from './shared/Wrapper';
 import Renderer from '../Renderer';
 import Block from '../Block';
 import IfBlock from '../../nodes/IfBlock';
-import create_debugging_comment from './shared/create_debugging_comment';
 import ElseBlock from '../../nodes/ElseBlock';
 import FragmentWrapper from './Fragment';
 import { b, x } from 'code-red';
@@ -62,7 +61,6 @@ class IfBlockBranch extends Wrapper {
 		}
 
 		this.block = block.child({
-			comment: create_debugging_comment(node, parent.renderer.component),
 			name: parent.renderer.component.get_unique_name(
 				is_else ? 'create_else_block' : 'create_if_block'
 			),

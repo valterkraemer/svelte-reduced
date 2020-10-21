@@ -205,38 +205,6 @@ export default function mustache(parser: Parser) {
 			type: 'RawMustacheTag',
 			expression
 		});
-	} else if (parser.eat('@debug')) {
-		let identifiers;
-
-		// Implies {@debug} which indicates "debug all"
-		if (parser.read(/\s*}/)) {
-			identifiers = [];
-		} else {
-			const expression = read_expression(parser);
-
-			identifiers = expression.type === 'SequenceExpression'
-				? expression.expressions
-				: [expression];
-
-			identifiers.forEach(node => {
-				if (node.type !== 'Identifier') {
-					parser.error({
-						code: 'invalid-debug-args',
-						message: '{@debug ...} arguments must be identifiers, not arbitrary expressions'
-					}, node.start);
-				}
-			});
-
-			parser.allow_whitespace();
-			parser.eat('}', true);
-		}
-
-		parser.current().children.push({
-			start,
-			end: parser.index,
-			type: 'DebugTag',
-			identifiers
-		});
 	} else {
 		const expression = read_expression(parser);
 
