@@ -30,7 +30,6 @@ export type DirectiveType = 'Action'
 | 'Class'
 | 'EventHandler'
 | 'Let'
-| 'Ref'
 | 'Transition';
 
 interface BaseDirective extends BaseNode {

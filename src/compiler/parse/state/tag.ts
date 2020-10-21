@@ -380,13 +380,6 @@ function read_attribute(parser: Parser, unique_names: Set<string>) {
 			check_unique(name);
 		}
 
-		if (type === 'Ref') {
-			parser.error({
-				code: 'invalid-ref-directive',
-				message: `The ref directive is no longer supported — use \`bind:this={${directive_name}}\` instead`
-			}, start);
-		}
-
 		if (value[0]) {
 			if ((value as any[]).length > 1 || value[0].type === 'Text') {
 				parser.error({
@@ -441,7 +434,6 @@ function get_directive_type(name: string): DirectiveType {
 	if (name === 'class') return 'Class';
 	if (name === 'on') return 'EventHandler';
 	if (name === 'let') return 'Let';
-	if (name === 'ref') return 'Ref';
 	if (name === 'in' || name === 'out' || name === 'transition') return 'Transition';
 }
 
