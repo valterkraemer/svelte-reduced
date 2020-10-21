@@ -10,7 +10,6 @@ import CatchBlock from './CatchBlock';
 import Class from './Class';
 import Comment from './Comment';
 import DebugTag from './DebugTag';
-import EachBlock from './EachBlock';
 import Element from './Element';
 import ElseBlock from './ElseBlock';
 import EventHandler from './EventHandler';
@@ -43,7 +42,6 @@ export type INode = Action
 | Class
 | Comment
 | DebugTag
-| EachBlock
 | Element
 | ElseBlock
 | EventHandler

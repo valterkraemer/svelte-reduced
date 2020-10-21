@@ -9,7 +9,6 @@ import Renderer from '../../Renderer';
 import flatten_reference from '../../../utils/flatten_reference';
 import { Node, Identifier } from 'estree';
 import add_to_set from '../../../utils/add_to_set';
-import mark_each_block_bindings from '../shared/mark_each_block_bindings';
 import handle_select_value_binding from './handle_select_value_binding';
 
 export default class BindingWrapper {
@@ -38,10 +37,6 @@ export default class BindingWrapper {
 		// TODO does this also apply to e.g. `<input type='checkbox' bind:group='foo'>`?
 
 		handle_select_value_binding(this, dependencies);
-
-		if (node.is_contextual) {
-			mark_each_block_bindings(this.parent, this.node);
-		}
 
 		this.object = get_object(this.node.expression.node).name;
 

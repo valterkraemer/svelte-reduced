@@ -15,7 +15,6 @@ import { Node, FunctionExpression, Identifier } from 'estree';
 import { TemplateNode } from '../../../interfaces';
 import { is_reserved_keyword } from '../../utils/reserved_keywords';
 import replace_object from '../../utils/replace_object';
-import EachBlock from '../EachBlock';
 
 type Owner = Wrapper | TemplateNode;
 
@@ -101,10 +100,7 @@ export default class Expression {
 
 						contextual_dependencies.add(name);
 
-						const owner = template_scope.get_owner(name);
-						const is_index = owner.type === 'EachBlock' && owner.key && name === owner.index;
-
-						if (!lazy || is_index) {
+						if (!lazy) {
 							template_scope.dependencies_for_name.get(name).forEach(name => dependencies.add(name));
 						}
 					} else {
@@ -139,8 +135,6 @@ export default class Expression {
 								const variable = component.var_lookup.get(name);
 								if (variable) variable[deep ? 'mutated' : 'reassigned'] = true;
 							});
-							const each_block = template_scope.get_owner(name);
-							(each_block as EachBlock).has_binding = true;
 						} else {
 							component.add_reference(name);
 

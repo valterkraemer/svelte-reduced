@@ -13,8 +13,6 @@ export function to_string(node: TemplateNode) {
 			return '{#await} block';
 		case 'CatchBlock':
 			return '{:catch} block';
-		case 'EachBlock':
-			return '{#each} block';
 		case 'RawMustacheTag':
 			return '{@html} block';
 		case 'DebugTag':

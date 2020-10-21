@@ -5,7 +5,6 @@ import { CssNode } from './interfaces';
 import Component from '../Component';
 import Element from '../nodes/Element';
 import { INode } from '../nodes/interfaces';
-import EachBlock from '../nodes/EachBlock';
 import IfBlock from '../nodes/IfBlock';
 import AwaitBlock from '../nodes/AwaitBlock';
 
@@ -413,7 +412,7 @@ function get_possible_element_siblings(node: INode, adjacent_only: boolean): Map
 			if (adjacent_only) {
 				break;
 			}
-		} else if (prev.type === 'EachBlock' || prev.type === 'IfBlock' || prev.type === 'AwaitBlock') {
+		} else if (prev.type === 'IfBlock' || prev.type === 'AwaitBlock') {
 			const possible_last_child = get_possible_last_child(prev, adjacent_only);
 
 			add_to_map(possible_last_child, result);
@@ -425,20 +424,11 @@ function get_possible_element_siblings(node: INode, adjacent_only: boolean): Map
 
 	if (!prev || !adjacent_only) {
 		let parent: INode = node;
-		let skip_each_for_last_child = node.type === 'ElseBlock';
-		while ((parent = parent.parent) && (parent.type === 'EachBlock' || parent.type === 'IfBlock' || parent.type === 'ElseBlock' || parent.type === 'AwaitBlock')) {
+		while ((parent = parent.parent) && (parent.type === 'IfBlock' || parent.type === 'ElseBlock' || parent.type === 'AwaitBlock')) {
 			const possible_siblings = get_possible_element_siblings(parent, adjacent_only);
 			add_to_map(possible_siblings, result);
-			
-			if (parent.type === 'EachBlock') {
-				// first child of each block can select the last child of each block as previous sibling
-				if (skip_each_for_last_child) {
-					skip_each_for_last_child = false;
-				} else {
-					add_to_map(get_possible_last_child(parent, adjacent_only), result);
-				}
-			} else if (parent.type === 'ElseBlock') {
-				skip_each_for_last_child = true;
+
+			if (parent.type === 'ElseBlock') {
 				parent = parent.parent;
 			}
 
@@ -451,22 +441,10 @@ function get_possible_element_siblings(node: INode, adjacent_only: boolean): Map
 	return result;
 }
 
-function get_possible_last_child(block: EachBlock | IfBlock | AwaitBlock, adjacent_only: boolean): Map<Element, NodeExist> {
+function get_possible_last_child(block: IfBlock | AwaitBlock, adjacent_only: boolean): Map<Element, NodeExist> {
 	const result: Map<Element, NodeExist> = new Map();
 
-	if (block.type === 'EachBlock') {
-		const each_result: Map<Element, NodeExist> = loop_child(block.children, adjacent_only);
-		const else_result: Map<Element, NodeExist> = block.else ? loop_child(block.else.children, adjacent_only) : new Map();
-		
-		const not_exhaustive = !has_definite_elements(else_result);
-
-		if (not_exhaustive) {
-			mark_as_probably(each_result);
-			mark_as_probably(else_result);
-		}
-		add_to_map(each_result, result);
-		add_to_map(else_result, result);
-	} else if (block.type === 'IfBlock') {
+	if (block.type === 'IfBlock') {
 		const if_result: Map<Element, NodeExist> = loop_child(block.children, adjacent_only);
 		const else_result: Map<Element, NodeExist> = block.else ? loop_child(block.else.children, adjacent_only) : new Map();
 
@@ -536,7 +514,7 @@ function loop_child(children: INode[], adjacent_only: boolean) {
 			if (adjacent_only) {
 				break;
 			}
-		} else if (child.type === 'EachBlock' || child.type === 'IfBlock' || child.type === 'AwaitBlock') {
+		} else if (child.type === 'IfBlock' || child.type === 'AwaitBlock') {
 			const child_result = get_possible_last_child(child, adjacent_only);
 			add_to_map(child_result, result);
 			if (adjacent_only && has_definite_elements(child_result)) {

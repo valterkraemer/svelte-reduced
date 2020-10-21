@@ -16,7 +16,6 @@ import bind_this from '../shared/bind_this';
 import { Node, Identifier, ObjectExpression } from 'estree';
 import EventHandler from '../Element/EventHandler';
 import { extract_names } from 'periscopic';
-import mark_each_block_bindings from '../shared/mark_each_block_bindings';
 import { string_to_member_expression } from '../../../utils/string_to_member_expression';
 
 export default class InlineComponentWrapper extends Wrapper {
@@ -47,10 +46,6 @@ export default class InlineComponentWrapper extends Wrapper {
 		});
 
 		this.node.bindings.forEach(binding => {
-			if (binding.is_contextual) {
-				mark_each_block_bindings(this, binding);
-			}
-
 			block.add_dependencies(binding.expression.dependencies);
 		});
 

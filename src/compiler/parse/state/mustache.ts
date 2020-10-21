@@ -59,8 +59,6 @@ export default function mustache(parser: Parser) {
 
 		if (block.type === 'IfBlock') {
 			expected = 'if';
-		} else if (block.type === 'EachBlock') {
-			expected = 'each';
 		} else if (block.type === 'AwaitBlock') {
 			expected = 'await';
 		} else if (block.type === 'KeyBlock') {
@@ -147,12 +145,12 @@ export default function mustache(parser: Parser) {
 		// :else
 		else {
 			const block = parser.current();
-			if (block.type !== 'IfBlock' && block.type !== 'EachBlock') {
+			if (block.type !== 'IfBlock') {
 				parser.error({
 					code: 'invalid-else-placement',
-					message: parser.stack.some(block => block.type === 'IfBlock' || block.type === 'EachBlock')
+					message: parser.stack.some(block => block.type === 'IfBlock')
 						? `Expected to close ${to_string(block)} before seeing {:else} block`
-						: 'Cannot have an {:else} block outside an {#if ...} or {#each ...} block'
+						: 'Cannot have an {:else} block outside an {#if ...} block'
 				});
 			}
 
@@ -219,8 +217,6 @@ export default function mustache(parser: Parser) {
 
 		if (parser.eat('if')) {
 			type = 'IfBlock';
-		} else if (parser.eat('each')) {
-			type = 'EachBlock';
 		} else if (parser.eat('await')) {
 			type = 'AwaitBlock';
 		} else if (parser.eat('key')) {
@@ -275,36 +271,6 @@ export default function mustache(parser: Parser) {
 			};
 
 		parser.allow_whitespace();
-
-		// {#each} blocks must declare a context – {#each list as item}
-		if (type === 'EachBlock') {
-			parser.eat('as', true);
-			parser.require_whitespace();
-
-			block.context = read_context(parser);
-
-			parser.allow_whitespace();
-
-			if (parser.eat(',')) {
-				parser.allow_whitespace();
-				block.index = parser.read_identifier();
-				if (!block.index) parser.error({
-					code: 'expected-name',
-					message: 'Expected name'
-				});
-
-				parser.allow_whitespace();
-			}
-
-			if (parser.eat('(')) {
-				parser.allow_whitespace();
-
-				block.key = read_expression(parser);
-				parser.allow_whitespace();
-				parser.eat(')', true);
-				parser.allow_whitespace();
-			}
-		}
 
 		const await_block_shorthand = type === 'AwaitBlock' && parser.eat('then');
 		if (await_block_shorthand) {

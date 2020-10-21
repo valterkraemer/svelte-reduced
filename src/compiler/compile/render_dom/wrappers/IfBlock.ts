@@ -1,7 +1,6 @@
 import Wrapper from './shared/Wrapper';
 import Renderer from '../Renderer';
 import Block from '../Block';
-import EachBlock from '../../nodes/EachBlock';
 import IfBlock from '../../nodes/IfBlock';
 import create_debugging_comment from './shared/create_debugging_comment';
 import ElseBlock from '../../nodes/ElseBlock';
@@ -87,7 +86,7 @@ export default class IfBlockWrapper extends Wrapper {
 		renderer: Renderer,
 		block: Block,
 		parent: Wrapper,
-		node: EachBlock,
+		node: IfBlock,
 		strip_whitespace: boolean,
 		next_sibling: Wrapper
 	) {

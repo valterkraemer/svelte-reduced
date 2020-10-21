@@ -2,7 +2,6 @@ import Wrapper from './shared/Wrapper';
 import AwaitBlock from './AwaitBlock';
 import Body from './Body';
 import DebugTag from './DebugTag';
-import EachBlock from './EachBlock';
 import Element from './Element/index';
 import Head from './Head';
 import IfBlock from './IfBlock';
@@ -26,7 +25,6 @@ const wrappers = {
 	Body,
 	Comment: null,
 	DebugTag,
-	EachBlock,
 	Element,
 	Head,
 	IfBlock,
@@ -40,13 +38,6 @@ const wrappers = {
 	Title,
 	Window
 };
-
-function trimmable_at(child: INode, next_sibling: Wrapper): boolean {
-	// Whitespace is trimmable if one of the following is true:
-	// The child and its sibling share a common nearest each block (not at an each block boundary)
-	// The next sibling's previous node is an each block
-	return (next_sibling.node.find_nearest(/EachBlock/) === child.find_nearest(/EachBlock/)) || next_sibling.node.prev.type === 'EachBlock';
-}
 
 export default class FragmentWrapper {
 	nodes: Wrapper[];
@@ -90,7 +81,7 @@ export default class FragmentWrapper {
 				// *unless* there is no whitespace between this node and its next sibling
 				if (this.nodes.length === 0) {
 					const should_trim = (
-						next_sibling ? (next_sibling.node.type === 'Text' && /^\s/.test(next_sibling.node.data) && trimmable_at(child, next_sibling)) : !child.has_ancestor('EachBlock')
+						next_sibling ? (next_sibling.node.type === 'Text' && /^\s/.test(next_sibling.node.data)) : true
 					);
 
 					if (should_trim) {
