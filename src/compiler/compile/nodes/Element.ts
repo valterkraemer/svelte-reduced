@@ -286,7 +286,7 @@ export default class Element extends Node {
 	}
 
 	validate_attributes() {
-		const { component, parent } = this;
+		const { component } = this;
 
 		const attribute_map = new Map();
 
@@ -836,13 +836,4 @@ function should_have_attribute(
 		code: 'a11y-missing-attribute',
 		message: `A11y: <${name}> element should have ${article} ${sequence} attribute`
 	});
-}
-
-function within_custom_element(parent: INode) {
-	while (parent) {
-		if (parent.type === 'InlineComponent') return false;
-		if (parent.type === 'Element' && /-/.test(parent.name)) return true;
-		parent = parent.parent;
-	}
-	return false;
 }

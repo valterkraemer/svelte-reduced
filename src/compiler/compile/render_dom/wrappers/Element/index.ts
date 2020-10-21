@@ -230,7 +230,7 @@ export default class ElementWrapper extends Wrapper {
 		const children = x`@children(${this.node.name === 'template' ? x`${node}.content` : node})`;
 
 		block.add_variable(node);
-		const render_statement = this.get_render_statement(block);
+		const render_statement = this.get_render_statement();
 		block.chunks.create.push(
 			b`${node} = ${render_statement};`
 		);
@@ -343,7 +343,7 @@ export default class ElementWrapper extends Wrapper {
 		return this.is_static_content && this.fragment.nodes.every(node => node.node.type === 'Text' || node.node.type === 'MustacheTag');
 	}
 
-	get_render_statement(block: Block) {
+	get_render_statement() {
 		const { name, namespace } = this.node;
 
 		if (namespace === namespaces.svg) {
@@ -352,11 +352,6 @@ export default class ElementWrapper extends Wrapper {
 
 		if (namespace) {
 			return x`@_document.createElementNS("${namespace}", "${name}")`;
-		}
-
-		const is: AttributeWrapper = this.attributes.find(attr => attr.node.name === 'is') as any;
-		if (is) {
-			return x`@element_is("${name}", ${is.render_chunks(block).reduce((lhs, rhs) => x`${lhs} + ${rhs}`)})`;
 		}
 
 		return x`@element("${name}")`;

@@ -117,8 +117,6 @@ export interface CompileOptions {
 	immutable?: boolean;
 	hydratable?: boolean;
 	legacy?: boolean;
-	customElement?: boolean;
-	tag?: string;
 	css?: boolean;
 	loopGuardTimeout?: number;
 
@@ -127,7 +125,6 @@ export interface CompileOptions {
 
 export interface ParserOptions {
 	filename?: string;
-	customElement?: boolean;
 }
 
 export interface Visitor {

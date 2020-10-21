@@ -85,11 +85,9 @@ export default class AttributeWrapper extends BaseAttributeWrapper {
 		// xlink is a special case... we could maybe extend this to generic
 		// namespaced attributes but I'm not sure that's applicable in
 		// HTML5?
-		const method = /-/.test(element.node.name)
-			? '@set_custom_element_data'
-			: name.slice(0, 6) === 'xlink:'
-				? '@xlink_attr'
-				: '@attr';
+		const method = name.slice(0, 6) === 'xlink:'
+			? '@xlink_attr'
+			: '@attr';
 
 		const is_legacy_input_type = element.renderer.component.compile_options.legacy && name === 'type' && this.parent.node.name === 'input';
 

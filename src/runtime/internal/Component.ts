@@ -164,54 +164,6 @@ export function init(component, options, instance, create_fragment, not_equal, p
 	set_current_component(parent_component);
 }
 
-export let SvelteElement;
-if (typeof HTMLElement === 'function') {
-	SvelteElement = class extends HTMLElement {
-		$$: T$$;
-		$$set?: ($$props: any) => void;
-		constructor() {
-			super();
-			this.attachShadow({ mode: 'open' });
-		}
-
-		connectedCallback() {
-			// @ts-ignore todo: improve typings
-			for (const key in this.$$.slotted) {
-				// @ts-ignore todo: improve typings
-				this.appendChild(this.$$.slotted[key]);
-			}
-		}
-
-		attributeChangedCallback(attr, _oldValue, newValue) {
-			this[attr] = newValue;
-		}
-
-		$destroy() {
-			destroy_component(this, 1);
-			this.$destroy = noop;
-		}
-
-		$on(type, callback) {
-			// TODO should this delegate to addEventListener?
-			const callbacks = (this.$$.callbacks[type] || (this.$$.callbacks[type] = []));
-			callbacks.push(callback);
-
-			return () => {
-				const index = callbacks.indexOf(callback);
-				if (index !== -1) callbacks.splice(index, 1);
-			};
-		}
-
-		$set($$props) {
-			if (this.$$set && !is_empty($$props)) {
-				this.$$.skip_bound = true;
-				this.$$set($$props);
-				this.$$.skip_bound = false;
-			}
-		}
-	};
-}
-
 export class SvelteComponent {
 	$$: T$$;
 	$$set?: ($$props: any) => void;

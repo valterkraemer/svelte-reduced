@@ -17,7 +17,6 @@ interface LastAutoClosedTag {
 export class Parser {
 	readonly template: string;
 	readonly filename?: string;
-	readonly customElement: boolean;
 
 	index = 0;
 	stack: TemplateNode[] = [];
@@ -35,7 +34,6 @@ export class Parser {
 
 		this.template = template.replace(/\s+$/, '');
 		this.filename = options.filename;
-		this.customElement = options.customElement;
 
 		this.html = {
 			start: null,

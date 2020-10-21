@@ -32,7 +32,6 @@ import Element from './nodes/Element';
 
 interface ComponentOptions {
 	namespace?: string;
-	tag?: string;
 	immutable?: boolean;
 	accessors?: boolean;
 	preserveWhitespace?: boolean;
@@ -56,7 +55,6 @@ export default class Component {
 
 	component_options: ComponentOptions;
 	namespace: string;
-	tag: string;
 	accessors: boolean;
 
 	vars: Var[] = [];
@@ -143,24 +141,6 @@ export default class Component {
 			namespaces[this.component_options.namespace] ||
 			this.component_options.namespace;
 
-		if (compile_options.customElement) {
-			if (
-				this.component_options.tag === undefined &&
-				compile_options.tag === undefined
-			) {
-				const svelteOptions = ast.html.children.find(
-					child => child.name === 'svelte:options'
-				) || { start: 0, end: 0 };
-				this.warn(svelteOptions, {
-					code: 'custom-element-no-tag',
-					message: 'No custom element \'tag\' option was specified. To automatically register a custom element, specify a name with a hyphen in it, e.g. <svelte:options tag="my-thing"/>. To hide this warning, use <svelte:options tag={null}/>'
-				});
-			}
-			this.tag = this.component_options.tag || compile_options.tag;
-		} else {
-			this.tag = this.name.name;
-		}
-
 		this.walk_module_js();
 		this.walk_instance_js_pre_template();
 
@@ -170,7 +150,7 @@ export default class Component {
 		this.walk_instance_js_post_template();
 
 		this.elements.forEach(element => this.stylesheet.apply(element));
-		if (!compile_options.customElement) this.stylesheet.reify();
+		this.stylesheet.reify();
 		this.stylesheet.warn_on_unused_selectors(this);
 	}
 
@@ -311,9 +291,7 @@ export default class Component {
 					}))
 			);
 
-			css = compile_options.customElement
-				? { code: null, map: null }
-				: result.css;
+			css = result.css;
 
 			js = print(program, {
 				sourceMapSource: compile_options.filename
@@ -1342,7 +1320,7 @@ function process_component_options(component: Component, nodes) {
 		accessors:
 			'accessors' in component.compile_options
 				? component.compile_options.accessors
-				: !!component.compile_options.customElement,
+				: false,
 		preserveWhitespace: !!component.compile_options.preserveWhitespace
 	};
 
@@ -1373,32 +1351,6 @@ function process_component_options(component: Component, nodes) {
 				const { name } = attribute;
 
 				switch (name) {
-					case 'tag': {
-						const code = 'invalid-tag-attribute';
-						const message = "'tag' must be a string literal";
-						const tag = get_value(attribute, code, message);
-
-						if (typeof tag !== 'string' && tag !== null)
-							component.error(attribute, { code, message });
-
-						if (tag && !/^[a-zA-Z][a-zA-Z0-9]*-[a-zA-Z0-9-]+$/.test(tag)) {
-							component.error(attribute, {
-								code: 'invalid-tag-property',
-								message: "tag name must be two or more words joined by the '-' character"
-							});
-						}
-
-						if (tag && !component.compile_options.customElement) {
-							component.warn(attribute, {
-								code: 'missing-custom-element-compile-options',
-								message: "The 'tag' option is used when generating a custom element. Did you forget the 'customElement: true' compile option?"
-							});
-						}
-
-						component_options.tag = tag;
-						break;
-					}
-
 					case 'namespace': {
 						const code = 'invalid-namespace-attribute';
 						const message = "The 'namespace' attribute must be a string literal representing a valid namespace";
@@ -1449,7 +1401,7 @@ function process_component_options(component: Component, nodes) {
 			} else {
 				component.error(attribute, {
 					code: 'invalid-options-attribute',
-					message: "<svelte:options> can only have static 'tag', 'namespace', 'accessors', 'immutable' and 'preserveWhitespace' attributes"
+					message: "<svelte:options> can only have static 'namespace', 'accessors', 'immutable' and 'preserveWhitespace' attributes"
 				});
 			}
 		});

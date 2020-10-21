@@ -19,8 +19,6 @@ const valid_options = [
 	'immutable',
 	'hydratable',
 	'legacy',
-	'customElement',
-	'tag',
 	'css',
 	'loopGuardTimeout',
 	'preserveWhitespace'

@@ -19,9 +19,6 @@ export default function dom(
 
 	block.has_outro_method = true;
 
-	// prevent fragment being created twice (#1063)
-	if (options.customElement) block.chunks.create.push(b`this.c = @noop;`);
-
 	const body = [];
 
 	if (renderer.file_var) {
@@ -29,7 +26,7 @@ export default function dom(
 		body.push(b`const ${renderer.file_var} = ${file};`);
 	}
 
-	const css = component.stylesheet.render(options.filename, !options.customElement);
+	const css = component.stylesheet.render(options.filename, true);
 	const styles = component.stylesheet.has_styles && options.dev
 		? `${css.code}\n/*# sourceMappingURL=${css.map.toUrl()} */`
 		: css.code;
@@ -37,7 +34,6 @@ export default function dom(
 	const add_css = component.get_unique_name('add_css');
 
 	const should_add_css = (
-		!options.customElement &&
 		!!styles &&
 		options.css !== false
 	);
@@ -167,7 +163,7 @@ export default function dom(
 		if (expected.length) {
 			dev_props_check = b`
 				const { ctx: #ctx } = this.$$;
-				const props = ${options.customElement ? x`this.attributes` : x`options.props || {}`};
+				const props = ${x`options.props || {}`};
 				${expected.map(prop => b`
 				if (${renderer.reference(prop.name)} === undefined && !('${prop.export_name}' in props)) {
 					@_console.warn("<${component.tag}> was created without expected prop '${prop.export_name}'");
@@ -452,78 +448,27 @@ export default function dom(
 		}
 	}
 
-	if (options.customElement) {
-		const declaration = b`
-			class ${name} extends @SvelteElement {
-				constructor(options) {
-					super();
+	const superclass = {
+		type: 'Identifier',
+		name: options.dev ? '@SvelteComponentDev' : '@SvelteComponent'
+	};
 
-					${css.code && b`this.shadowRoot.innerHTML = \`<style>${css.code.replace(/\\/g, '\\\\')}${options.dev ? `\n/*# sourceMappingURL=${css.map.toUrl()} */` : ''}</style>\`;`}
+	const declaration = b`
+		class ${name} extends ${superclass} {
+			constructor(options) {
+				super(${options.dev && 'options'});
+				${should_add_css && b`if (!@_document.getElementById("${component.stylesheet.id}-style")) ${add_css}();`}
+				@init(this, options, ${definition}, ${has_create_fragment ? 'create_fragment': 'null'}, ${not_equal}, ${prop_indexes}, ${dirty});
+				${options.dev && b`@dispatch_dev("SvelteRegisterComponent", { component: this, tagName: "${name.name}", options, id: create_fragment.name });`}
 
-					@init(this, { target: this.shadowRoot }, ${definition}, ${has_create_fragment ? 'create_fragment': 'null'}, ${not_equal}, ${prop_indexes}, ${dirty});
-
-					${dev_props_check}
-
-					if (options) {
-						if (options.target) {
-							@insert(options.target, this, options.anchor);
-						}
-
-						${(props.length > 0 || uses_props || uses_rest) && b`
-						if (options.props) {
-							this.$set(options.props);
-							@flush();
-						}`}
-					}
-				}
+				${dev_props_check}
 			}
-		`[0] as ClassDeclaration;
-
-		if (props.length > 0) {
-			declaration.body.body.push({
-				type: 'MethodDefinition',
-				kind: 'get',
-				static: true,
-				computed: false,
-				key: { type: 'Identifier', name: 'observedAttributes' },
-				value: x`function() {
-					return [${props.map(prop => x`"${prop.export_name}"`)}];
-				}` as FunctionExpression
-			});
 		}
+	`[0] as ClassDeclaration;
 
-		declaration.body.body.push(...accessors);
+	declaration.body.body.push(...accessors);
 
-		body.push(declaration);
-
-		if (component.tag != null) {
-			body.push(b`
-				@_customElements.define("${component.tag}", ${name});
-			`);
-		}
-	} else {
-		const superclass = {
-			type: 'Identifier',
-			name: options.dev ? '@SvelteComponentDev' : '@SvelteComponent'
-		};
-
-		const declaration = b`
-			class ${name} extends ${superclass} {
-				constructor(options) {
-					super(${options.dev && 'options'});
-					${should_add_css && b`if (!@_document.getElementById("${component.stylesheet.id}-style")) ${add_css}();`}
-					@init(this, options, ${definition}, ${has_create_fragment ? 'create_fragment': 'null'}, ${not_equal}, ${prop_indexes}, ${dirty});
-					${options.dev && b`@dispatch_dev("SvelteRegisterComponent", { component: this, tagName: "${name.name}", options, id: create_fragment.name });`}
-
-					${dev_props_check}
-				}
-			}
-		`[0] as ClassDeclaration;
-
-		declaration.body.body.push(...accessors);
-
-		body.push(declaration);
-	}
+	body.push(declaration);
 
 	return { js: flatten(body, []), css };
 }

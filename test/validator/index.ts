@@ -29,7 +29,6 @@ describe('validate', () => {
 					dev: config.dev,
 					legacy: config.legacy,
 					generate: false,
-					customElement: config.customElement,
 					...options
 				});
 
