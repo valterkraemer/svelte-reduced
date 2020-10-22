@@ -8,7 +8,6 @@ import {
 	init,
 	insert,
 	listen,
-	noop,
 	raf,
 	run_all,
 	safe_not_equal
@@ -59,8 +58,6 @@ function create_fragment(ctx) {
 
 			video_updating = false;
 		},
-		i: noop,
-		o: noop,
 		d(detaching) {
 			if (detaching) detach(video);
 			video_resize_listener();

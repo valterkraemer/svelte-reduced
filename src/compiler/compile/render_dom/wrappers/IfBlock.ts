@@ -96,8 +96,6 @@ export default class IfBlockWrapper extends Wrapper {
 
 		const blocks: Block[] = [];
 		let is_dynamic = false;
-		let has_intros = false;
-		let has_outros = false;
 
 		const create_branches = (node: IfBlock) => {
 			const branch = new IfBlockBranch(
@@ -125,9 +123,6 @@ export default class IfBlockWrapper extends Wrapper {
 				this.needs_update = true;
 			}
 
-			if (branch.block.has_intros) has_intros = true;
-			if (branch.block.has_outros) has_outros = true;
-
 			if (is_else_if(node.else)) {
 				create_branches(node.else.children[0] as IfBlock);
 			} else if (node.else) {
@@ -148,9 +143,6 @@ export default class IfBlockWrapper extends Wrapper {
 					is_dynamic = true;
 					block.add_dependencies(branch.block.dependencies);
 				}
-
-				if (branch.block.has_intros) has_intros = true;
-				if (branch.block.has_outros) has_outros = true;
 			}
 		};
 
@@ -158,8 +150,6 @@ export default class IfBlockWrapper extends Wrapper {
 
 		blocks.forEach(block => {
 			block.has_update_method = is_dynamic;
-			block.has_intro_method = has_intros;
-			block.has_outro_method = has_outros;
 		});
 
 		renderer.blocks.push(...blocks);
@@ -181,11 +171,8 @@ export default class IfBlockWrapper extends Wrapper {
 		const if_exists_condition = has_else ? null : name;
 
 		const dynamic = this.branches[0].block.has_update_method; // can use [0] as proxy for all, since they necessarily have the same value
-		const has_intros = this.branches[0].block.has_intro_method;
-		const has_outros = this.branches[0].block.has_outro_method;
-		const has_transitions = has_intros || has_outros;
 
-		const vars = { name, anchor, if_exists_condition, has_else, has_transitions };
+		const vars = { name, anchor, if_exists_condition, has_else };
 
 		const detaching = parent_node ? null : 'detaching';
 
@@ -194,19 +181,9 @@ export default class IfBlockWrapper extends Wrapper {
 				if (branch.snippet) block.add_variable(branch.condition);
 			});
 
-			if (has_outros) {
-				this.render_compound_with_outros(block, parent_node, parent_nodes, dynamic, vars, detaching);
-
-				block.chunks.outro.push(b`@transition_out(${name});`);
-			} else {
-				this.render_compound(block, parent_node, parent_nodes, dynamic, vars, detaching);
-			}
+			this.render_compound(block, parent_node, parent_nodes, dynamic, vars, detaching);
 		} else {
 			this.render_simple(block, parent_node, parent_nodes, dynamic, vars, detaching);
-
-			if (has_outros) {
-				block.chunks.outro.push(b`@transition_out(${name});`);
-			}
 		}
 
 		if (if_exists_condition) {
@@ -225,10 +202,6 @@ export default class IfBlockWrapper extends Wrapper {
 					b`${name}.l(${parent_nodes});`
 				);
 			}
-		}
-
-		if (has_intros || has_outros) {
-			block.chunks.intro.push(b`@transition_in(${name});`);
 		}
 
 		if (needs_anchor) {
@@ -250,7 +223,7 @@ export default class IfBlockWrapper extends Wrapper {
 		parent_node: Identifier,
 		_parent_nodes: Identifier,
 		dynamic,
-		{ name, anchor, has_else, if_exists_condition, has_transitions },
+		{ name, anchor, has_else, if_exists_condition },
 		detaching
 	) {
 		const select_block_type = this.renderer.component.get_unique_name('select_block_type');
@@ -309,7 +282,6 @@ export default class IfBlockWrapper extends Wrapper {
 				${name} = ${get_block};
 				if (${name}) {
 					${name}.c();
-					${has_transitions && b`@transition_in(${name}, 1);`}
 					${name}.m(${update_mount_node}, ${anchor});
 				}
 			`;
@@ -350,160 +322,12 @@ export default class IfBlockWrapper extends Wrapper {
 		}
 	}
 
-	// if any of the siblings have outros, we need to keep references to the blocks
-	// (TODO does this only apply to bidi transitions?)
-	render_compound_with_outros(
-		block: Block,
-		parent_node: Identifier,
-		_parent_nodes: Identifier,
-		dynamic,
-		{ name, anchor, has_else, has_transitions, if_exists_condition },
-		detaching
-	) {
-		const select_block_type = this.renderer.component.get_unique_name('select_block_type');
-		const current_block_type_index = block.get_unique_name('current_block_type_index');
-		const previous_block_index = block.get_unique_name('previous_block_index');
-		const if_block_creators = block.get_unique_name('if_block_creators');
-		const if_blocks = block.get_unique_name('if_blocks');
-
-		const if_current_block_type_index = has_else
-			? nodes => nodes
-			: nodes => b`if (~${current_block_type_index}) { ${nodes} }`;
-
-		block.add_variable(current_block_type_index);
-		block.add_variable(name);
-
-		block.chunks.init.push(b`
-			const ${if_block_creators} = [
-				${this.branches.map(branch => branch.block.name)}
-			];
-
-			const ${if_blocks} = [];
-
-			${this.needs_update
-				? b`
-					function ${select_block_type}(#ctx, #dirty) {
-						${this.branches.map(({ dependencies, condition, snippet }, i) => condition
-						? b`
-						${snippet && (
-							dependencies.length > 0
-								? b`if (${block.renderer.dirty(dependencies)}) ${condition} = !!${snippet}`
-								: b`if (${condition} == null) ${condition} = !!${snippet}`
-						)}
-						if (${condition}) return ${i};`
-						: b`return ${i};`)}
-						${!has_else && b`return -1;`}
-					}
-				`
-				: b`
-					function ${select_block_type}(#ctx, #dirty) {
-						${this.branches.map(({ condition, snippet }, i) => condition
-						? b`if (${snippet || condition}) return ${i};`
-						: b`return ${i};`)}
-						${!has_else && b`return -1;`}
-					}
-				`}
-		`);
-
-		if (has_else) {
-			block.chunks.init.push(b`
-				${current_block_type_index} = ${select_block_type}(#ctx, ${this.get_initial_dirty_bit()});
-				${name} = ${if_blocks}[${current_block_type_index}] = ${if_block_creators}[${current_block_type_index}](#ctx);
-			`);
-		} else {
-			block.chunks.init.push(b`
-				if (~(${current_block_type_index} = ${select_block_type}(#ctx, ${this.get_initial_dirty_bit()}))) {
-					${name} = ${if_blocks}[${current_block_type_index}] = ${if_block_creators}[${current_block_type_index}](#ctx);
-				}
-			`);
-		}
-
-		const initial_mount_node = parent_node || '#target';
-		const anchor_node = parent_node ? 'null' : '#anchor';
-
-		block.chunks.mount.push(
-			if_current_block_type_index(
-				b`${if_blocks}[${current_block_type_index}].m(${initial_mount_node}, ${anchor_node});`
-			)
-		);
-
-		if (this.needs_update) {
-			const update_mount_node = this.get_update_mount_node(anchor);
-
-			const destroy_old_block = b`
-				@group_outros();
-				@transition_out(${if_blocks}[${previous_block_index}], 1, 1, () => {
-					${if_blocks}[${previous_block_index}] = null;
-				});
-				@check_outros();
-			`;
-
-			const create_new_block = b`
-				${name} = ${if_blocks}[${current_block_type_index}];
-				if (!${name}) {
-					${name} = ${if_blocks}[${current_block_type_index}] = ${if_block_creators}[${current_block_type_index}](#ctx);
-					${name}.c();
-				}
-				${has_transitions && b`@transition_in(${name}, 1);`}
-				${name}.m(${update_mount_node}, ${anchor});
-			`;
-
-			const change_block = has_else
-				? b`
-					${destroy_old_block}
-
-					${create_new_block}
-				`
-				: b`
-					if (${name}) {
-						${destroy_old_block}
-					}
-
-					if (~${current_block_type_index}) {
-						${create_new_block}
-					} else {
-						${name} = null;
-					}
-				`;
-
-			if (dynamic) {
-				block.chunks.update.push(b`
-					let ${previous_block_index} = ${current_block_type_index};
-					${current_block_type_index} = ${select_block_type}(#ctx, #dirty);
-					if (${current_block_type_index} === ${previous_block_index}) {
-						${if_current_block_type_index(b`${if_blocks}[${current_block_type_index}].p(#ctx, #dirty);`)}
-					} else {
-						${change_block}
-					}
-				`);
-			} else {
-				block.chunks.update.push(b`
-					let ${previous_block_index} = ${current_block_type_index};
-					${current_block_type_index} = ${select_block_type}(#ctx, #dirty);
-					if (${current_block_type_index} !== ${previous_block_index}) {
-						${change_block}
-					}
-				`);
-			}
-		} else if (dynamic) {
-			if (if_exists_condition) {
-				block.chunks.update.push(b`if (${if_exists_condition}) ${name}.p(#ctx, #dirty);`);
-			} else {
-				block.chunks.update.push(b`${name}.p(#ctx, #dirty);`);
-			}
-		}
-
-		block.chunks.destroy.push(
-			if_current_block_type_index(b`${if_blocks}[${current_block_type_index}].d(${detaching});`)
-		);
-	}
-
 	render_simple(
 		block: Block,
 		parent_node: Identifier,
 		_parent_nodes: Identifier,
 		dynamic,
-		{ name, anchor, if_exists_condition, has_transitions },
+		{ name, anchor, if_exists_condition },
 		detaching
 	) {
 		const branch = this.branches[0];
@@ -527,16 +351,9 @@ export default class IfBlockWrapper extends Wrapper {
 			const enter = b`
 				if (${name}) {
 					${dynamic && b`${name}.p(#ctx, #dirty);`}
-					${
-						has_transitions &&
-						b`if (${block.renderer.dirty(branch.dependencies)}) {
-							@transition_in(${name}, 1);
-						}`
-					}
 				} else {
 					${name} = ${branch.block.name}(#ctx);
 					${name}.c();
-					${has_transitions && b`@transition_in(${name}, 1);`}
 					${name}.m(${update_mount_node}, ${anchor});
 				}
 			`;
@@ -547,28 +364,14 @@ export default class IfBlockWrapper extends Wrapper {
 
 			// no `p()` here — we don't want to update outroing nodes,
 			// as that will typically result in glitching
-			if (branch.block.has_outro_method) {
-				block.chunks.update.push(b`
-					if (${branch.condition}) {
-						${enter}
-					} else if (${name}) {
-						@group_outros();
-						@transition_out(${name}, 1, 1, () => {
-							${name} = null;
-						});
-						@check_outros();
-					}
-				`);
-			} else {
-				block.chunks.update.push(b`
-					if (${branch.condition}) {
-						${enter}
-					} else if (${name}) {
-						${name}.d(1);
-						${name} = null;
-					}
-				`);
-			}
+			block.chunks.update.push(b`
+				if (${branch.condition}) {
+					${enter}
+				} else if (${name}) {
+					${name}.d(1);
+					${name} = null;
+				}
+			`);
 		} else if (dynamic) {
 			block.chunks.update.push(b`
 				if (${branch.condition}) ${name}.p(#ctx, #dirty);

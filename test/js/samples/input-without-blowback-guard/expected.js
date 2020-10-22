@@ -7,7 +7,6 @@ import {
 	init,
 	insert,
 	listen,
-	noop,
 	safe_not_equal
 } from "svelte/internal";
 
@@ -35,8 +34,6 @@ function create_fragment(ctx) {
 				input.checked = /*foo*/ ctx[0];
 			}
 		},
-		i: noop,
-		o: noop,
 		d(detaching) {
 			if (detaching) detach(input);
 			mounted = false;

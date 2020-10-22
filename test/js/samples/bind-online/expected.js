@@ -27,8 +27,6 @@ function create_fragment(ctx) {
 			}
 		},
 		p: noop,
-		i: noop,
-		o: noop,
 		d(detaching) {
 			mounted = false;
 			run_all(dispose);

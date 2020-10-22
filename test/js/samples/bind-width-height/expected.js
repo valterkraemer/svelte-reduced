@@ -26,8 +26,6 @@ function create_fragment(ctx) {
 			div_resize_listener = add_resize_listener(div, /*div_elementresize_handler*/ ctx[2].bind(div));
 		},
 		p: noop,
-		i: noop,
-		o: noop,
 		d(detaching) {
 			if (detaching) detach(div);
 			div_resize_listener();

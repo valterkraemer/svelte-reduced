@@ -51,12 +51,6 @@ export default class InlineComponent extends Node {
 					this.handlers.push(new EventHandler(component, this, scope, node));
 					break;
 
-				case 'Transition':
-					component.error(node, {
-						code: 'invalid-transition',
-						message: 'Transitions can only be applied to DOM elements, not components'
-					});
-
 				default:
 					throw new Error(`Not implemented: ${node.type}`);
 			}

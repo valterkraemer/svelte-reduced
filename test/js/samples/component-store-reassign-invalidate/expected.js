@@ -47,8 +47,6 @@ function create_fragment(ctx) {
 		p(ctx, [dirty]) {
 			if (dirty & /*$foo*/ 2) set_data(t0, /*$foo*/ ctx[1]);
 		},
-		i: noop,
-		o: noop,
 		d(detaching) {
 			if (detaching) detach(h1);
 			if (detaching) detach(t1);

@@ -2,7 +2,6 @@ import { add_render_callback, flush, schedule_update, dirty_components } from '.
 import { current_component, set_current_component } from './lifecycle';
 import { blank_object, is_empty, is_function, run, run_all, noop } from './utils';
 import { children, detach } from './dom';
-import { transition_in } from './transitions';
 
 interface Fragment {
 	key: string|null;
@@ -12,11 +11,6 @@ interface Fragment {
 	/* hydrate */ h: () => void;
 	/* mount   */ m: (target: HTMLElement, anchor: any) => void;
 	/* update  */ p: (ctx: any, dirty: any) => void;
-	/* measure */ r: () => void;
-	/* fix     */ f: () => void;
-	/* animate */ a: () => void;
-	/* intro   */ i: (local: any) => void;
-	/* outro   */ o: (local: any) => void;
 	/* destroy */ d: (detaching: 0|1) => void;
 }
 interface T$$ {
@@ -156,7 +150,6 @@ export function init(component, options, instance, create_fragment, not_equal, p
 			$$.fragment && $$.fragment!.c();
 		}
 
-		if (options.intro) transition_in(component.$$.fragment);
 		mount_component(component, options.target, options.anchor);
 		flush();
 	}

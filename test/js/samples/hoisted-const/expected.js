@@ -21,8 +21,6 @@ function create_fragment(ctx) {
 			insert(target, b, anchor);
 		},
 		p: noop,
-		i: noop,
-		o: noop,
 		d(detaching) {
 			if (detaching) detach(b);
 		}

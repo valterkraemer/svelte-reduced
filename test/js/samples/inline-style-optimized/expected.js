@@ -5,7 +5,6 @@ import {
 	element,
 	init,
 	insert,
-	noop,
 	safe_not_equal,
 	set_style
 } from "svelte/internal";
@@ -26,8 +25,6 @@ function create_fragment(ctx) {
 				set_style(div, "color", /*color*/ ctx[0]);
 			}
 		},
-		i: noop,
-		o: noop,
 		d(detaching) {
 			if (detaching) detach(div);
 		}

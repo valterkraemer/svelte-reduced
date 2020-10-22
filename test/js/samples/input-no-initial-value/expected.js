@@ -8,7 +8,6 @@ import {
 	init,
 	insert,
 	listen,
-	noop,
 	run_all,
 	safe_not_equal,
 	set_input_value,
@@ -54,8 +53,6 @@ function create_fragment(ctx) {
 				set_input_value(input, /*test*/ ctx[0]);
 			}
 		},
-		i: noop,
-		o: noop,
 		d(detaching) {
 			if (detaching) detach(form);
 			mounted = false;

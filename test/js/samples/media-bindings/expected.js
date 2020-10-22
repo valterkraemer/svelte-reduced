@@ -7,7 +7,6 @@ import {
 	init,
 	insert,
 	listen,
-	noop,
 	raf,
 	run_all,
 	safe_not_equal,
@@ -97,8 +96,6 @@ function create_fragment(ctx) {
 				audio.playbackRate = /*playbackRate*/ ctx[8];
 			}
 		},
-		i: noop,
-		o: noop,
 		d(detaching) {
 			if (detaching) detach(audio);
 			mounted = false;

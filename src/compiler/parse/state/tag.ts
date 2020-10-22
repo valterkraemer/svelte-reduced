@@ -335,12 +335,6 @@ function read_attribute(parser: Parser, unique_names: Set<string>) {
 			expression: (value[0] && value[0].expression) || null
 		};
 
-		if (type === 'Transition') {
-			const direction = name.slice(0, colon_index);
-			directive.intro = direction === 'in' || direction === 'transition';
-			directive.outro = direction === 'out' || direction === 'transition';
-		}
-
 		if (!directive.expression && (type === 'Binding' || type === 'Class')) {
 			directive.expression = {
 				start: directive.start + colon_index + 1,
@@ -365,11 +359,9 @@ function read_attribute(parser: Parser, unique_names: Set<string>) {
 }
 
 function get_directive_type(name: string): DirectiveType {
-	if (name === 'animate') return 'Animation';
 	if (name === 'bind') return 'Binding';
 	if (name === 'class') return 'Class';
 	if (name === 'on') return 'EventHandler';
-	if (name === 'in' || name === 'out' || name === 'transition') return 'Transition';
 }
 
 function read_attribute_value(parser: Parser) {

@@ -53,8 +53,6 @@ export default class InlineComponentWrapper extends Wrapper {
 				sanitize(this.node.name)
 			).toLowerCase()
 		};
-
-		block.add_outro();
 	}
 
 	warn_if_reactive() {
@@ -335,10 +333,6 @@ export default class InlineComponentWrapper extends Wrapper {
 			b`@mount_component(${name}, ${parent_node || '#target'}, ${parent_node ? 'null' : '#anchor'});`
 		);
 
-		block.chunks.intro.push(b`
-			@transition_in(${name}.$$.fragment, #local);
-		`);
-
 		if (updates.length) {
 			block.chunks.update.push(b`
 				${updates}
@@ -349,9 +343,5 @@ export default class InlineComponentWrapper extends Wrapper {
 		block.chunks.destroy.push(b`
 			@destroy_component(${name}, ${parent_node ? null : 'detaching'});
 		`);
-
-		block.chunks.outro.push(
-			b`@transition_out(${name}.$$.fragment, #local);`
-		);
 	}
 }

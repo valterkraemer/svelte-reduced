@@ -65,8 +65,6 @@ function create_fragment(ctx) {
 			}
 		},
 		p: noop,
-		i: noop,
-		o: noop,
 		d(detaching) {
 			if (detaching) detach(div1);
 			mounted = false;
@@ -76,11 +74,11 @@ function create_fragment(ctx) {
 }
 
 function handleTouchstart() {
-	
+
 } // ...
 
 function handleClick() {
-	
+
 } // ...
 
 class Component extends SvelteComponent {

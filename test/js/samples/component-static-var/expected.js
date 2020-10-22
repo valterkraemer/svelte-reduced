@@ -11,9 +11,7 @@ import {
 	mount_component,
 	safe_not_equal,
 	set_input_value,
-	space,
-	transition_in,
-	transition_out
+	space
 } from "svelte/internal";
 
 import Foo from "./Foo.svelte";
@@ -25,7 +23,6 @@ function create_fragment(ctx) {
 	let bar;
 	let t1;
 	let input;
-	let current;
 	let mounted;
 	let dispose;
 	foo = new Foo({ props: { x: y } });
@@ -46,7 +43,6 @@ function create_fragment(ctx) {
 			insert(target, t1, anchor);
 			insert(target, input, anchor);
 			set_input_value(input, /*z*/ ctx[0]);
-			current = true;
 
 			if (!mounted) {
 				dispose = listen(input, "input", /*input_input_handler*/ ctx[1]);
@@ -61,17 +57,6 @@ function create_fragment(ctx) {
 			if (dirty & /*z*/ 1 && input.value !== /*z*/ ctx[0]) {
 				set_input_value(input, /*z*/ ctx[0]);
 			}
-		},
-		i(local) {
-			if (current) return;
-			transition_in(foo.$$.fragment, local);
-			transition_in(bar.$$.fragment, local);
-			current = true;
-		},
-		o(local) {
-			transition_out(foo.$$.fragment, local);
-			transition_out(bar.$$.fragment, local);
-			current = false;
 		},
 		d(detaching) {
 			destroy_component(foo, detaching);

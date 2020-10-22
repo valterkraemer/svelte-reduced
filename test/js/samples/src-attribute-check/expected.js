@@ -8,7 +8,6 @@ import {
 	element,
 	init,
 	insert,
-	noop,
 	safe_not_equal,
 	space
 } from "svelte/internal";
@@ -53,8 +52,6 @@ function create_fragment(ctx) {
 				attr(img1, "src", img1_src_value);
 			}
 		},
-		i: noop,
-		o: noop,
 		d(detaching) {
 			if (detaching) detach(img0);
 			if (detaching) detach(t);

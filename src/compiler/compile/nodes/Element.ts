@@ -3,8 +3,6 @@ import Node from './shared/Node';
 import Attribute from './Attribute';
 import Binding from './Binding';
 import EventHandler from './EventHandler';
-import Transition from './Transition';
-import Animation from './Animation';
 import Class from './Class';
 import Text from './Text';
 import { namespaces } from '../../utils/namespaces';
@@ -114,9 +112,6 @@ export default class Element extends Node {
 	bindings: Binding[] = [];
 	classes: Class[] = [];
 	handlers: EventHandler[] = [];
-	intro?: Transition = null;
-	outro?: Transition = null;
-	animation?: Animation = null;
 	children: INode[];
 	namespace: string;
 	needs_manual_style_scoping: boolean;
@@ -189,18 +184,6 @@ export default class Element extends Node {
 
 				case 'EventHandler':
 					this.handlers.push(new EventHandler(component, this, scope, node));
-					break;
-
-				case 'Transition':
-				{
-					const transition = new Transition(component, this, scope, node);
-					if (node.intro) this.intro = transition;
-					if (node.outro) this.outro = transition;
-					break;
-				}
-
-				case 'Animation':
-					this.animation = new Animation(component, this, scope, node);
 					break;
 
 				default:

@@ -2,7 +2,6 @@ import { run_all } from './utils';
 import { set_current_component } from './lifecycle';
 
 export const dirty_components = [];
-export const intros = { enabled: false };
 
 export const binding_callbacks = [];
 const render_callbacks = [];

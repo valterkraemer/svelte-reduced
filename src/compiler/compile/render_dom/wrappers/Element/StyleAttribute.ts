@@ -45,11 +45,7 @@ export default class StyleAttributeWrapper extends AttributeWrapper {
 				// }
 
 				if (prop_dependencies.size) {
-					let condition = block.renderer.dirty(Array.from(prop_dependencies));
-
-					if (block.has_outros) {
-						condition = x`!#current || ${condition}`;
-					}
+					const condition = block.renderer.dirty(Array.from(prop_dependencies));
 
 					const update = b`
 						if (${condition}) {

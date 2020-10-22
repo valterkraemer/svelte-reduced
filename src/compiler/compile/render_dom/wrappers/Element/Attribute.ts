@@ -188,10 +188,6 @@ export default class AttributeWrapper extends BaseAttributeWrapper {
 			}
 		}
 
-		if (block.has_outros) {
-			condition = x`!#current || ${condition}`;
-		}
-
 		return condition;
 	}
 

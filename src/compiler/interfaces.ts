@@ -24,11 +24,9 @@ export interface MustacheTag extends BaseNode {
 	expression: Node;
 }
 
-export type DirectiveType = 'Animation'
-| 'Binding'
+export type DirectiveType = 'Binding'
 | 'Class'
-| 'EventHandler'
-| 'Transition';
+| 'EventHandler';
 
 interface BaseDirective extends BaseNode {
 	type: DirectiveType;
@@ -37,19 +35,12 @@ interface BaseDirective extends BaseNode {
 	modifiers: string[];
 }
 
-export interface Transition extends BaseDirective{
-	type: 'Transition';
-	intro: boolean;
-	outro: boolean;
-}
-
-export type Directive = BaseDirective | Transition;
+export type Directive = BaseDirective;
 
 export type TemplateNode = Text
 | MustacheTag
 | BaseNode
-| Directive
-| Transition;
+| Directive;
 
 export interface Parser {
 	readonly template: string;

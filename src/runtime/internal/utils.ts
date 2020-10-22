@@ -2,8 +2,6 @@ import { Readable } from 'svelte/store';
 
 export function noop() {}
 
-export const identity = x => x;
-
 export function assign<T, S>(tar: T, src: S): T & S {
 	// @ts-ignore
 	for (const k in src) tar[k] = src[k];

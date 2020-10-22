@@ -46,24 +46,13 @@ export default class Block {
 		claim: Array<Node | Node[]>;
 		hydrate: Array<Node | Node[]>;
 		mount: Array<Node | Node[]>;
-		measure: Array<Node | Node[]>;
-		fix: Array<Node | Node[]>;
-		animate: Array<Node | Node[]>;
-		intro: Array<Node | Node[]>;
 		update: Array<Node | Node[]>;
-		outro: Array<Node | Node[]>;
 		destroy: Array<Node | Node[]>;
 	};
 
 	event_listeners: Node[] = [];
 
 	maintain_context: boolean;
-	has_animation: boolean;
-	has_intros: boolean;
-	has_outros: boolean;
-	has_intro_method: boolean; // could have the method without the transition, due to siblings
-	has_outro_method: boolean;
-	outros: number;
 
 	aliases: Map<string, Identifier>;
 	variables: Map<string, { id: Identifier; init?: Node }> = new Map();
@@ -94,19 +83,9 @@ export default class Block {
 			claim: [],
 			hydrate: [],
 			mount: [],
-			measure: [],
-			fix: [],
-			animate: [],
-			intro: [],
 			update: [],
-			outro: [],
 			destroy: []
 		};
-
-		this.has_animation = false;
-		this.has_intro_method = false; // a block could have an intro method but not intro transitions, e.g. if a sibling block has intros
-		this.has_outro_method = false;
-		this.outros = 0;
 
 		this.get_unique_name = this.renderer.component.get_unique_name_maker();
 
@@ -183,21 +162,6 @@ export default class Block {
 		}
 	}
 
-	add_intro(local?: boolean) {
-		this.has_intros = this.has_intro_method = true;
-		if (!local && this.parent) this.parent.add_intro();
-	}
-
-	add_outro(local?: boolean) {
-		this.has_outros = this.has_outro_method = true;
-		this.outros += 1;
-		if (!local && this.parent) this.parent.add_outro();
-	}
-
-	add_animation() {
-		this.has_animation = true;
-	}
-
 	add_variable(id: Identifier, init?: Node) {
 		if (this.variables.has(id.name)) {
 			throw new Error(
@@ -221,19 +185,6 @@ export default class Block {
 	}
 
 	get_contents(key?: any) {
-		if (this.has_outros) {
-			this.add_variable({ type: 'Identifier', name: '#current' });
-
-			if (this.chunks.intro.length > 0) {
-				this.chunks.intro.push(b`#current = true;`);
-				this.chunks.mount.push(b`#current = true;`);
-			}
-
-			if (this.chunks.outro.length > 0) {
-				this.chunks.outro.push(b`#current = false;`);
-			}
-		}
-
 		if (this.autofocus) {
 			this.chunks.mount.push(b`${this.autofocus}.focus();`);
 		}
@@ -313,39 +264,6 @@ export default class Block {
 			}
 		}
 
-		if (this.has_animation) {
-			properties.measure = x`function #measure() {
-				${this.chunks.measure}
-			}`;
-
-			properties.fix = x`function #fix() {
-				${this.chunks.fix}
-			}`;
-
-			properties.animate = x`function #animate() {
-				${this.chunks.animate}
-			}`;
-		}
-
-		if (this.has_intro_method || this.has_outro_method) {
-			if (this.chunks.intro.length === 0) {
-				properties.intro = noop;
-			} else {
-				properties.intro = x`function #intro(#local) {
-					${this.has_outros && b`if (#current) return;`}
-					${this.chunks.intro}
-				}`;
-			}
-
-			if (this.chunks.outro.length === 0) {
-				properties.outro = noop;
-			} else {
-				properties.outro = x`function #outro(#local) {
-					${this.chunks.outro}
-				}`;
-			}
-		}
-
 		if (this.chunks.destroy.length === 0) {
 			properties.destroy = noop;
 		} else {
@@ -367,11 +285,6 @@ export default class Block {
 			h: ${properties.hydrate},
 			m: ${properties.mount},
 			p: ${properties.update},
-			r: ${properties.measure},
-			f: ${properties.fix},
-			a: ${properties.animate},
-			i: ${properties.intro},
-			o: ${properties.outro},
 			d: ${properties.destroy}
 		}`;
 
@@ -397,15 +310,12 @@ export default class Block {
 	has_content(): boolean {
 		return !!this.first ||
 			this.event_listeners.length > 0 ||
-			this.chunks.intro.length > 0 ||
-			this.chunks.outro.length > 0  ||
 			this.chunks.create.length > 0 ||
 			this.chunks.hydrate.length > 0 ||
 			this.chunks.claim.length > 0 ||
 			this.chunks.mount.length > 0 ||
 			this.chunks.update.length > 0 ||
-			this.chunks.destroy.length > 0 ||
-			this.has_animation;
+			this.chunks.destroy.length > 0;
 	}
 
 	render() {

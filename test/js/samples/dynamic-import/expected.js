@@ -6,16 +6,13 @@ import {
 	init,
 	mount_component,
 	noop,
-	safe_not_equal,
-	transition_in,
-	transition_out
+	safe_not_equal
 } from "svelte/internal";
 
 import LazyLoad from "./LazyLoad.svelte";
 
 function create_fragment(ctx) {
 	let lazyload;
-	let current;
 	lazyload = new LazyLoad({ props: { load: func } });
 
 	return {
@@ -24,18 +21,8 @@ function create_fragment(ctx) {
 		},
 		m(target, anchor) {
 			mount_component(lazyload, target, anchor);
-			current = true;
 		},
 		p: noop,
-		i(local) {
-			if (current) return;
-			transition_in(lazyload.$$.fragment, local);
-			current = true;
-		},
-		o(local) {
-			transition_out(lazyload.$$.fragment, local);
-			current = false;
-		},
 		d(detaching) {
 			destroy_component(lazyload, detaching);
 		}

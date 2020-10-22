@@ -6,14 +6,11 @@ import {
 	init,
 	mount_component,
 	noop,
-	safe_not_equal,
-	transition_in,
-	transition_out
+	safe_not_equal
 } from "svelte/internal";
 
 function create_fragment(ctx) {
 	let nested;
-	let current;
 	nested = new /*Nested*/ ctx[0]({ props: { foo: [1, 2, 3] } });
 
 	return {
@@ -22,18 +19,8 @@ function create_fragment(ctx) {
 		},
 		m(target, anchor) {
 			mount_component(nested, target, anchor);
-			current = true;
 		},
 		p: noop,
-		i(local) {
-			if (current) return;
-			transition_in(nested.$$.fragment, local);
-			current = true;
-		},
-		o(local) {
-			transition_out(nested.$$.fragment, local);
-			current = false;
-		},
 		d(detaching) {
 			destroy_component(nested, detaching);
 		}

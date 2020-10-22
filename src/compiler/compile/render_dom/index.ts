@@ -17,8 +17,6 @@ export default function dom(
 	const renderer = new Renderer(component, options);
 	const { block } = renderer;
 
-	block.has_outro_method = true;
-
 	const body = [];
 
 	const css = component.stylesheet.render(options.filename, true);

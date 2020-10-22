@@ -40,10 +40,6 @@ export default class Tag extends Wrapper {
 		if (dependencies.length > 0) {
 			let condition = block.renderer.dirty(dependencies);
 
-			if (block.has_outros) {
-				condition = x`!#current || ${condition}`;
-			}
-
 			const update_cached_value = x`${value} !== (${value} = ${snippet})`;
 
 			if (this.node.should_cache) {

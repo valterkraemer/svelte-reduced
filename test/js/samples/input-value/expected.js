@@ -7,7 +7,6 @@ import {
 	init,
 	insert,
 	listen,
-	noop,
 	safe_not_equal,
 	set_data,
 	space,
@@ -51,8 +50,6 @@ function create_fragment(ctx) {
 
 			if (dirty & /*name*/ 1) set_data(t1, /*name*/ ctx[0]);
 		},
-		i: noop,
-		o: noop,
 		d(detaching) {
 			if (detaching) detach(input);
 			if (detaching) detach(t0);

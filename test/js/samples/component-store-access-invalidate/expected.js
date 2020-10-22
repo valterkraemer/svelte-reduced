@@ -7,7 +7,6 @@ import {
 	element,
 	init,
 	insert,
-	noop,
 	safe_not_equal,
 	set_data,
 	text
@@ -31,8 +30,6 @@ function create_fragment(ctx) {
 		p(ctx, [dirty]) {
 			if (dirty & /*$foo*/ 1) set_data(t, /*$foo*/ ctx[0]);
 		},
-		i: noop,
-		o: noop,
 		d(detaching) {
 			if (detaching) detach(h1);
 		}

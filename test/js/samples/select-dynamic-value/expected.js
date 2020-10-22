@@ -6,7 +6,6 @@ import {
 	element,
 	init,
 	insert,
-	noop,
 	safe_not_equal,
 	select_option
 } from "svelte/internal";
@@ -39,8 +38,6 @@ function create_fragment(ctx) {
 				select_option(select, /*current*/ ctx[0]);
 			}
 		},
-		i: noop,
-		o: noop,
 		d(detaching) {
 			if (detaching) detach(select);
 		}

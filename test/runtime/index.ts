@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { rollup } from 'rollup';
 import virtual from '@rollup/plugin-virtual';
 import glob from 'tiny-glob/sync.js';
-import { clear_loops, flush, set_now, set_raf } from '../../internal';
+import { flush, set_now, set_raf } from '../../internal';
 
 import {
 	assert,
@@ -118,9 +118,6 @@ describe('runtime', () => {
 
 			return Promise.resolve()
 				.then(() => {
-					// hack to support transition tests
-					clear_loops();
-
 					const raf = {
 						time: 0,
 						callback: null,

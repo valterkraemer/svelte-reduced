@@ -43,8 +43,6 @@ function create_fragment(ctx) {
 			insert(target, if_block_anchor, anchor);
 		},
 		p: noop,
-		i: noop,
-		o: noop,
 		d(detaching) {
 			if (if_block) if_block.d(detaching);
 			if (detaching) detach(if_block_anchor);

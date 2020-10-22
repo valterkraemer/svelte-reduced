@@ -6,7 +6,6 @@ import {
 	empty,
 	init,
 	insert,
-	noop,
 	safe_not_equal
 } from "svelte/internal";
 
@@ -43,7 +42,7 @@ function create_fragment(ctx) {
 		p(ctx, [dirty]) {
 			if (/*foo*/ ctx[0]) {
 				if (if_block) {
-					
+
 				} else {
 					if_block = create_if_block(ctx);
 					if_block.c();
@@ -54,8 +53,6 @@ function create_fragment(ctx) {
 				if_block = null;
 			}
 		},
-		i: noop,
-		o: noop,
 		d(detaching) {
 			if (if_block) if_block.d(detaching);
 			if (detaching) detach(if_block_anchor);

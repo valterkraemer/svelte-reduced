@@ -6,7 +6,6 @@ import {
 	element,
 	init,
 	insert,
-	noop,
 	safe_not_equal,
 	set_data,
 	space,
@@ -59,8 +58,6 @@ function create_fragment(ctx) {
 		p(ctx, [dirty]) {
 			if (dirty & /*world3*/ 1) set_data(t9, /*world3*/ ctx[0]);
 		},
-		i: noop,
-		o: noop,
 		d(detaching) {
 			if (detaching) detach(div0);
 			if (detaching) detach(t7);
