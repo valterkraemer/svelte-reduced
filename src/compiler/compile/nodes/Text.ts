@@ -29,10 +29,9 @@ export default class Text extends Node {
 	should_skip() {
 		if (/\S/.test(this.data)) return false;
 
-		const parent_element = this.find_nearest(/(?:Element|InlineComponent|Head)/);
+		const parent_element = this.find_nearest(/(?:Element|InlineComponent)/);
 		if (!parent_element) return false;
 
-		if (parent_element.type === 'Head') return true;
 		if (parent_element.type === 'InlineComponent') return parent_element.children.length === 1 && this === parent_element.children[0];
 
 		// svg namespace exclusions

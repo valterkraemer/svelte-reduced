@@ -6,7 +6,6 @@ import ElseBlock from '../../nodes/ElseBlock';
 import FragmentWrapper from './Fragment';
 import { b, x } from 'code-red';
 import { walk } from 'estree-walker';
-import { is_head } from './shared/is_head';
 import { Identifier, Node, UnaryExpression } from 'estree';
 
 function is_else_if(node: ElseBlock) {
@@ -188,7 +187,7 @@ export default class IfBlockWrapper extends Wrapper {
 
 		const vars = { name, anchor, if_exists_condition, has_else, has_transitions };
 
-		const detaching = parent_node && !is_head(parent_node) ? null : 'detaching';
+		const detaching = parent_node ? null : 'detaching';
 
 		if (this.node.else) {
 			this.branches.forEach(branch => {

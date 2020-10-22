@@ -278,7 +278,3 @@ export function custom_event<T=any>(type: string, detail?: T) {
 	e.initCustomEvent(type, false, false, detail);
 	return e;
 }
-
-export function query_selector_all(selector: string, parent: HTMLElement = document.body) {
-	return Array.from(parent.querySelectorAll(selector));
-}

@@ -1,7 +1,6 @@
 import Body from '../Body';
 import Comment from '../Comment';
 import Element from '../Element';
-import Head from '../Head';
 import IfBlock from '../IfBlock';
 import InlineComponent from '../InlineComponent';
 import MustacheTag from '../MustacheTag';
@@ -15,7 +14,6 @@ function get_constructor(type) {
 		case 'Body': return Body;
 		case 'Comment': return Comment;
 		case 'Element': return Element;
-		case 'Head': return Head;
 		case 'IfBlock': return IfBlock;
 		case 'InlineComponent': return InlineComponent;
 		case 'MustacheTag': return MustacheTag;

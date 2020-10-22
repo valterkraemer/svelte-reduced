@@ -12,7 +12,6 @@ import list from '../../utils/list';
 const valid_tag_name = /^\!?[a-zA-Z]{1,}:?[a-zA-Z0-9\-]*/;
 
 const meta_tags = new Map([
-	['svelte:head', 'Head'],
 	['svelte:options', 'Options'],
 	['svelte:window', 'Window'],
 	['svelte:body', 'Body']
@@ -39,16 +38,6 @@ const specials = new Map([
 
 const SELF = /^svelte:self(?=[\s/>])/;
 const COMPONENT = /^svelte:component(?=[\s/>])/;
-
-function parent_is_head(stack) {
-	let i = stack.length;
-	while (i--) {
-		const { type } = stack[i];
-		if (type === 'Head') return true;
-		if (type === 'Element' || type === 'InlineComponent') return false;
-	}
-	return false;
-}
 
 export default function tag(parser: Parser) {
 	const start = parser.index++;

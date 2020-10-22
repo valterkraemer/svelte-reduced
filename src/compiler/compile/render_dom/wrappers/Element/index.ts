@@ -17,7 +17,6 @@ import Binding from './Binding';
 import add_to_set from '../../../utils/add_to_set';
 import { add_event_handler } from '../shared/add_event_handlers';
 import bind_this from '../shared/bind_this';
-import { is_head } from '../shared/is_head';
 import { Identifier } from 'estree';
 import EventHandler from './EventHandler';
 import MustacheTagWrapper from '../MustacheTag';
@@ -251,10 +250,6 @@ export default class ElementWrapper extends Wrapper {
 			block.chunks.mount.push(
 				b`@append(${parent_node}, ${node});`
 			);
-
-			if (is_head(parent_node)) {
-				block.chunks.destroy.push(b`@detach(${node});`);
-			}
 		} else {
 			block.chunks.mount.push(b`@insert(#target, ${node}, #anchor);`);
 

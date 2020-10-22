@@ -1,7 +1,6 @@
 import Wrapper from './shared/Wrapper';
 import Body from './Body';
 import Element from './Element/index';
-import Head from './Head';
 import IfBlock from './IfBlock';
 import InlineComponent from './InlineComponent/index';
 import MustacheTag from './MustacheTag';
@@ -18,7 +17,6 @@ const wrappers = {
 	Body,
 	Comment: null,
 	Element,
-	Head,
 	IfBlock,
 	InlineComponent,
 	MustacheTag,

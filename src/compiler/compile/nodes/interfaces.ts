@@ -9,7 +9,6 @@ import Element from './Element';
 import ElseBlock from './ElseBlock';
 import EventHandler from './EventHandler';
 import Fragment from './Fragment';
-import Head from './Head';
 import IfBlock from './IfBlock';
 import InlineComponent from './InlineComponent';
 import MustacheTag from './MustacheTag';
@@ -30,7 +29,6 @@ export type INode = Animation
 | ElseBlock
 | EventHandler
 | Fragment
-| Head
 | IfBlock
 | InlineComponent
 | MustacheTag
