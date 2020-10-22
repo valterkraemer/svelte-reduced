@@ -21,7 +21,7 @@ export default class InlineComponent extends Node {
 	constructor(component: Component, parent, scope, info) {
 		super(component, parent, scope, info);
 
-		if (info.name !== 'svelte:component' && info.name !== 'svelte:self') {
+		if (info.name !== 'svelte:self') {
 			const name = info.name.split('.')[0]; // accommodate namespaces
 			component.warn_if_undefined(name, info, scope);
 			component.add_reference(name);
@@ -29,9 +29,7 @@ export default class InlineComponent extends Node {
 
 		this.name = info.name;
 
-		this.expression = this.name === 'svelte:component'
-			? new Expression(component, this, scope, info.expression)
-			: null;
+		this.expression = null;
 
 		info.attributes.forEach(node => {
 			/* eslint-disable no-fallthrough */

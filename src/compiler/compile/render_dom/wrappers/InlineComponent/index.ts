@@ -50,9 +50,7 @@ export default class InlineComponentWrapper extends Wrapper {
 		this.var = {
 			type: 'Identifier',
 			name: (
-				this.node.name === 'svelte:self' ? renderer.component.name.name :
-					this.node.name === 'svelte:component' ? 'switch_instance' :
-						sanitize(this.node.name)
+				this.node.name === 'svelte:self' ? renderer.component.name.name : sanitize(this.node.name)
 			).toLowerCase()
 		};
 
@@ -313,137 +311,49 @@ export default class InlineComponentWrapper extends Wrapper {
 			return b`${name}.$on("${handler.name}", ${snippet});`;
 		});
 
-		if (this.node.name === 'svelte:component') {
-			const switch_value = block.get_unique_name('switch_value');
-			const switch_props = block.get_unique_name('switch_props');
+		const expression = this.node.name === 'svelte:self'
+			? component.name
+			: this.renderer.reference(string_to_member_expression(this.node.name));
 
-			const snippet = this.node.expression.manipulate(block);
+		block.chunks.init.push(b`
+			${(this.node.attributes.length > 0 || this.node.bindings.length > 0) && b`
+			${props && b`let ${props} = ${attribute_object};`}`}
+			${statements}
+			${name} = new ${expression}(${component_opts});
 
-			block.chunks.init.push(b`
-				var ${switch_value} = ${snippet};
+			${munged_bindings}
+			${munged_handlers}
+		`);
 
-				function ${switch_props}(#ctx) {
-					${(this.node.attributes.length > 0 || this.node.bindings.length > 0) && b`
-					${props && b`let ${props} = ${attribute_object};`}`}
-					${statements}
-					return ${component_opts};
-				}
+		block.chunks.create.push(b`@create_component(${name}.$$.fragment);`);
 
-				if (${switch_value}) {
-					${name} = new ${switch_value}(${switch_props}(#ctx));
-
-					${munged_bindings}
-					${munged_handlers}
-				}
-			`);
-
-			block.chunks.create.push(
-				b`if (${name}) @create_component(${name}.$$.fragment);`
-			);
-
-			if (parent_nodes && this.renderer.options.hydratable) {
-				block.chunks.claim.push(
-					b`if (${name}) @claim_component(${name}.$$.fragment, ${parent_nodes});`
-				);
-			}
-
-			block.chunks.mount.push(b`
-				if (${name}) {
-					@mount_component(${name}, ${parent_node || '#target'}, ${parent_node ? 'null' : '#anchor'});
-				}
-			`);
-
-			const anchor = this.get_or_create_anchor(block, parent_node, parent_nodes);
-			const update_mount_node = this.get_update_mount_node(anchor);
-
-			if (updates.length) {
-				block.chunks.update.push(b`
-					${updates}
-				`);
-			}
-
-			block.chunks.update.push(b`
-				if (${switch_value} !== (${switch_value} = ${snippet})) {
-					if (${name}) {
-						@group_outros();
-						const old_component = ${name};
-						@transition_out(old_component.$$.fragment, 1, 0, () => {
-							@destroy_component(old_component, 1);
-						});
-						@check_outros();
-					}
-
-					if (${switch_value}) {
-						${name} = new ${switch_value}(${switch_props}(#ctx));
-
-						${munged_bindings}
-						${munged_handlers}
-
-						@create_component(${name}.$$.fragment);
-						@transition_in(${name}.$$.fragment, 1);
-						@mount_component(${name}, ${update_mount_node}, ${anchor});
-					} else {
-						${name} = null;
-					}
-				} else if (${switch_value}) {
-					${updates.length > 0 && b`${name}.$set(${name_changes});`}
-				}
-			`);
-
-			block.chunks.intro.push(b`
-				if (${name}) @transition_in(${name}.$$.fragment, #local);
-			`);
-
-			block.chunks.outro.push(
-				b`if (${name}) @transition_out(${name}.$$.fragment, #local);`
-			);
-
-			block.chunks.destroy.push(b`if (${name}) @destroy_component(${name}, ${parent_node ? null : 'detaching'});`);
-		} else {
-			const expression = this.node.name === 'svelte:self'
-				? component.name
-				: this.renderer.reference(string_to_member_expression(this.node.name));
-
-			block.chunks.init.push(b`
-				${(this.node.attributes.length > 0 || this.node.bindings.length > 0) && b`
-				${props && b`let ${props} = ${attribute_object};`}`}
-				${statements}
-				${name} = new ${expression}(${component_opts});
-
-				${munged_bindings}
-				${munged_handlers}
-			`);
-
-			block.chunks.create.push(b`@create_component(${name}.$$.fragment);`);
-
-			if (parent_nodes && this.renderer.options.hydratable) {
-				block.chunks.claim.push(
-					b`@claim_component(${name}.$$.fragment, ${parent_nodes});`
-				);
-			}
-
-			block.chunks.mount.push(
-				b`@mount_component(${name}, ${parent_node || '#target'}, ${parent_node ? 'null' : '#anchor'});`
-			);
-
-			block.chunks.intro.push(b`
-				@transition_in(${name}.$$.fragment, #local);
-			`);
-
-			if (updates.length) {
-				block.chunks.update.push(b`
-					${updates}
-					${name}.$set(${name_changes});
-				`);
-			}
-
-			block.chunks.destroy.push(b`
-				@destroy_component(${name}, ${parent_node ? null : 'detaching'});
-			`);
-
-			block.chunks.outro.push(
-				b`@transition_out(${name}.$$.fragment, #local);`
+		if (parent_nodes && this.renderer.options.hydratable) {
+			block.chunks.claim.push(
+				b`@claim_component(${name}.$$.fragment, ${parent_nodes});`
 			);
 		}
+
+		block.chunks.mount.push(
+			b`@mount_component(${name}, ${parent_node || '#target'}, ${parent_node ? 'null' : '#anchor'});`
+		);
+
+		block.chunks.intro.push(b`
+			@transition_in(${name}.$$.fragment, #local);
+		`);
+
+		if (updates.length) {
+			block.chunks.update.push(b`
+				${updates}
+				${name}.$set(${name_changes});
+			`);
+		}
+
+		block.chunks.destroy.push(b`
+			@destroy_component(${name}, ${parent_node ? null : 'detaching'});
+		`);
+
+		block.chunks.outro.push(
+			b`@transition_out(${name}.$$.fragment, #local);`
+		);
 	}
 }

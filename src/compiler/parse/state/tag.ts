@@ -15,7 +15,7 @@ const meta_tags = new Map([
 	['svelte:window', 'Window']
 ]);
 
-const valid_meta_tags = Array.from(meta_tags.keys()).concat('svelte:self', 'svelte:component');
+const valid_meta_tags = Array.from(meta_tags.keys()).concat('svelte:self');
 
 const specials = new Map([
 	[
@@ -35,7 +35,6 @@ const specials = new Map([
 ]);
 
 const SELF = /^svelte:self(?=[\s/>])/;
-const COMPONENT = /^svelte:component(?=[\s/>])/;
 
 export default function tag(parser: Parser) {
 	const start = parser.index++;
@@ -93,7 +92,7 @@ export default function tag(parser: Parser) {
 
 	const type = meta_tags.has(name)
 		? meta_tags.get(name)
-		: (/[A-Z]/.test(name[0]) || name === 'svelte:self' || name === 'svelte:component') ? 'InlineComponent'
+		: (/[A-Z]/.test(name[0]) || name === 'svelte:self') ? 'InlineComponent'
 			: 'Element';
 
 	const element: TemplateNode = {
@@ -159,26 +158,6 @@ export default function tag(parser: Parser) {
 	while ((attribute = read_attribute(parser, unique_names))) {
 		element.attributes.push(attribute);
 		parser.allow_whitespace();
-	}
-
-	if (name === 'svelte:component') {
-		const index = element.attributes.findIndex(attr => attr.type === 'Attribute' && attr.name === 'this');
-		if (!~index) {
-			parser.error({
-				code: 'missing-component-definition',
-				message: "<svelte:component> must have a 'this' attribute"
-			}, start);
-		}
-
-		const definition = element.attributes.splice(index, 1)[0];
-		if (definition.value === true || definition.value.length !== 1 || definition.value[0].type === 'Text') {
-			parser.error({
-				code: 'invalid-component-definition',
-				message: 'invalid component definition'
-			}, definition.start);
-		}
-
-		element.expression = definition.value[0].expression;
 	}
 
 	// special cases – top-level <script> and <style>
@@ -248,8 +227,6 @@ function read_tag_name(parser: Parser) {
 
 		return 'svelte:self';
 	}
-
-	if (parser.read(COMPONENT)) return 'svelte:component';
 
 	const name = parser.read_until(/(\s|\/|>)/);
 
