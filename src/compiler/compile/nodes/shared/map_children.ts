@@ -4,7 +4,6 @@ import Element from '../Element';
 import IfBlock from '../IfBlock';
 import InlineComponent from '../InlineComponent';
 import MustacheTag from '../MustacheTag';
-import Options from '../Options';
 import Text from '../Text';
 import Window from '../Window';
 import { TemplateNode } from '../../../interfaces';
@@ -17,7 +16,6 @@ function get_constructor(type) {
 		case 'IfBlock': return IfBlock;
 		case 'InlineComponent': return InlineComponent;
 		case 'MustacheTag': return MustacheTag;
-		case 'Options': return Options;
 		case 'Text': return Text;
 		case 'Window': return Window;
 		default: throw new Error(`Not implemented: ${type}`);

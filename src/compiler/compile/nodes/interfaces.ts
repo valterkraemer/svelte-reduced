@@ -12,7 +12,6 @@ import Fragment from './Fragment';
 import IfBlock from './IfBlock';
 import InlineComponent from './InlineComponent';
 import MustacheTag from './MustacheTag';
-import Options from './Options';
 import Text from './Text';
 import Transition from './Transition';
 import Window from './Window';
@@ -32,7 +31,6 @@ export type INode = Animation
 | IfBlock
 | InlineComponent
 | MustacheTag
-| Options
 | Tag
 | Text
 | Transition

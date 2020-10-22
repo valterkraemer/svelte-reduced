@@ -12,7 +12,6 @@ import list from '../../utils/list';
 const valid_tag_name = /^\!?[a-zA-Z]{1,}:?[a-zA-Z0-9\-]*/;
 
 const meta_tags = new Map([
-	['svelte:options', 'Options'],
 	['svelte:window', 'Window'],
 	['svelte:body', 'Body']
 ]);

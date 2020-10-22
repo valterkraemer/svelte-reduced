@@ -2,7 +2,7 @@ import { walk } from 'estree-walker';
 import { getLocator } from 'locate-character';
 import Stats from '../Stats';
 import { globals, reserved, is_valid } from '../utils/names';
-import { namespaces, valid_namespaces } from '../utils/namespaces';
+import { namespaces } from '../utils/namespaces';
 import create_module from './create_module';
 import {
 	create_scopes,
@@ -21,7 +21,6 @@ import flatten_reference from './utils/flatten_reference';
 import is_used_as_reference from './utils/is_used_as_reference';
 import is_reference from 'is-reference';
 import TemplateScope from './nodes/shared/TemplateScope';
-import fuzzymatch from '../utils/fuzzymatch';
 import get_object from './utils/get_object';
 import { Node, ImportDeclaration, Identifier, Program, ExpressionStatement, AssignmentExpression, Literal } from 'estree';
 import add_to_set from './utils/add_to_set';
@@ -133,8 +132,7 @@ export default class Component {
 		this.stylesheet.validate(this);
 
 		this.component_options = process_component_options(
-			this,
-			this.ast.html.children
+			this
 		);
 		this.namespace =
 			namespaces[this.component_options.namespace] ||
@@ -1278,7 +1276,7 @@ export default class Component {
 	}
 }
 
-function process_component_options(component: Component, nodes) {
+function process_component_options(component: Component) {
 	const component_options: ComponentOptions = {
 		immutable: component.compile_options.immutable || false,
 		accessors:
@@ -1287,89 +1285,6 @@ function process_component_options(component: Component, nodes) {
 				: false,
 		preserveWhitespace: !!component.compile_options.preserveWhitespace
 	};
-
-	const node = nodes.find(node => node.name === 'svelte:options');
-
-	function get_value(attribute, code, message) {
-		const { value } = attribute;
-		const chunk = value[0];
-
-		if (!chunk) return true;
-
-		if (value.length > 1) {
-			component.error(attribute, { code, message });
-		}
-
-		if (chunk.type === 'Text') return chunk.data;
-
-		if (chunk.expression.type !== 'Literal') {
-			component.error(attribute, { code, message });
-		}
-
-		return chunk.expression.value;
-	}
-
-	if (node) {
-		node.attributes.forEach(attribute => {
-			if (attribute.type === 'Attribute') {
-				const { name } = attribute;
-
-				switch (name) {
-					case 'namespace': {
-						const code = 'invalid-namespace-attribute';
-						const message = "The 'namespace' attribute must be a string literal representing a valid namespace";
-						const ns = get_value(attribute, code, message);
-
-						if (typeof ns !== 'string')
-							component.error(attribute, { code, message });
-
-						if (valid_namespaces.indexOf(ns) === -1) {
-							const match = fuzzymatch(ns, valid_namespaces);
-							if (match) {
-								component.error(attribute, {
-									code: 'invalid-namespace-property',
-									message: `Invalid namespace '${ns}' (did you mean '${match}'?)`
-								});
-							} else {
-								component.error(attribute, {
-									code: 'invalid-namespace-property',
-									message: `Invalid namespace '${ns}'`
-								});
-							}
-						}
-
-						component_options.namespace = ns;
-						break;
-					}
-
-					case 'accessors':
-					case 'immutable':
-					case 'preserveWhitespace': {
-						const code = `invalid-${name}-value`;
-						const message = `${name} attribute must be true or false`;
-						const value = get_value(attribute, code, message);
-
-						if (typeof value !== 'boolean')
-							component.error(attribute, { code, message });
-
-						component_options[name] = value;
-						break;
-					}
-
-					default:
-						component.error(attribute, {
-							code: 'invalid-options-attribute',
-							message: '<svelte:options> unknown attribute'
-						});
-				}
-			} else {
-				component.error(attribute, {
-					code: 'invalid-options-attribute',
-					message: "<svelte:options> can only have static 'namespace', 'accessors', 'immutable' and 'preserveWhitespace' attributes"
-				});
-			}
-		});
-	}
 
 	return component_options;
 }

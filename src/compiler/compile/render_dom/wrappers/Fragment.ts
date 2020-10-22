@@ -20,7 +20,6 @@ const wrappers = {
 	IfBlock,
 	InlineComponent,
 	MustacheTag,
-	Options: null,
 	Text,
 	Window
 };
