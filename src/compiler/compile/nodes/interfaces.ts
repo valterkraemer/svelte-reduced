@@ -2,7 +2,6 @@ import Tag from './shared/Tag';
 import Animation from './Animation';
 import Attribute from './Attribute';
 import Binding from './Binding';
-import Body from './Body';
 import Class from './Class';
 import Comment from './Comment';
 import Element from './Element';
@@ -21,7 +20,6 @@ import Window from './Window';
 export type INode = Animation
 | Attribute
 | Binding
-| Body
 | Class
 | Comment
 | Element

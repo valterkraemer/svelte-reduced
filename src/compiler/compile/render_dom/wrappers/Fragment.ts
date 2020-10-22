@@ -1,5 +1,4 @@
 import Wrapper from './shared/Wrapper';
-import Body from './Body';
 import Element from './Element/index';
 import IfBlock from './IfBlock';
 import InlineComponent from './InlineComponent/index';
@@ -14,7 +13,6 @@ import { link } from '../../../utils/link';
 import { Identifier } from 'estree';
 
 const wrappers = {
-	Body,
 	Comment: null,
 	Element,
 	IfBlock,

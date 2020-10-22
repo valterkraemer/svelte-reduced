@@ -1,4 +1,3 @@
-import Body from '../Body';
 import Comment from '../Comment';
 import Element from '../Element';
 import IfBlock from '../IfBlock';
@@ -10,7 +9,6 @@ import { TemplateNode } from '../../../interfaces';
 
 function get_constructor(type) {
 	switch (type) {
-		case 'Body': return Body;
 		case 'Comment': return Comment;
 		case 'Element': return Element;
 		case 'IfBlock': return IfBlock;
