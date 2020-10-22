@@ -107,8 +107,7 @@ export default function tag(parser: Parser) {
 	const type = meta_tags.has(name)
 		? meta_tags.get(name)
 		: (/[A-Z]/.test(name[0]) || name === 'svelte:self' || name === 'svelte:component') ? 'InlineComponent'
-			: name === 'title' && parent_is_head(parser.stack) ? 'Title'
-				: 'Element';
+			: 'Element';
 
 	const element: TemplateNode = {
 		start,

@@ -7,11 +7,8 @@ import InlineComponent from '../InlineComponent';
 import MustacheTag from '../MustacheTag';
 import Options from '../Options';
 import Text from '../Text';
-import Title from '../Title';
 import Window from '../Window';
 import { TemplateNode } from '../../../interfaces';
-
-export type Children = ReturnType<typeof map_children>;
 
 function get_constructor(type) {
 	switch (type) {
@@ -24,7 +21,6 @@ function get_constructor(type) {
 		case 'MustacheTag': return MustacheTag;
 		case 'Options': return Options;
 		case 'Text': return Text;
-		case 'Title': return Title;
 		case 'Window': return Window;
 		default: throw new Error(`Not implemented: ${type}`);
 	}

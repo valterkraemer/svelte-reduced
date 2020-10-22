@@ -6,7 +6,6 @@ import IfBlock from './IfBlock';
 import InlineComponent from './InlineComponent/index';
 import MustacheTag from './MustacheTag';
 import Text from './Text';
-import Title from './Title';
 import Window from './Window';
 import { INode } from '../../nodes/interfaces';
 import Renderer from '../Renderer';
@@ -25,7 +24,6 @@ const wrappers = {
 	MustacheTag,
 	Options: null,
 	Text,
-	Title,
 	Window
 };
 

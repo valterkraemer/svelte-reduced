@@ -15,7 +15,6 @@ import InlineComponent from './InlineComponent';
 import MustacheTag from './MustacheTag';
 import Options from './Options';
 import Text from './Text';
-import Title from './Title';
 import Transition from './Transition';
 import Window from './Window';
 
@@ -38,6 +37,5 @@ export type INode = Animation
 | Options
 | Tag
 | Text
-| Title
 | Transition
 | Window;

@@ -8,7 +8,6 @@ export function to_string(node: TemplateNode) {
 			return '{:else} block';
 		case 'Element':
 		case 'InlineComponent':
-		case 'Title':
 			return `<${node.name}> tag`;
 		default:
 			return node.type;
