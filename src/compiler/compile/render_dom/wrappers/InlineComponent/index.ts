@@ -50,7 +50,7 @@ export default class InlineComponentWrapper extends Wrapper {
 		this.var = {
 			type: 'Identifier',
 			name: (
-				this.node.name === 'svelte:self' ? renderer.component.name.name : sanitize(this.node.name)
+				sanitize(this.node.name)
 			).toLowerCase()
 		};
 
@@ -311,9 +311,7 @@ export default class InlineComponentWrapper extends Wrapper {
 			return b`${name}.$on("${handler.name}", ${snippet});`;
 		});
 
-		const expression = this.node.name === 'svelte:self'
-			? component.name
-			: this.renderer.reference(string_to_member_expression(this.node.name));
+		const expression = this.renderer.reference(string_to_member_expression(this.node.name));
 
 		block.chunks.init.push(b`
 			${(this.node.attributes.length > 0 || this.node.bindings.length > 0) && b`

@@ -15,7 +15,7 @@ const meta_tags = new Map([
 	['svelte:window', 'Window']
 ]);
 
-const valid_meta_tags = Array.from(meta_tags.keys()).concat('svelte:self');
+const valid_meta_tags = Array.from(meta_tags.keys());
 
 const specials = new Map([
 	[
@@ -33,8 +33,6 @@ const specials = new Map([
 		}
 	]
 ]);
-
-const SELF = /^svelte:self(?=[\s/>])/;
 
 export default function tag(parser: Parser) {
 	const start = parser.index++;
@@ -92,7 +90,7 @@ export default function tag(parser: Parser) {
 
 	const type = meta_tags.has(name)
 		? meta_tags.get(name)
-		: (/[A-Z]/.test(name[0]) || name === 'svelte:self') ? 'InlineComponent'
+		: (/[A-Z]/.test(name[0])) ? 'InlineComponent'
 			: 'Element';
 
 	const element: TemplateNode = {
@@ -203,30 +201,6 @@ export default function tag(parser: Parser) {
 
 function read_tag_name(parser: Parser) {
 	const start = parser.index;
-
-	if (parser.read(SELF)) {
-		// check we're inside a block, otherwise this
-		// will cause infinite recursion
-		let i = parser.stack.length;
-		let legal = false;
-
-		while (i--) {
-			const fragment = parser.stack[i];
-			if (fragment.type === 'IfBlock' || fragment.type === 'InlineComponent') {
-				legal = true;
-				break;
-			}
-		}
-
-		if (!legal) {
-			parser.error({
-				code: 'invalid-self-placement',
-				message: '<svelte:self> components can only exist inside {#if} blocks'
-			}, start);
-		}
-
-		return 'svelte:self';
-	}
 
 	const name = parser.read_until(/(\s|\/|>)/);
 
