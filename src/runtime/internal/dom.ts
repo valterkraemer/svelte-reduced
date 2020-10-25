@@ -97,14 +97,6 @@ export function set_input_value(input, value) {
 	input.value = value == null ? '' : value;
 }
 
-export function set_input_type(input, type) {
-	try {
-		input.type = type;
-	} catch (e) {
-		// do nothing
-	}
-}
-
 export function set_style(node, key, value, important) {
 	node.style.setProperty(key, value, important ? 'important' : '');
 }

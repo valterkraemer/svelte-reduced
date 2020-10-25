@@ -89,20 +89,13 @@ export default class AttributeWrapper extends BaseAttributeWrapper {
 			? '@xlink_attr'
 			: '@attr';
 
-		const is_legacy_input_type = element.renderer.component.compile_options.legacy && name === 'type' && this.parent.node.name === 'input';
-
 		const dependencies = this.get_dependencies();
 		const value = this.get_value(block);
 
 		let updater;
 		const init = this.get_init(block, value);
 
-		if (is_legacy_input_type) {
-			block.chunks.hydrate.push(
-				b`@set_input_type(${element.var}, ${init});`
-			);
-			updater = b`@set_input_type(${element.var}, ${should_cache ? this.last : value});`;
-		} else if (this.is_select_value_attribute) {
+		if (this.is_select_value_attribute) {
 			// annoying special case
 			const is_multiple_select = element.node.get_static_attribute_value('multiple');
 

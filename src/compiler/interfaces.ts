@@ -104,7 +104,6 @@ export interface CompileOptions {
 
 	accessors?: boolean;
 	immutable?: boolean;
-	legacy?: boolean;
 	css?: boolean;
 
 	preserveWhitespace?: boolean;
