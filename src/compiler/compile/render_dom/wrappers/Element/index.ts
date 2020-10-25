@@ -75,7 +75,6 @@ export default class ElementWrapper extends Wrapper {
 		block: Block,
 		parent: Wrapper,
 		node: Element,
-		strip_whitespace: boolean,
 		next_sibling: Wrapper
 	) {
 		super(renderer, block, parent, node);
@@ -126,7 +125,7 @@ export default class ElementWrapper extends Wrapper {
 			}
 		}
 
-		this.fragment = new FragmentWrapper(renderer, block, node.children, this, strip_whitespace, next_sibling);
+		this.fragment = new FragmentWrapper(renderer, block, node.children, this, next_sibling);
 	}
 
 	render(block: Block, parent_node: Identifier, parent_nodes: Identifier) {

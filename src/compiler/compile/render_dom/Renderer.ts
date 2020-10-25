@@ -75,7 +75,6 @@ export default class Renderer {
 			this.block,
 			component.fragment.children,
 			null,
-			true,
 			null
 		);
 

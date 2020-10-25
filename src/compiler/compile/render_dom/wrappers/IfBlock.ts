@@ -29,7 +29,6 @@ class IfBlockBranch extends Wrapper {
 		block: Block,
 		parent: IfBlockWrapper,
 		node: IfBlock | ElseBlock,
-		strip_whitespace: boolean,
 		next_sibling: Wrapper
 	) {
 		super(renderer, block, parent, node);
@@ -66,7 +65,7 @@ class IfBlockBranch extends Wrapper {
 			type: (node as IfBlock).expression ? 'if' : 'else'
 		});
 
-		this.fragment = new FragmentWrapper(renderer, this.block, node.children, parent, strip_whitespace, next_sibling);
+		this.fragment = new FragmentWrapper(renderer, this.block, node.children, parent, next_sibling);
 
 		this.is_dynamic = this.block.dependencies.size > 0;
 	}
@@ -84,7 +83,6 @@ export default class IfBlockWrapper extends Wrapper {
 		block: Block,
 		parent: Wrapper,
 		node: IfBlock,
-		strip_whitespace: boolean,
 		next_sibling: Wrapper
 	) {
 		super(renderer, block, parent, node);
@@ -103,7 +101,6 @@ export default class IfBlockWrapper extends Wrapper {
 				block,
 				this,
 				node,
-				strip_whitespace,
 				next_sibling
 			);
 
@@ -131,7 +128,6 @@ export default class IfBlockWrapper extends Wrapper {
 					block,
 					this,
 					node.else,
-					strip_whitespace,
 					next_sibling
 				);
 

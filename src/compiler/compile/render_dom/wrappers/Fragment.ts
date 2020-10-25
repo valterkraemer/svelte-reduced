@@ -29,7 +29,6 @@ export default class FragmentWrapper {
 		block: Block,
 		nodes: INode[],
 		parent: Wrapper,
-		strip_whitespace: boolean,
 		next_sibling: Wrapper
 	) {
 		this.nodes = [];
@@ -88,25 +87,23 @@ export default class FragmentWrapper {
 				const Wrapper = wrappers[child.type];
 				if (!Wrapper) continue;
 
-				const wrapper = new Wrapper(renderer, block, parent, child, strip_whitespace, last_child || next_sibling);
+				const wrapper = new Wrapper(renderer, block, parent, child, last_child || next_sibling);
 				this.nodes.unshift(wrapper);
 
 				link(last_child, last_child = wrapper);
 			}
 		}
 
-		if (strip_whitespace) {
-			const first = this.nodes[0] as Text;
+		const first = this.nodes[0] as Text;
 
-			if (first && first.node.type === 'Text') {
-				first.data = trim_start(first.data);
-				if (!first.data) {
-					first.var = null;
-					this.nodes.shift();
+		if (first && first.node.type === 'Text') {
+			first.data = trim_start(first.data);
+			if (!first.data) {
+				first.var = null;
+				this.nodes.shift();
 
-					if (this.nodes[0]) {
-						this.nodes[0].prev = null;
-					}
+				if (this.nodes[0]) {
+					this.nodes[0].prev = null;
 				}
 			}
 		}
