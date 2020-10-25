@@ -7,7 +7,6 @@ export interface Bindings {
 	object: Identifier;
 	property: Identifier;
 	snippet: Node;
-	store: string;
 	tail: Node;
 	modifier: (node: Node) => Node;
 }

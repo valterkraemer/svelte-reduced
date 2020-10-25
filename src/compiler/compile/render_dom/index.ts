@@ -155,16 +155,7 @@ export default function dom(
 			}
 		});
 
-		component.rewrite_props(({ name, reassigned, export_name }) => {
-			const value = `$${name}`;
-			const i = renderer.context_lookup.get(`$${name}`).index;
-
-			const insert = (reassigned || export_name)
-				? b`${`$$subscribe_${name}`}()`
-				: b`@component_subscribe($$self, ${name}, #value => $$invalidate(${i}, ${value} = #value))`;
-
-			return insert;
-		});
+		component.rewrite_props();
 	}
 
 	const args = [x`$$self`];
@@ -198,8 +189,6 @@ export default function dom(
 		return prop.name[0] !== '$';
 	});
 
-	const reactive_stores = component.vars.filter(variable => variable.name[0] === '$' && variable.name[1] !== '$');
-
 	const instance_javascript = component.extract_javascript(component.ast.instance);
 
 	const has_definition = (
@@ -216,22 +205,6 @@ export default function dom(
 	const definition = has_definition
 		? component.alias('instance')
 		: { type: 'Literal', value: null };
-
-	const reactive_store_subscriptions = reactive_stores
-		.filter(store => {
-			const variable = component.var_lookup.get(store.name.slice(1));
-			return !variable || variable.hoistable;
-		})
-		.map(({ name }) => b`
-			@component_subscribe($$self, ${name.slice(1)}, $$value => $$invalidate(${renderer.context_lookup.get(name).index}, ${name} = $$value));
-		`);
-
-	const resubscribable_reactive_store_unsubscribers = reactive_stores
-		.filter(store => {
-			const variable = component.var_lookup.get(store.name.slice(1));
-			return variable && (variable.reassigned || variable.export_name);
-		})
-		.map(({ name }) => b`$$self.$$.on_destroy.push(() => ${`$$unsubscribe_${name.slice(1)}`}());`);
 
 	if (has_definition) {
 		const reactive_declarations: (Node | Node[]) = [];
@@ -264,22 +237,6 @@ export default function dom(
 			return variable.injected && variable.name[0] !== '$';
 		});
 
-		const reactive_store_declarations = reactive_stores.map(variable => {
-			const $name = variable.name;
-			const name = $name.slice(1);
-
-			const store = component.var_lookup.get(name);
-			if (store && (store.reassigned || store.export_name)) {
-				const unsubscribe = `$$unsubscribe_${name}`;
-				const subscribe = `$$subscribe_${name}`;
-				const i = renderer.context_lookup.get($name).index;
-
-				return b`let ${$name}, ${unsubscribe} = @noop, ${subscribe} = () => (${unsubscribe}(), ${unsubscribe} = @subscribe(${name}, $$value => $$invalidate(${i}, ${$name} = $$value)), ${name})`;
-			}
-
-			return b`let ${$name};`;
-		});
-
 		let unknown_props_check;
 
 		const return_value = {
@@ -293,12 +250,6 @@ export default function dom(
 		body.push(b`
 			function ${definition}(${args}) {
 				${rest}
-
-				${reactive_store_declarations}
-
-				${reactive_store_subscriptions}
-
-				${resubscribable_reactive_store_unsubscribers}
 
 				${instance_javascript}
 

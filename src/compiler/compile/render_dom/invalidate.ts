@@ -21,7 +21,6 @@ export function invalidate(renderer: Renderer, scope: Scope, node: Node, names: 
 				!variable.module &&
 				(
 					variable.referenced ||
-					variable.subscribable ||
 					variable.is_reactive_dependency ||
 					variable.export_name ||
 					variable.name[0] === '$'
@@ -30,10 +29,10 @@ export function invalidate(renderer: Renderer, scope: Scope, node: Node, names: 
 		}) as Var[];
 
 	function get_invalidated(variable: Var, node?: Expression) {
-		if (main_execution_context && !variable.subscribable && variable.name[0] !== '$') {
+		if (main_execution_context && variable.name[0] !== '$') {
 			return node;
 		}
-		return renderer.invalidate(variable.name, undefined, main_execution_context);
+		return renderer.invalidate(variable.name, undefined);
 	}
 
 	if (!head) {
@@ -46,13 +45,8 @@ export function invalidate(renderer: Renderer, scope: Scope, node: Node, names: 
 		return get_invalidated(head, node);
 	}
 
-	const is_store_value = head.name[0] === '$' && head.name[1] !== '$';
 	const extra_args = tail.map(variable => get_invalidated(variable)).filter(Boolean);
 
-	if (is_store_value) {
-		return x`@set_store_value(${head.name.slice(1)}, ${node}, ${head.name}, ${extra_args})`;
-	}
-	
 	let invalidate;
 	if (!main_execution_context) {
 		const pass_value = (
@@ -70,11 +64,6 @@ export function invalidate(renderer: Renderer, scope: Scope, node: Node, names: 
 	} else {
 		// skip `$$invalidate` if it is in the main execution context
 		invalidate = extra_args.length ? [node, ...extra_args] : node;
-	}
-
-	if (head.subscribable && head.reassigned) {
-		const subscribe = `$$subscribe_${head.name}`;
-		invalidate = x`${subscribe}(${invalidate})`;
 	}
 
 	return invalidate;

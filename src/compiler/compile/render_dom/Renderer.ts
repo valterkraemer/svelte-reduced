@@ -46,9 +46,6 @@ export default class Renderer {
 
 		component.vars.filter(v => !v.hoistable || (v.export_name && !v.module)).forEach(v => this.add_to_context(v.name));
 
-		// ensure store values are included in context
-		component.vars.filter(v => v.subscribable).forEach(v => this.add_to_context(`$${v.name}`));
-
 		reserved_keywords.forEach(keyword => {
 			if (component.var_lookup.has(keyword)) {
 				this.add_to_context(keyword);
@@ -158,15 +155,9 @@ export default class Renderer {
 		return member;
 	}
 
-	invalidate(name: string, value?, main_execution_context: boolean = false) {
+	invalidate(name: string, value?) {
 		const variable = this.component.var_lookup.get(name);
 		const member = this.context_lookup.get(name);
-
-		if (variable && (variable.subscribable && (variable.reassigned || variable.export_name))) {
-			return main_execution_context
-			  ? x`${`$$subscribe_${name}`}(${value || name})`
-			  : x`${`$$subscribe_${name}`}($$invalidate(${member.index}, ${value || name}))`;
-		}
 
 		if (name[0] === '$' && name[1] !== '$') {
 			return x`${name.slice(1)}.set(${value || name})`;

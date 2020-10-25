@@ -319,31 +319,19 @@ function get_event_handler(
 	const contextual_dependencies = new Set<string>(binding.node.expression.contextual_dependencies);
 
 	const context = block.bindings.get(name);
-	let set_store;
 
 	if (context) {
-		const { object, property, store, snippet } = context;
+		const { object, property, snippet } = context;
 		lhs = replace_object(lhs, snippet);
 		contextual_dependencies.add(object.name);
 		contextual_dependencies.add(property.name);
 		contextual_dependencies.delete(name);
-
-		if (store) {
-			set_store = b`${store}.set(${`$${store}`});`;
-		}
-	} else {
-		const object = get_object(lhs);
-		if (object.name[0] === '$') {
-			const store = object.name.slice(1);
-			set_store = b`${store}.set(${object.name});`;
-		}
 	}
 
 	const value = get_value_from_dom(renderer, binding.parent, binding, block, contextual_dependencies);
 
 	const mutation = b`
 		${lhs} = ${value};
-		${set_store}
 	`;
 
 	return {

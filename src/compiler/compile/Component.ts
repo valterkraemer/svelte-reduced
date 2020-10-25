@@ -175,14 +175,6 @@ export default class Component {
 				mutated: true,
 				writable: true
 			});
-
-			const subscribable_name = name.slice(1);
-
-			const variable = this.var_lookup.get(subscribable_name);
-			if (variable) {
-				variable.referenced = true;
-				variable.subscribable = true;
-			}
 		} else {
 			this.used_names.add(name);
 		}
@@ -439,7 +431,7 @@ export default class Component {
 						extract_names(declarator.id).forEach(name => {
 							const variable = this.var_lookup.get(name);
 							variable.export_name = name;
-							if (variable.writable && !(variable.referenced || variable.referenced_from_script || variable.subscribable)) {
+							if (variable.writable && !(variable.referenced || variable.referenced_from_script)) {
 								this.warn(declarator, {
 									code: 'unused-export-let',
 									message: `${this.name.name} has unused export property '${name}'. If it is for external reference only, please consider using \`export const ${name}\``
@@ -462,7 +454,7 @@ export default class Component {
 					if (variable) {
 						variable.export_name = specifier.exported.name;
 
-						if (variable.writable && !(variable.referenced || variable.referenced_from_script || variable.subscribable)) {
+						if (variable.writable && !(variable.referenced || variable.referenced_from_script)) {
 							this.warn(specifier, {
 								code: 'unused-export-let',
 								message: `${this.name.name} has unused export property '${specifier.exported.name}'. If it is for external reference only, please consider using \`export const ${specifier.exported.name}\``
@@ -641,12 +633,6 @@ export default class Component {
 				});
 
 				this.add_reference(name.slice(1));
-
-				const variable = this.var_lookup.get(name.slice(1));
-				if (variable) {
-					variable.subscribable = true;
-					variable.referenced_from_script = true;
-				}
 			} else {
 				this.add_var({
 					name,
@@ -842,7 +828,7 @@ export default class Component {
 		return null;
 	}
 
-	rewrite_props(get_insert: (variable: Var) => Node[]) {
+	rewrite_props() {
 		if (!this.ast.instance) return;
 
 		const component = this;
@@ -874,10 +860,6 @@ export default class Component {
 											code: 'destructured-prop',
 											message: 'Cannot declare props in destructured declaration'
 										});
-									}
-
-									if (variable.subscribable) {
-										inserts.push(get_insert(variable));
 									}
 								});
 
@@ -912,11 +894,6 @@ export default class Component {
 								};
 
 								declarator.init = x`$$props`;
-							}
-
-							if (variable.subscribable && declarator.init) {
-								const insert = get_insert(variable);
-								parent[key].splice(index + 1, 0, ...insert);
 							}
 						});
 					}
@@ -1101,7 +1078,7 @@ export default class Component {
 			for (const specifier of specifiers) {
 				const variable = var_lookup.get(specifier.local.name);
 
-				if (!variable.mutated || variable.subscribable) {
+				if (!variable.mutated) {
 					variable.hoistable = true;
 				}
 			}

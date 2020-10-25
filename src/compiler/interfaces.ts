@@ -136,7 +136,6 @@ export interface Var {
 	internal?: boolean; // event handlers, bindings
 	initialised?: boolean;
 	hoistable?: boolean;
-	subscribable?: boolean;
 	is_reactive_dependency?: boolean;
 	imported?: boolean;
 }
