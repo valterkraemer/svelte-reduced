@@ -244,45 +244,31 @@ function read_attribute(parser: Parser, unique_names: Set<string>) {
 	if (parser.eat('{')) {
 		parser.allow_whitespace();
 
-		if (parser.eat('...')) {
-			const expression = read_expression(parser);
+		const value_start = parser.index;
 
-			parser.allow_whitespace();
-			parser.eat('}', true);
+		const name = parser.read_identifier();
+		parser.allow_whitespace();
+		parser.eat('}', true);
 
-			return {
-				start,
-				end: parser.index,
-				type: 'Spread',
-				expression
-			};
-		} else {
-			const value_start = parser.index;
+		check_unique(name);
 
-			const name = parser.read_identifier();
-			parser.allow_whitespace();
-			parser.eat('}', true);
-
-			check_unique(name);
-
-			return {
-				start,
-				end: parser.index,
-				type: 'Attribute',
-				name,
-				value: [{
+		return {
+			start,
+			end: parser.index,
+			type: 'Attribute',
+			name,
+			value: [{
+				start: value_start,
+				end: value_start + name.length,
+				type: 'AttributeShorthand',
+				expression: {
 					start: value_start,
 					end: value_start + name.length,
-					type: 'AttributeShorthand',
-					expression: {
-						start: value_start,
-						end: value_start + name.length,
-						type: 'Identifier',
-						name
-					}
-				}]
-			};
-		}
+					type: 'Identifier',
+					name
+				}
+			}]
+		};
 	}
 
 	// eslint-disable-next-line no-useless-escape

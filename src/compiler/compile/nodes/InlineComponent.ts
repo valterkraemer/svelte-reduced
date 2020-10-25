@@ -33,7 +33,6 @@ export default class InlineComponent extends Node {
 			/* eslint-disable no-fallthrough */
 			switch (node.type) {
 				case 'Attribute':
-				case 'Spread':
 					this.attributes.push(new Attribute(component, this, scope, node));
 					break;
 

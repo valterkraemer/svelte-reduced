@@ -11,7 +11,6 @@ import { b, x, p } from 'code-red';
 import { namespaces } from '../../../../utils/namespaces';
 import AttributeWrapper from './Attribute';
 import StyleAttributeWrapper from './StyleAttribute';
-import SpreadAttributeWrapper from './SpreadAttribute';
 import { dimensions } from '../../../../utils/patterns';
 import Binding from './Binding';
 import add_to_set from '../../../utils/add_to_set';
@@ -130,7 +129,7 @@ const events = [
 export default class ElementWrapper extends Wrapper {
 	node: Element;
 	fragment: FragmentWrapper;
-	attributes: Array<AttributeWrapper | StyleAttributeWrapper | SpreadAttributeWrapper>;
+	attributes: Array<AttributeWrapper | StyleAttributeWrapper>;
 	bindings: Binding[];
 	event_handlers: EventHandler[];
 	class_dependencies: string[];
@@ -161,9 +160,6 @@ export default class ElementWrapper extends Wrapper {
 		this.attributes = this.node.attributes.map(attribute => {
 			if (attribute.name === 'style') {
 				return new StyleAttributeWrapper(this, block, attribute);
-			}
-			if (attribute.type === 'Spread') {
-				return new SpreadAttributeWrapper(this, block, attribute);
 			}
 			return new AttributeWrapper(this, block, attribute);
 		});
@@ -298,7 +294,6 @@ export default class ElementWrapper extends Wrapper {
 		this.add_attributes(block);
 		this.add_directives_in_order(block);
 		this.add_classes(block);
-		this.add_manual_style_scoping(block);
 
 		if (nodes && this.renderer.options.hydratable && !this.void) {
 			block.chunks.claim.push(
@@ -539,99 +534,12 @@ export default class ElementWrapper extends Wrapper {
 			}
 		});
 
-		if (this.node.attributes.some(attr => attr.is_spread)) {
-			this.add_spread_attributes(block);
-			return;
-		}
-
 		this.attributes.forEach((attribute) => {
 			attribute.render(block);
 		});
 	}
 
-	add_spread_attributes(block: Block) {
-		const levels = block.get_unique_name(`${this.var.name}_levels`);
-		const data = block.get_unique_name(`${this.var.name}_data`);
-
-		const initial_props = [];
-		const updates = [];
-
-		this.attributes
-			.forEach(attr => {
-				const dependencies = attr.node.get_dependencies();
-
-				const condition = dependencies.length > 0
-					? block.renderer.dirty(dependencies)
-					: null;
-
-				if (attr instanceof SpreadAttributeWrapper) {
-					const snippet = attr.node.expression.manipulate(block);
-
-					initial_props.push(snippet);
-
-					updates.push(condition ? x`${condition} && ${snippet}` : snippet);
-				} else {
-					const name = attr.property_name || attr.name;
-					initial_props.push(x`{ ${name}: ${attr.get_init(block, attr.get_value(block))} }`);
-					const snippet = x`{ ${name}: ${attr.should_cache ? attr.last : attr.get_value(block)} }`;
-
-					updates.push(condition ? x`${attr.get_dom_update_conditions(block, condition)} && ${snippet}` : snippet);
-				}
-			});
-
-		block.chunks.init.push(b`
-			let ${levels} = [${initial_props}];
-
-			let ${data} = {};
-			for (let #i = 0; #i < ${levels}.length; #i += 1) {
-				${data} = @assign(${data}, ${levels}[#i]);
-			}
-		`);
-
-		const fn = this.node.namespace === namespaces.svg ? x`@set_svg_attributes` : x`@set_attributes`;
-
-		block.chunks.hydrate.push(
-			b`${fn}(${this.var}, ${data});`
-		);
-
-		block.chunks.update.push(b`
-			${fn}(${this.var}, ${data} = @get_spread_update(${levels}, [
-				${updates}
-			]));
-		`);
-
-		// handle edge cases for elements
-		if (this.node.name === 'select') {
-			const dependencies = new Set();
-			for (const attr of this.attributes) {
-				for (const dep of attr.node.dependencies) {
-					dependencies.add(dep);
-				}
-			}
-
-			block.chunks.mount.push(b`
-				if (${data}.multiple) @select_options(${this.var}, ${data}.value);
-			`);
-			block.chunks.update.push(b`
-				if (${block.renderer.dirty(Array.from(dependencies))} && ${data}.multiple) @select_options(${this.var}, ${data}.value);
-			`);
-		} else if (this.node.name === 'input' && this.attributes.find(attr => attr.node.name === 'value')) {
-			const type = this.node.get_static_attribute_value('type');
-			if (type === null || type === '' || type === 'text' || type === 'email' || type === 'password') {
-				block.chunks.mount.push(b`
-					${this.var}.value = ${data}.value;
-				`);
-				block.chunks.update.push(b`
-					if ('value' in ${data}) {
-						${this.var}.value = ${data}.value;
-					}
-				`);
-			}
-		}
-	}
-
 	add_classes(block: Block) {
-		const has_spread = this.node.attributes.some(attr => attr.is_spread);
 		this.node.classes.forEach(class_directive => {
 			const { expression, name } = class_directive;
 			let snippet;
@@ -647,9 +555,7 @@ export default class ElementWrapper extends Wrapper {
 
 			block.chunks.hydrate.push(updater);
 
-			if (has_spread) {
-				block.chunks.update.push(updater);
-			} else if ((dependencies && dependencies.size > 0) || this.class_dependencies.length) {
+			if ((dependencies && dependencies.size > 0) || this.class_dependencies.length) {
 				const all_dependencies = this.class_dependencies.concat(...dependencies);
 				const condition = block.renderer.dirty(all_dependencies);
 
@@ -659,14 +565,6 @@ export default class ElementWrapper extends Wrapper {
 					}`);
 			}
 		});
-	}
-
-	add_manual_style_scoping(block) {
-		if (this.node.needs_manual_style_scoping) {
-			const updater = b`@toggle_class(${this.var}, "${this.node.component.stylesheet.id}", true);`;
-			block.chunks.hydrate.push(updater);
-			block.chunks.update.push(updater);
-		}
 	}
 }
 

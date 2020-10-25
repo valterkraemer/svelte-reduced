@@ -114,7 +114,6 @@ export default class Element extends Node {
 	handlers: EventHandler[] = [];
 	children: INode[];
 	namespace: string;
-	needs_manual_style_scoping: boolean;
 
 	constructor(component: Component, parent, scope, info: any) {
 		super(component, parent, scope, info);
@@ -167,7 +166,6 @@ export default class Element extends Node {
 		info.attributes.forEach(node => {
 			switch (node.type) {
 				case 'Attribute':
-				case 'Spread':
 					// special case
 					if (node.name === 'xmlns') this.namespace = node.value[0].data;
 
@@ -268,8 +266,6 @@ export default class Element extends Node {
 		const attribute_map = new Map();
 
 		this.attributes.forEach(attribute => {
-			if (attribute.is_spread) return;
-
 			const name = attribute.name.toLowerCase();
 
 			// aria-props
@@ -766,11 +762,6 @@ export default class Element extends Node {
 	}
 
 	add_css_class() {
-		if (this.attributes.some(attr => attr.is_spread)) {
-			this.needs_manual_style_scoping = true;
-			return;
-		}
-
 		const { id } = this.component.stylesheet;
 
 		const class_attribute = this.attributes.find(a => a.name === 'class');

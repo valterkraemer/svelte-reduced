@@ -289,9 +289,6 @@ function test_attribute(operator, expected_value, case_insensitive, value) {
 }
 
 function attribute_matches(node: CssNode, name: string, expected_value: string, operator: string, case_insensitive: boolean) {
-	const spread = node.attributes.find(attr => attr.type === 'Spread');
-	if (spread) return true;
-
 	if (node.bindings.some((binding: CssNode) => binding.name === name)) return true;
 
 	const attr = node.attributes.find((attr: CssNode) => attr.name === name);

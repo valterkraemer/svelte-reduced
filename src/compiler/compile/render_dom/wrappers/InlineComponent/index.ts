@@ -5,7 +5,6 @@ import Block from '../../Block';
 import InlineComponent from '../../../nodes/InlineComponent';
 import FragmentWrapper from '../Fragment';
 import { sanitize } from '../../../../utils/names';
-import add_to_set from '../../../utils/add_to_set';
 import { b, x, p } from 'code-red';
 import Attribute from '../../../nodes/Attribute';
 import bind_this from '../shared/bind_this';
@@ -95,19 +94,15 @@ export default class InlineComponentWrapper extends Wrapper {
 		let props;
 		const name_changes = block.get_unique_name(`${name.name}_changes`);
 
-		const uses_spread = !!this.node.attributes.find(a => a.is_spread);
-
 		const initial_props = [];
 
-		const attribute_object = uses_spread
-			? x`{ ${initial_props} }`
-			: x`{
+		const attribute_object = x`{
 				${this.node.attributes.map(attr => p`${attr.name}: ${attr.get_value(block)}`)},
 				${initial_props}
 			}`;
 
 		if (this.node.attributes.length || this.node.bindings.length || initial_props.length) {
-			if (!uses_spread && this.node.bindings.length === 0) {
+			if (this.node.bindings.length === 0) {
 				component_opts.properties.push(p`props: ${attribute_object}`);
 			} else {
 				props = block.get_unique_name(`${name.name}_props`);
@@ -119,93 +114,21 @@ export default class InlineComponentWrapper extends Wrapper {
 
 		const dynamic_attributes = this.node.attributes.filter(a => a.get_dependencies().length > 0);
 
-		if (!uses_spread && (dynamic_attributes.length > 0 || this.node.bindings.length > 0 || fragment_dependencies.size > 0)) {
+		if (dynamic_attributes.length > 0 || this.node.bindings.length > 0 || fragment_dependencies.size > 0) {
 			updates.push(b`const ${name_changes} = {};`);
 		}
 
 		if (this.node.attributes.length) {
-			if (uses_spread) {
-				const levels = block.get_unique_name(`${this.var.name}_spread_levels`);
-
-				const initial_props = [];
-				const changes = [];
-
-				const all_dependencies: Set<string> = new Set();
-
-				this.node.attributes.forEach(attr => {
-					add_to_set(all_dependencies, attr.dependencies);
-				});
-
-				this.node.attributes.forEach((attr, i) => {
-					const { name, dependencies } = attr;
-
-					const condition = dependencies.size > 0 && (dependencies.size !== all_dependencies.size)
-						? renderer.dirty(Array.from(dependencies))
-						: null;
-					const unchanged = dependencies.size === 0;
-
-					let change_object;
-					if (attr.is_spread) {
-						const value = attr.expression.manipulate(block);
-						initial_props.push(value);
-
-						let value_object = value;
-						if (attr.expression.node.type !== 'ObjectExpression') {
-							value_object = x`@get_spread_object(${value})`;
-						}
-						change_object = value_object;
-					} else {
-						const obj = x`{ ${name}: ${attr.get_value(block)} }`;
-						initial_props.push(obj);
-						change_object = obj;
-					}
-
-					changes.push(
-						unchanged
-							? x`${levels}[${i}]`
-							: condition
-							? x`${condition} && ${change_object}`
-							: change_object
-					);
-				});
-
-				block.chunks.init.push(b`
-					const ${levels} = [
-						${initial_props}
-					];
-				`);
-
-				statements.push(b`
-					for (let #i = 0; #i < ${levels}.length; #i += 1) {
-						${props} = @assign(${props}, ${levels}[#i]);
-					}
-				`);
-
-				if (all_dependencies.size) {
-					const condition = renderer.dirty(Array.from(all_dependencies));
+			dynamic_attributes.forEach((attribute: Attribute) => {
+				const dependencies = attribute.get_dependencies();
+				if (dependencies.length > 0) {
+					const condition = renderer.dirty(dependencies);
 
 					updates.push(b`
-						const ${name_changes} = ${condition} ? @get_spread_update(${levels}, [
-							${changes}
-						]) : {}
-					`);
-				} else {
-					updates.push(b`
-						const ${name_changes} = {};
+						if (${condition}) ${name_changes}.${attribute.name} = ${attribute.get_value(block)};
 					`);
 				}
-			} else {
-				dynamic_attributes.forEach((attribute: Attribute) => {
-					const dependencies = attribute.get_dependencies();
-					if (dependencies.length > 0) {
-						const condition = renderer.dirty(dependencies);
-
-						updates.push(b`
-							if (${condition}) ${name_changes}.${attribute.name} = ${attribute.get_value(block)};
-						`);
-					}
-				});
-			}
+			});
 		}
 
 		if (fragment_dependencies.size > 0) {

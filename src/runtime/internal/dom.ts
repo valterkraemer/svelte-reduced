@@ -63,24 +63,6 @@ export function attr(node: Element, attribute: string, value?: string) {
 	else if (node.getAttribute(attribute) !== value) node.setAttribute(attribute, value);
 }
 
-export function set_attributes(node: Element & ElementCSSInlineStyle, attributes: { [x: string]: string }) {
-	// @ts-ignore
-	const descriptors = Object.getOwnPropertyDescriptors(node.__proto__);
-	for (const key in attributes) {
-		if (attributes[key] == null) {
-			node.removeAttribute(key);
-		} else if (key === 'style') {
-			node.style.cssText = attributes[key];
-		} else if (key === '__value') {
-			(node as any).value = node[key] = attributes[key];
-		} else if (descriptors[key] && descriptors[key].set) {
-			node[key] = attributes[key];
-		} else {
-			attr(node, key, attributes[key]);
-		}
-	}
-}
-
 export function set_svg_attributes(node: Element & ElementCSSInlineStyle, attributes: { [x: string]: string }) {
 	for (const key in attributes) {
 		attr(node, key, attributes[key]);

@@ -9,7 +9,7 @@ import TemplateScope from './shared/TemplateScope';
 import { x } from 'code-red';
 
 export default class Attribute extends Node {
-	type: 'Attribute' | 'Spread';
+	type: 'Attribute';
 	start: number;
 	end: number;
 	scope: TemplateScope;
@@ -17,7 +17,6 @@ export default class Attribute extends Node {
 	component: Component;
 	parent: Element;
 	name: string;
-	is_spread: boolean;
 	is_true: boolean;
 	is_static: boolean;
 	expression?: Expression;
@@ -28,43 +27,27 @@ export default class Attribute extends Node {
 		super(component, parent, scope, info);
 		this.scope = scope;
 
-		if (info.type === 'Spread') {
-			this.name = null;
-			this.is_spread = true;
-			this.is_true = false;
+		this.name = info.name;
+		this.is_true = info.value === true;
+		this.is_static = true;
 
-			this.expression = new Expression(component, this, scope, info.expression);
-			this.dependencies = this.expression.dependencies;
-			this.chunks = null;
+		this.dependencies = new Set();
 
-			this.is_static = false;
-		}
+		this.chunks = this.is_true
+			? []
+			: info.value.map(node => {
+				if (node.type === 'Text') return node;
 
-		else {
-			this.name = info.name;
-			this.is_true = info.value === true;
-			this.is_static = true;
+				this.is_static = false;
 
-			this.dependencies = new Set();
+				const expression = new Expression(component, this, scope, node.expression);
 
-			this.chunks = this.is_true
-				? []
-				: info.value.map(node => {
-					if (node.type === 'Text') return node;
-
-					this.is_static = false;
-
-					const expression = new Expression(component, this, scope, node.expression);
-
-					add_to_set(this.dependencies, expression.dependencies);
-					return expression;
-				});
-		}
+				add_to_set(this.dependencies, expression.dependencies);
+				return expression;
+			});
 	}
 
 	get_dependencies() {
-		if (this.is_spread) return this.expression.dynamic_dependencies();
-
 		const dependencies: Set<string> = new Set();
 		this.chunks.forEach(chunk => {
 			if (chunk.type === 'Expression') {
@@ -97,7 +80,7 @@ export default class Attribute extends Node {
 	}
 
 	get_static_value() {
-		if (this.is_spread || this.dependencies.size > 0) return null;
+		if (this.dependencies.size > 0) return null;
 
 		return this.is_true
 			? true
