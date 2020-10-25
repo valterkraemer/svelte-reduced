@@ -9,8 +9,7 @@ export default {
 				mutated: false,
 				reassigned: false,
 				referenced: false,
-				writable: false,
-				referenced_from_script: false
+				writable: false
 			},
 			{
 				name: 'j',
@@ -20,8 +19,7 @@ export default {
 				mutated: false,
 				reassigned: false,
 				referenced: false,
-				writable: false,
-				referenced_from_script: false
+				writable: false
 			},
 			{
 				name: 'k',
@@ -31,8 +29,7 @@ export default {
 				mutated: false,
 				reassigned: false,
 				referenced: false,
-				writable: false,
-				referenced_from_script: false
+				writable: false
 			},
 			{
 				name: 'a',
@@ -42,8 +39,7 @@ export default {
 				mutated: false,
 				reassigned: true,
 				referenced: false,
-				writable: true,
-				referenced_from_script: true
+				writable: true
 			},
 			{
 				name: 'b',
@@ -53,8 +49,7 @@ export default {
 				mutated: false,
 				reassigned: false,
 				referenced: false,
-				writable: true,
-				referenced_from_script: true
+				writable: true
 			},
 			{
 				name: 'c',
@@ -64,8 +59,7 @@ export default {
 				mutated: false,
 				reassigned: false,
 				referenced: false,
-				writable: true,
-				referenced_from_script: true
+				writable: true
 			},
 			{
 				name: 'd',
@@ -75,8 +69,7 @@ export default {
 				mutated: false,
 				reassigned: false,
 				referenced: false,
-				writable: true,
-				referenced_from_script: true
+				writable: true
 			},
 			{
 				name: 'e',
@@ -86,8 +79,7 @@ export default {
 				mutated: false,
 				reassigned: false,
 				referenced: false,
-				writable: true,
-				referenced_from_script: false
+				writable: true
 			},
 			{
 				name: 'f',
@@ -97,8 +89,7 @@ export default {
 				mutated: false,
 				reassigned: false,
 				referenced: false,
-				writable: true,
-				referenced_from_script: false
+				writable: true
 			},
 			{
 				name: 'g',
@@ -108,8 +99,7 @@ export default {
 				mutated: false,
 				reassigned: false,
 				referenced: false,
-				writable: true,
-				referenced_from_script: true
+				writable: true
 			},
 			{
 				name: 'h',
@@ -119,8 +109,7 @@ export default {
 				mutated: false,
 				reassigned: true,
 				referenced: false,
-				writable: true,
-				referenced_from_script: true
+				writable: true
 			},
 			{
 				name: 'foo',
@@ -130,8 +119,7 @@ export default {
 				mutated: false,
 				reassigned: false,
 				referenced: false,
-				writable: false,
-				referenced_from_script: false
+				writable: false
 			},
 			{
 				name: 'l',
@@ -141,7 +129,6 @@ export default {
 				mutated: false,
 				reassigned: false,
 				referenced: false,
-				referenced_from_script: true,
 				writable: false
 			},
 			{
@@ -152,8 +139,7 @@ export default {
 				mutated: false,
 				reassigned: false,
 				referenced: false,
-				writable: false,
-				referenced_from_script: false
+				writable: false
 			}
 		]);
 	}

@@ -18,7 +18,6 @@ import { Ast, CompileOptions, Var, Warning, CssResult } from '../interfaces';
 import error from '../utils/error';
 import get_code_frame from '../utils/get_code_frame';
 import flatten_reference from './utils/flatten_reference';
-import is_used_as_reference from './utils/is_used_as_reference';
 import is_reference from 'is-reference';
 import TemplateScope from './nodes/shared/TemplateScope';
 import get_object from './utils/get_object';
@@ -300,8 +299,7 @@ export default class Component {
 					mutated: v.mutated || false,
 					reassigned: v.reassigned || false,
 					referenced: v.referenced || false,
-					writable: v.writable || false,
-					referenced_from_script: v.referenced_from_script || false
+					writable: v.writable || false
 				})),
 			stats: this.stats.render()
 		};
@@ -429,12 +427,6 @@ export default class Component {
 						extract_names(declarator.id).forEach(name => {
 							const variable = this.var_lookup.get(name);
 							variable.export_name = name;
-							if (variable.writable && !(variable.referenced || variable.referenced_from_script)) {
-								this.warn(declarator, {
-									code: 'unused-export-let',
-									message: `${this.name.name} has unused export property '${name}'. If it is for external reference only, please consider using \`export const ${name}\``
-								});
-							}
 						});
 					});
 				} else {
@@ -451,13 +443,6 @@ export default class Component {
 
 					if (variable) {
 						variable.export_name = specifier.exported.name;
-
-						if (variable.writable && !(variable.referenced || variable.referenced_from_script)) {
-							this.warn(specifier, {
-								code: 'unused-export-let',
-								message: `${this.name.name} has unused export property '${specifier.exported.name}'. If it is for external reference only, please consider using \`export const ${specifier.exported.name}\``
-							});
-						}
 					}
 				});
 
@@ -724,7 +709,7 @@ export default class Component {
 		let scope = instance_scope;
 
 		walk(content, {
-			enter(node: Node, parent: Node) {
+			enter(node: Node) {
 				if (map.has(node)) {
 					scope = map.get(node);
 				}
@@ -746,14 +731,6 @@ export default class Component {
 							variable[deep ? 'mutated' : 'reassigned'] = true;
 						}
 					});
-				}
-
-				if (is_used_as_reference(node, parent)) {
-					const object = get_object(node);
-					if (scope.find_owner(object.name) === instance_scope) {
-						const variable = component.var_lookup.get(object.name);
-						variable.referenced_from_script = true;
-					}
 				}
 			},
 

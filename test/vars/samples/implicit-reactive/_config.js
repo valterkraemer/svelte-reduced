@@ -9,7 +9,6 @@ export default {
 				mutated: false,
 				reassigned: false,
 				referenced: true,
-				referenced_from_script: true,
 				writable: true
 			},
 			{
@@ -20,7 +19,6 @@ export default {
 				mutated: false,
 				reassigned: true,
 				referenced: true,
-				referenced_from_script: false,
 				writable: true
 			}
 		]);

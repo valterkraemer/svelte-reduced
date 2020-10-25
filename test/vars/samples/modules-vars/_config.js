@@ -9,7 +9,6 @@ export default {
 				mutated: false,
 				reassigned: true,
 				referenced: false,
-				referenced_from_script: false,
 				writable: true
 			},
 			{
@@ -20,7 +19,6 @@ export default {
 				mutated: true,
 				reassigned: false,
 				referenced: false,
-				referenced_from_script: false,
 				writable: true
 			},
 			{
@@ -31,7 +29,6 @@ export default {
 				mutated: false,
 				reassigned: false,
 				referenced: false,
-				referenced_from_script: false,
 				writable: true
 			},
 			{
@@ -42,7 +39,6 @@ export default {
 				mutated: false,
 				reassigned: false,
 				referenced: false,
-				referenced_from_script: false,
 				writable: true
 			},
 			{
@@ -53,7 +49,6 @@ export default {
 				mutated: false,
 				reassigned: true,
 				referenced: false,
-				referenced_from_script: true,
 				writable: true
 			},
 			{
@@ -64,7 +59,6 @@ export default {
 				mutated: false,
 				reassigned: false,
 				referenced: false,
-				referenced_from_script: false,
 				writable: false
 			}
 		]);
