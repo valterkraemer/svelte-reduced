@@ -52,24 +52,14 @@ export default function dom(
 	}));
 
 	const uses_props = component.var_lookup.has('$$props');
-	const uses_rest = component.var_lookup.has('$$restProps');
-	const $$props = uses_props || uses_rest ? '$$new_props' : '$$props';
+	const $$props = uses_props ? '$$new_props' : '$$props';
 	const props = component.vars.filter(variable => !variable.module && variable.export_name);
 	const writable_props = props.filter(variable => variable.writable);
 
-	const omit_props_names = component.get_unique_name('omit_props_names');
-	const compute_rest = x`@compute_rest_props($$props, ${omit_props_names.name})`;
-	const rest = uses_rest ? b`
-		const ${omit_props_names.name} = [${props.map(prop => `"${prop.export_name}"`).join(',')}];
-		let $$restProps = ${compute_rest};
-	` : null;
-
-	const set = (uses_props || uses_rest || writable_props.length > 0)
+	const set = (uses_props || writable_props.length > 0)
 		? x`
 			${$$props} => {
 				${uses_props && renderer.invalidate('$$props', x`$$props = @assign(@assign({}, $$props), @exclude_internal_props($$new_props))`)}
-				${uses_rest && !uses_props && x`$$props = @assign(@assign({}, $$props), @exclude_internal_props($$new_props))`}
-				${uses_rest && renderer.invalidate('$$restProps', x`$$restProps = ${compute_rest}`)}
 				${writable_props.map(prop =>
 					b`if ('${prop.export_name}' in ${$$props}) ${renderer.invalidate(prop.name, x`${prop.name} = ${$$props}.${prop.export_name}`)};`
 				)}
@@ -212,20 +202,20 @@ export default function dom(
 
 		component.reactive_declarations.forEach(d => {
 			const dependencies = Array.from(d.dependencies);
-			const uses_rest_or_props = !!dependencies.find(n => n === '$$props' || n === '$$restProps');
+			const uses_props = !!dependencies.find(n => n === '$$props');
 
 			const writable = dependencies.filter(n => {
 				const variable = component.var_lookup.get(n);
 				return variable && (variable.export_name || variable.mutated || variable.reassigned);
 			});
 
-			const condition = !uses_rest_or_props && writable.length > 0 && renderer.dirty(writable, true);
+			const condition = !uses_props && writable.length > 0 && renderer.dirty(writable, true);
 
 			let statement = d.node; // TODO remove label (use d.node.body) if it's not referenced
 
 			if (condition) statement = b`if (${condition}) { ${statement} }`[0] as Statement;
 
-			if (condition || uses_rest_or_props) {
+			if (condition || uses_props) {
 				reactive_declarations.push(statement);
 			} else {
 				fixed_reactive_declarations.push(statement);
@@ -249,8 +239,6 @@ export default function dom(
 
 		body.push(b`
 			function ${definition}(${args}) {
-				${rest}
-
 				${instance_javascript}
 
 				${unknown_props_check}
