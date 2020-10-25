@@ -2,7 +2,6 @@ import Tag from './shared/Tag';
 import Attribute from './Attribute';
 import Binding from './Binding';
 import Class from './Class';
-import Comment from './Comment';
 import Element from './Element';
 import ElseBlock from './ElseBlock';
 import EventHandler from './EventHandler';
@@ -18,7 +17,6 @@ import Window from './Window';
 export type INode = Attribute
 | Binding
 | Class
-| Comment
 | Element
 | ElseBlock
 | EventHandler

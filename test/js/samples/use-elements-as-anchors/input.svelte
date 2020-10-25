@@ -27,7 +27,6 @@
 		<p>d</p>
 	{/if}
 
-	<!-- d can use 'null' as its anchor -->
 </div>
 
 {#if e}

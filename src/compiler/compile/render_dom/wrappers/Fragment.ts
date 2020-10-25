@@ -13,7 +13,6 @@ import { link } from '../../../utils/link';
 import { Identifier } from 'estree';
 
 const wrappers = {
-	Comment: null,
 	Element,
 	IfBlock,
 	InlineComponent,

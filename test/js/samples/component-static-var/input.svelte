@@ -9,5 +9,4 @@
 <Foo x={y}/>
 <Bar x={z}/>
 
-<!-- ensure z is considered dynamic, even though the binding is encountered late -->
 <input bind:value={z}>

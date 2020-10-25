@@ -1,5 +1,5 @@
 <div class='foo'>
-	<!-- html injected somehow -->
+
 </div>
 
 <style>

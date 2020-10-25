@@ -1,5 +1,5 @@
 <div>
-	<!-- html injected somehow -->
+
 </div>
 
 <style>

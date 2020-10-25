@@ -39,20 +39,6 @@ export default function tag(parser: Parser) {
 
 	const parent = parser.current();
 
-	if (parser.eat('!--')) {
-		const data = parser.read_until(/-->/);
-		parser.eat('-->', true, 'comment was left open, expected -->');
-
-		parser.current().children.push({
-			start,
-			end: parser.index,
-			type: 'Comment',
-			data
-		});
-
-		return;
-	}
-
 	const is_closing_tag = parser.eat('/');
 
 	const name = read_tag_name(parser);

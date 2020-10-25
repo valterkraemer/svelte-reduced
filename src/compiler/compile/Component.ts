@@ -22,7 +22,6 @@ import is_reference from 'is-reference';
 import TemplateScope from './nodes/shared/TemplateScope';
 import get_object from './utils/get_object';
 import { Node, ImportDeclaration, Identifier, Program, ExpressionStatement, AssignmentExpression, Literal } from 'estree';
-import add_to_set from './utils/add_to_set';
 import check_graph_for_cycles from './utils/check_graph_for_cycles';
 import { print, x, b } from 'code-red';
 import { is_reserved_keyword } from './utils/reserved_keywords';
@@ -36,8 +35,6 @@ interface ComponentOptions {
 export default class Component {
 	stats: Stats;
 	warnings: Warning[];
-	ignores: Set<string>;
-	ignore_stack: Array<Set<string>> = [];
 
 	ast: Ast;
 	original_ast: Ast;
@@ -379,9 +376,6 @@ export default class Component {
 			message: string;
 		}
 	) {
-		if (this.ignores && this.ignores.has(warning.code)) {
-			return;
-		}
 
 		const start = this.locate(pos.start);
 		const end = this.locate(pos.end);
@@ -1213,17 +1207,6 @@ export default class Component {
 			code: 'missing-declaration',
 			message
 		});
-	}
-
-	push_ignores(ignores) {
-		this.ignores = new Set(this.ignores || []);
-		add_to_set(this.ignores, ignores);
-		this.ignore_stack.push(this.ignores);
-	}
-
-	pop_ignores() {
-		this.ignore_stack.pop();
-		this.ignores = this.ignore_stack[this.ignore_stack.length - 1];
 	}
 }
 

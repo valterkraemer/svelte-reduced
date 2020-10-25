@@ -16,7 +16,6 @@ export interface BlockOptions {
 	name: Identifier;
 	type: string;
 	renderer?: Renderer;
-	comment?: string;
 	key?: Identifier;
 	bindings?: Map<string, Bindings>;
 	dependencies?: Set<string>;
@@ -27,7 +26,6 @@ export default class Block {
 	renderer: Renderer;
 	name: Identifier;
 	type: string;
-	comment?: string;
 
 	wrappers: Wrapper[];
 
@@ -64,7 +62,6 @@ export default class Block {
 		this.renderer = options.renderer;
 		this.name = options.name;
 		this.type = options.type;
-		this.comment = options.comment;
 
 		this.wrappers = [];
 
@@ -296,11 +293,7 @@ export default class Block {
 			${this.get_contents(key)}
 		}`;
 
-		return this.comment
-			? b`
-				// ${this.comment}
-				${fn}`
-			: fn;
+		return fn;
 	}
 
 	render_listeners(chunk: string = '') {

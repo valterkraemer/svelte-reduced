@@ -238,7 +238,6 @@ export default class Element extends Node {
 
 		if (this.name === 'figure') {
 			const children = this.children.filter(node => {
-				if (node.type === 'Comment') return false;
 				if (node.type === 'Text') return /\S/.test(node.data);
 				return true;
 			});

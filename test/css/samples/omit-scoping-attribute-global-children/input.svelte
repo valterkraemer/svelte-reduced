@@ -11,6 +11,6 @@
 
 <div class={unknown1}>
 	<section class={unknown2}>
-		<!-- injected somehow -->
+
 	</section>
 </div>
