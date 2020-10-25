@@ -1,4 +1,3 @@
-import { run_all } from './utils';
 import { set_current_component } from './lifecycle';
 
 export const dirty_components = [];

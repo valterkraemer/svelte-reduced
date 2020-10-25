@@ -38,14 +38,6 @@ export function createEventDispatcher<
 	};
 }
 
-export function setContext<T>(key, context: T) {
-	get_current_component().$$.context.set(key, context);
-}
-
-export function getContext<T>(key): T {
-	return get_current_component().$$.context.get(key);
-}
-
 // TODO figure out if we still want to support
 // shorthand events, or if we want to implement
 // a real bubbling mechanism

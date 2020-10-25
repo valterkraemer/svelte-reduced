@@ -22,7 +22,6 @@ interface T$$ {
 	props: Record<string, 0 | string>;
 	fragment: null|false|Fragment;
 	not_equal: any;
-	context: Map<any, any>;
 	on_mount: any[];
 	on_destroy: any[];
 	skip_bound: boolean;
@@ -105,7 +104,6 @@ export function init(component, options, instance, create_fragment, not_equal, p
 		// lifecycle
 		on_mount: [],
 		on_destroy: [],
-		context: new Map(parent_component ? parent_component.$$.context : []),
 
 		// everything else
 		callbacks: blank_object(),
