@@ -6,18 +6,6 @@ import TemplateScope from './shared/TemplateScope';
 import {dimensions} from '../../utils/patterns';
 import { Node as ESTreeNode } from 'estree';
 
-// TODO this should live in a specific binding
-const read_only_media_attributes = new Set([
-	'duration',
-	'buffered',
-	'seekable',
-	'played',
-	'seeking',
-	'ended',
-	'videoHeight',
-	'videoWidth'
-]);
-
 export default class Binding extends Node {
 	type: 'Binding';
 	name: string;
@@ -77,12 +65,7 @@ export default class Binding extends Node {
 
 		this.is_readonly = (
 			dimensions.test(this.name) ||
-			(parent.is_media_node && parent.is_media_node() && read_only_media_attributes.has(this.name)) ||
 			(parent.name === 'input' && type === 'file') // TODO others?
 		);
-	}
-
-	is_readonly_media_attribute() {
-		return read_only_media_attributes.has(this.name);
 	}
 }

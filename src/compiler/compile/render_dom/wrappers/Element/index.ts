@@ -11,7 +11,6 @@ import { b, x, p } from 'code-red';
 import { namespaces } from '../../../../utils/namespaces';
 import AttributeWrapper from './Attribute';
 import StyleAttributeWrapper from './StyleAttribute';
-import { dimensions } from '../../../../utils/patterns';
 import Binding from './Binding';
 import add_to_set from '../../../utils/add_to_set';
 import { add_event_handler } from '../shared/add_event_handlers';
@@ -48,74 +47,6 @@ const events = [
 		event_names: ['change', 'input'],
 		filter: (node: Element, _name: string) =>
 			node.name === 'input' && node.get_static_attribute_value('type') === 'range'
-	},
-
-	{
-		event_names: ['elementresize'],
-		filter: (_node: Element, name: string) =>
-			dimensions.test(name)
-	},
-
-	// media events
-	{
-		event_names: ['timeupdate'],
-		filter: (node: Element, name: string) =>
-			node.is_media_node() &&
-			(name === 'currentTime' || name === 'played' || name === 'ended')
-	},
-	{
-		event_names: ['durationchange'],
-		filter: (node: Element, name: string) =>
-			node.is_media_node() &&
-			name === 'duration'
-	},
-	{
-		event_names: ['play', 'pause'],
-		filter: (node: Element, name: string) =>
-			node.is_media_node() &&
-			name === 'paused'
-	},
-	{
-		event_names: ['progress'],
-		filter: (node: Element, name: string) =>
-			node.is_media_node() &&
-			name === 'buffered'
-	},
-	{
-		event_names: ['loadedmetadata'],
-		filter: (node: Element, name: string) =>
-			node.is_media_node() &&
-			(name === 'buffered' || name === 'seekable')
-	},
-	{
-		event_names: ['volumechange'],
-		filter: (node: Element, name: string) =>
-			node.is_media_node() &&
-			(name === 'volume' || name === 'muted')
-	},
-	{
-		event_names: ['ratechange'],
-		filter: (node: Element, name: string) =>
-			node.is_media_node() &&
-			name === 'playbackRate'
-	},
-	{
-		event_names: ['seeking', 'seeked'],
-		filter: (node: Element, name: string) =>
-			node.is_media_node() &&
-			(name === 'seeking')
-	},
-	{
-		event_names: ['ended'],
-		filter: (node: Element, name: string) =>
-			node.is_media_node() &&
-			name === 'ended'
-	},
-	{
-		event_names: ['resize'],
-		filter: (node: Element, name: string) =>
-			node.is_media_node() &&
-			(name === 'videoHeight' || name === 'videoWidth')
 	},
 
 	// details event
@@ -383,17 +314,8 @@ export default class ElementWrapper extends Wrapper {
 
 		renderer.component.has_reactive_assignments = true;
 
-		const lock = binding_group.bindings.some(binding => binding.needs_lock) ?
-			block.get_unique_name(`${this.var.name}_updating`) :
-			null;
-
-		if (lock) block.add_variable(lock, x`false`);
-
 		const handler = renderer.component.get_unique_name(`${this.var.name}_${binding_group.events.join('_')}_handler`);
 		renderer.add_to_context(handler.name);
-
-		// TODO figure out how to handle locks
-		const needs_lock = binding_group.bindings.some(binding => binding.needs_lock);
 
 		const dependencies: Set<string> = new Set();
 		const contextual_dependencies: Set<string> = new Set();
@@ -403,19 +325,10 @@ export default class ElementWrapper extends Wrapper {
 			add_to_set(dependencies, binding.get_dependencies());
 			add_to_set(contextual_dependencies, binding.handler.contextual_dependencies);
 
-			binding.render(block, lock);
+			binding.render(block);
 		});
 
-		// media bindings — awkward special case. The native timeupdate events
-		// fire too infrequently, so we need to take matters into our
-		// own hands
-		let animation_frame;
-		if (binding_group.events[0] === 'timeupdate') {
-			animation_frame = block.get_unique_name(`${this.var.name}_animationframe`);
-			block.add_variable(animation_frame);
-		}
-
-		const has_local_function = contextual_dependencies.size > 0 || needs_lock || animation_frame;
+		const has_local_function = contextual_dependencies.size > 0;
 
 		let callee = renderer.reference(handler);
 
@@ -423,26 +336,11 @@ export default class ElementWrapper extends Wrapper {
 		if (has_local_function) {
 			const args = Array.from(contextual_dependencies).map(name => renderer.reference(name));
 
-			// need to create a block-local function that calls an instance-level function
-			if (animation_frame) {
-				block.chunks.init.push(b`
-					function ${handler}() {
-						@_cancelAnimationFrame(${animation_frame});
-						if (!${this.var}.paused) {
-							${animation_frame} = @raf(${handler});
-							${needs_lock && b`${lock} = true;`}
-						}
-						${callee}.call(${this.var}, ${args});
-					}
-				`);
-			} else {
-				block.chunks.init.push(b`
-					function ${handler}() {
-						${needs_lock && b`${lock} = true;`}
-						${callee}.call(${this.var}, ${args});
-					}
-				`);
-			}
+			block.chunks.init.push(b`
+				function ${handler}() {
+					${callee}.call(${this.var}, ${args});
+				}
+			`);
 
 			callee = handler;
 		}
@@ -463,23 +361,9 @@ export default class ElementWrapper extends Wrapper {
 		`);
 
 		binding_group.events.forEach(name => {
-			if (name === 'elementresize') {
-				// special case
-				const resize_listener = block.get_unique_name(`${this.var.name}_resize_listener`);
-				block.add_variable(resize_listener);
-
-				block.chunks.mount.push(
-					b`${resize_listener} = @add_resize_listener(${this.var}, ${callee}.bind(${this.var}));`
-				);
-
-				block.chunks.destroy.push(
-					b`${resize_listener}();`
-				);
-			} else {
-				block.event_listeners.push(
-					x`@listen(${this.var}, "${name}", ${callee})`
-				);
-			}
+			block.event_listeners.push(
+				x`@listen(${this.var}, "${name}", ${callee})`
+			);
 		});
 
 		const some_initial_state_is_undefined = binding_group.bindings
@@ -492,8 +376,7 @@ export default class ElementWrapper extends Wrapper {
 				return (
 					binding.node.name === 'indeterminate' ||
 					binding.node.name === 'textContent' ||
-					binding.node.name === 'innerHTML' ||
-					binding.is_readonly_media_attribute()
+					binding.node.name === 'innerHTML'
 				);
 			})
 		);
@@ -503,16 +386,6 @@ export default class ElementWrapper extends Wrapper {
 			block.chunks.hydrate.push(
 				b`if (${some_initial_state_is_undefined}) @add_render_callback(${callback});`
 			);
-		}
-
-		if (binding_group.events[0] === 'elementresize') {
-			block.chunks.hydrate.push(
-				b`@add_render_callback(() => ${callee}.call(${this.var}));`
-			);
-		}
-
-		if (lock) {
-			block.chunks.update.push(b`${lock} = false;`);
 		}
 	}
 

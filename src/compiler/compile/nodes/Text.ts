@@ -7,12 +7,10 @@ import { INode } from './interfaces';
 // a whitespace node being created in any circumstances. (This
 // list is almost certainly very incomplete)
 const elements_without_text = new Set([
-	'audio',
 	'datalist',
 	'dl',
 	'optgroup',
-	'select',
-	'video'
+	'select'
 ]);
 
 export default class Text extends Node {

@@ -88,14 +88,6 @@ export function to_number(value) {
 	return value === '' ? null : +value;
 }
 
-export function time_ranges_to_array(ranges) {
-	const array = [];
-	for (let i = 0; i < ranges.length; i += 1) {
-		array.push({ start: ranges.start(i), end: ranges.end(i) });
-	}
-	return array;
-}
-
 export function children(element) {
 	return Array.from(element.childNodes);
 }
@@ -184,71 +176,6 @@ export function select_value(select) {
 
 export function select_multiple_value(select) {
 	return [].map.call(select.querySelectorAll(':checked'), option => option.__value);
-}
-
-// unfortunately this can't be a constant as that wouldn't be tree-shakeable
-// so we cache the result instead
-let crossorigin: boolean;
-
-export function is_crossorigin() {
-	if (crossorigin === undefined) {
-		crossorigin = false;
-
-		try {
-			if (typeof window !== 'undefined' && window.parent) {
-				void window.parent.document;
-			}
-		} catch (error) {
-			crossorigin = true;
-		}
-	}
-
-	return crossorigin;
-}
-
-export function add_resize_listener(node: HTMLElement, fn: () => void) {
-	const computed_style = getComputedStyle(node);
-	const z_index = (parseInt(computed_style.zIndex) || 0) - 1;
-
-	if (computed_style.position === 'static') {
-		node.style.position = 'relative';
-	}
-
-	const iframe = element('iframe');
-	iframe.setAttribute('style',
-		'display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; ' +
-		`overflow: hidden; border: 0; opacity: 0; pointer-events: none; z-index: ${z_index};`
-	);
-	iframe.setAttribute('aria-hidden', 'true');
-	iframe.tabIndex = -1;
-
-	const crossorigin = is_crossorigin();
-
-	let unsubscribe: () => void;
-
-	if (crossorigin) {
-		iframe.src = "data:text/html,<script>onresize=function(){parent.postMessage(0,'*')}</script>";
-		unsubscribe = listen(window, 'message', (event: MessageEvent) => {
-			if (event.source === iframe.contentWindow) fn();
-		});
-	} else {
-		iframe.src = 'about:blank';
-		iframe.onload = () => {
-			unsubscribe = listen(iframe.contentWindow, 'resize', fn);
-		};
-	}
-
-	append(node, iframe);
-
-	return () => {
-		if (crossorigin) {
-			unsubscribe();
-		} else if (unsubscribe && iframe.contentWindow) {
-			unsubscribe();
-		}
-
-		detach(iframe);
-	};
 }
 
 export function toggle_class(element, name, toggle) {

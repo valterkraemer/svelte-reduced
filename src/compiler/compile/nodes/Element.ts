@@ -467,25 +467,6 @@ export default class Element extends Node {
 			}
 		}
 
-		if (this.is_media_node()) {
-			if (attribute_map.has('muted')) {
-				return;
-			}
-
-			let has_caption;
-			const track = this.children.find((i: Element) => i.name === 'track');
-			if (track) {
-				has_caption = track.attributes.find(a => a.name === 'kind' && a.get_static_value() === 'captions');
-			}
-
-			if (!has_caption) {
-				component.warn(this, {
-					code: 'a11y-media-has-caption',
-					message: 'A11y: Media elements must have a <track kind="captions">'
-				});
-			}
-		}
-
 		if (a11y_no_onchange.has(this.name)) {
 			if (handlers_map.has('change') && !handlers_map.has('blur')) {
 				component.warn(this, {
@@ -609,35 +590,6 @@ export default class Element extends Node {
 						message: `'${name}' binding can only be used with <details>`
 					});
 				}
-			} else if (
-				name === 'currentTime' ||
-				name === 'duration' ||
-				name === 'paused' ||
-				name === 'buffered' ||
-				name === 'seekable' ||
-				name === 'played' ||
-				name === 'volume' ||
-				name === 'muted' ||
-				name === 'playbackRate' ||
-				name === 'seeking' ||
-				name === 'ended'
-			) {
-				if (this.name !== 'audio' && this.name !== 'video') {
-					component.error(binding, {
-						code: 'invalid-binding',
-						message: `'${name}' binding can only be used with <audio> or <video>`
-					});
-				}
-			} else if (
-				name === 'videoHeight' ||
-				name === 'videoWidth'
-			) {
-				if (this.name !== 'video') {
-					component.error(binding, {
-						code: 'invalid-binding',
-						message: `'${name}' binding can only be used with <video>`
-					});
-				}
 			} else if (dimensions.test(name)) {
 				if (this.name === 'svg' && (name === 'offsetWidth' || name === 'offsetHeight')) {
 					component.error(binding, {
@@ -755,10 +707,6 @@ export default class Element extends Node {
 				handler.modifiers.add('passive');
 			}
 		});
-	}
-
-	is_media_node() {
-		return this.name === 'audio' || this.name === 'video';
 	}
 
 	add_css_class() {

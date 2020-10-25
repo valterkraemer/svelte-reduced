@@ -7,7 +7,7 @@ import replace_object from '../../../utils/replace_object';
 import Block from '../../Block';
 import Renderer from '../../Renderer';
 import flatten_reference from '../../../utils/flatten_reference';
-import { Node, Identifier } from 'estree';
+import { Node } from 'estree';
 import add_to_set from '../../../utils/add_to_set';
 import handle_select_value_binding from './handle_select_value_binding';
 
@@ -24,7 +24,6 @@ export default class BindingWrapper {
 	};
 	snippet: Node;
 	is_readonly: boolean;
-	needs_lock: boolean;
 
 	constructor(block: Block, node: Binding, parent: ElementWrapper | InlineComponentWrapper) {
 		this.node = node;
@@ -46,8 +45,6 @@ export default class BindingWrapper {
 		this.snippet = this.node.expression.manipulate(block);
 
 		this.is_readonly = this.node.is_readonly;
-
-		this.needs_lock = this.node.name === 'currentTime';  // TODO others?
 	}
 
 	get_dependencies() {
@@ -65,16 +62,12 @@ export default class BindingWrapper {
 		return dependencies;
 	}
 
-	is_readonly_media_attribute() {
-		return this.node.is_readonly_media_attribute();
-	}
-
-	render(block: Block, lock: Identifier) {
+	render(block: Block) {
 		if (this.is_readonly) return;
 
 		const { parent } = this;
 
-		const update_conditions: any[] = this.needs_lock ? [x`!${lock}`] : [];
+		const update_conditions: any[] = [];
 		const mount_conditions: any[] = [];
 
 		const dependency_array = Array.from(this.get_dependencies());
@@ -150,29 +143,6 @@ export default class BindingWrapper {
 				mount_conditions.push(x`${this.snippet} !== void 0`);
 				break;
 
-			case 'currentTime':
-				update_conditions.push(x`!@_isNaN(${this.snippet})`);
-				mount_dom = null;
-				break;
-
-			case 'playbackRate':
-			case 'volume':
-				update_conditions.push(x`!@_isNaN(${this.snippet})`);
-				mount_conditions.push(x`!@_isNaN(${this.snippet})`);
-				break;
-
-			case 'paused':
-			{
-				// this is necessary to prevent audio restarting by itself
-				const last = block.get_unique_name(`${parent.var.name}_is_paused`);
-				block.add_variable(last, x`true`);
-
-				update_conditions.push(x`${last} !== (${last} = ${this.snippet})`);
-				update_dom = b`${parent.var}[${last} ? "pause" : "play"]();`;
-				mount_dom = null;
-				break;
-			}
-
 			case 'value':
 				if (parent.node.get_static_attribute_value('type') === 'file') {
 					update_dom = null;
@@ -215,10 +185,6 @@ function get_dom_updater(
 	binding: BindingWrapper
 ) {
 	const { node } = element;
-
-	if (binding.is_readonly_media_attribute()) {
-		return null;
-	}
 
 	if (binding.node.name === 'this') {
 		return null;
@@ -379,10 +345,6 @@ function get_value_from_dom(
 	// <input type='range|number' bind:value>
 	if (type === 'range' || type === 'number') {
 		return x`@to_number(this.${name})`;
-	}
-
-	if ((name === 'buffered' || name === 'seekable' || name === 'played')) {
-		return x`@time_ranges_to_array(this.${name})`;
 	}
 
 	// everything else
