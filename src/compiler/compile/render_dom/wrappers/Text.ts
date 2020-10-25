@@ -26,7 +26,6 @@ export default class TextWrapper extends Wrapper {
 	}
 
 	use_space() {
-		if (this.renderer.component.component_options.preserveWhitespace) return false;
 		if (/[\S\u00A0]/.test(this.data)) return false;
 
 		let node = this.parent && this.parent.node;

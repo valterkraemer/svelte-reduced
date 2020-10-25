@@ -32,7 +32,6 @@ import Element from './nodes/Element';
 interface ComponentOptions {
 	namespace?: string;
 	accessors?: boolean;
-	preserveWhitespace?: boolean;
 }
 
 export default class Component {
@@ -1257,8 +1256,7 @@ function process_component_options(component: Component) {
 		accessors:
 			'accessors' in component.compile_options
 				? component.compile_options.accessors
-				: false,
-		preserveWhitespace: !!component.compile_options.preserveWhitespace
+				: false
 	};
 
 	return component_options;

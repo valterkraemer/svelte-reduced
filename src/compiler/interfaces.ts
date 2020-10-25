@@ -104,8 +104,6 @@ export interface CompileOptions {
 
 	accessors?: boolean;
 	css?: boolean;
-
-	preserveWhitespace?: boolean;
 }
 
 export interface ParserOptions {

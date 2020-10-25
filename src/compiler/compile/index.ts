@@ -15,8 +15,7 @@ const valid_options = [
 	'cssOutputFilename',
 	'sveltePath',
 	'accessors',
-	'css',
-	'preserveWhitespace'
+	'css'
 ];
 
 function validate_options(options: CompileOptions, warnings: Warning[]) {
