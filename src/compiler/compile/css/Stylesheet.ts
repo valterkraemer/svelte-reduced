@@ -102,12 +102,6 @@ class Rule {
 		});
 	}
 
-	warn_on_unused_selector(handler: (selector: Selector) => void) {
-		this.selectors.forEach(selector => {
-			if (!selector.used) handler(selector);
-		});
-	}
-
 	get_max_amount_class_specificity_increased() {
 		return Math.max(...this.selectors.map(selector => selector.get_amount_class_specificity_increased()));
 	}
@@ -264,14 +258,6 @@ class Atrule {
 		});
 	}
 
-	warn_on_unused_selector(handler: (selector: Selector) => void) {
-		if (this.node.name !== 'media') return;
-
-		this.children.forEach(child => {
-			child.warn_on_unused_selector(handler);
-		});
-	}
-
 	get_max_amount_class_specificity_increased() {
 		return Math.max(...this.children.map(rule => rule.get_max_amount_class_specificity_increased()));
 	}
@@ -419,17 +405,6 @@ export default class Stylesheet {
 	validate(component: Component) {
 		this.children.forEach(child => {
 			child.validate(component);
-		});
-	}
-
-	warn_on_unused_selectors(component: Component) {
-		this.children.forEach(child => {
-			child.warn_on_unused_selector((selector: Selector) => {
-				component.warn(selector.node, {
-					code: 'css-unused-selector',
-					message: `Unused CSS selector "${this.source.slice(selector.node.start, selector.node.end)}"`
-				});
-			});
 		});
 	}
 }

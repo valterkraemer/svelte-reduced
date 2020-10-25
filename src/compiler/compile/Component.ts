@@ -145,7 +145,6 @@ export default class Component {
 
 		this.elements.forEach(element => this.stylesheet.apply(element));
 		this.stylesheet.reify();
-		this.stylesheet.warn_on_unused_selectors(this);
 	}
 
 	add_var(variable: Var) {
