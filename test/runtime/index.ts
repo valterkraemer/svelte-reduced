@@ -74,7 +74,6 @@ describe('runtime', () => {
 			compileOptions = config.compileOptions || {};
 			compileOptions.format = 'cjs';
 			compileOptions.sveltePath = sveltePath;
-			compileOptions.immutable = config.immutable;
 			compileOptions.accessors = 'accessors' in config ? config.accessors : true;
 
 			cleanRequireCache();

@@ -15,7 +15,6 @@ const valid_options = [
 	'cssOutputFilename',
 	'sveltePath',
 	'accessors',
-	'immutable',
 	'css',
 	'preserveWhitespace'
 ];

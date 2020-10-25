@@ -31,7 +31,6 @@ import Element from './nodes/Element';
 
 interface ComponentOptions {
 	namespace?: string;
-	immutable?: boolean;
 	accessors?: boolean;
 	preserveWhitespace?: boolean;
 }
@@ -1255,7 +1254,6 @@ export default class Component {
 
 function process_component_options(component: Component) {
 	const component_options: ComponentOptions = {
-		immutable: component.compile_options.immutable || false,
 		accessors:
 			'accessors' in component.compile_options
 				? component.compile_options.accessors

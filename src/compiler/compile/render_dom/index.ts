@@ -69,7 +69,7 @@ export default function dom(
 
 	const accessors = [];
 
-	const not_equal = component.component_options.immutable ? x`@not_equal` : x`@safe_not_equal`;
+	const not_equal = x`@safe_not_equal`;
 	let inject_state: Expression;
 	let capture_state: Expression;
 	let props_inject: Node[] | Node;

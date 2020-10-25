@@ -26,10 +26,6 @@ export function safe_not_equal(a, b) {
 	return a != a ? b == b : a !== b || ((a && typeof a === 'object') || typeof a === 'function');
 }
 
-export function not_equal(a, b) {
-	return a != a ? b == b : a !== b;
-}
-
 export function is_empty(obj) {
 	return Object.keys(obj).length === 0;
 }

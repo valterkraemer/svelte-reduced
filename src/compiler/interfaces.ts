@@ -103,7 +103,6 @@ export interface CompileOptions {
 	sveltePath?: string;
 
 	accessors?: boolean;
-	immutable?: boolean;
 	css?: boolean;
 
 	preserveWhitespace?: boolean;
