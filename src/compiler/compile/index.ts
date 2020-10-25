@@ -16,7 +16,6 @@ const valid_options = [
 	'sveltePath',
 	'accessors',
 	'immutable',
-	'hydratable',
 	'legacy',
 	'css',
 	'preserveWhitespace'

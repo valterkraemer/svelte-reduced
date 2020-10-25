@@ -71,8 +71,7 @@ export default class InlineComponentWrapper extends Wrapper {
 
 	render(
 		block: Block,
-		parent_node: Identifier,
-		parent_nodes: Identifier
+		parent_node: Identifier
 	) {
 		this.warn_if_reactive();
 
@@ -245,12 +244,6 @@ export default class InlineComponentWrapper extends Wrapper {
 		`);
 
 		block.chunks.create.push(b`@create_component(${name}.$$.fragment);`);
-
-		if (parent_nodes && this.renderer.options.hydratable) {
-			block.chunks.claim.push(
-				b`@claim_component(${name}.$$.fragment, ${parent_nodes});`
-			);
-		}
 
 		block.chunks.mount.push(
 			b`@mount_component(${name}, ${parent_node || '#target'}, ${parent_node ? 'null' : '#anchor'});`

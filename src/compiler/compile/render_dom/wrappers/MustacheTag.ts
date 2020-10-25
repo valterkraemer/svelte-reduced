@@ -13,7 +13,7 @@ export default class MustacheTagWrapper extends Tag {
 		super(renderer, block, parent, node);
 	}
 
-	render(block: Block, parent_node: Identifier, parent_nodes: Identifier) {
+	render(block: Block, parent_node: Identifier) {
 		const { init } = this.rename_this_method(
 			block,
 			value => x`@set_data(${this.var}, ${value})`
@@ -22,7 +22,6 @@ export default class MustacheTagWrapper extends Tag {
 		block.add_element(
 			this.var,
 			x`@text(${init})`,
-			parent_nodes && x`@claim_text(${parent_nodes}, ${init})`,
 			parent_node
 		);
 	}

@@ -42,7 +42,6 @@ export default class Block {
 		declarations: Array<Node | Node[]>;
 		init: Array<Node | Node[]>;
 		create: Array<Node | Node[]>;
-		claim: Array<Node | Node[]>;
 		hydrate: Array<Node | Node[]>;
 		mount: Array<Node | Node[]>;
 		update: Array<Node | Node[]>;
@@ -79,7 +78,6 @@ export default class Block {
 			declarations: [],
 			init: [],
 			create: [],
-			claim: [],
 			hydrate: [],
 			mount: [],
 			update: [],
@@ -142,16 +140,11 @@ export default class Block {
 	add_element(
 		id: Identifier,
 		render_statement: Node,
-		claim_statement: Node,
 		parent_node: Node,
 		no_detach?: boolean
 	) {
 		this.add_variable(id);
 		this.chunks.create.push(b`${id} = ${render_statement};`);
-
-		if (this.renderer.options.hydratable) {
-			this.chunks.claim.push(b`${id} = ${claim_statement || render_statement};`);
-		}
 
 		if (parent_node) {
 			this.chunks.mount.push(b`@append(${parent_node}, ${id});`);
@@ -204,32 +197,11 @@ export default class Block {
 		if (this.chunks.create.length === 0 && this.chunks.hydrate.length === 0) {
 			properties.create = noop;
 		} else {
-			const hydrate = this.chunks.hydrate.length > 0 && (
-				this.renderer.options.hydratable
-					? b`this.h();`
-					: this.chunks.hydrate
-			);
+			const hydrate = this.chunks.hydrate;
 
 			properties.create = x`function #create() {
 				${this.chunks.create}
 				${hydrate}
-			}`;
-		}
-
-		if (this.renderer.options.hydratable || this.chunks.claim.length > 0) {
-			if (this.chunks.claim.length === 0 && this.chunks.hydrate.length === 0) {
-				properties.claim = noop;
-			} else {
-				properties.claim = x`function #claim(#nodes) {
-					${this.chunks.claim}
-					${this.renderer.options.hydratable && this.chunks.hydrate.length > 0 && b`this.h();`}
-				}`;
-			}
-		}
-
-		if (this.renderer.options.hydratable && this.chunks.hydrate.length > 0) {
-			properties.hydrate = x`function #hydrate() {
-				${this.chunks.hydrate}
 			}`;
 		}
 
@@ -280,8 +252,6 @@ export default class Block {
 			key: ${properties.key},
 			first: ${properties.first},
 			c: ${properties.create},
-			l: ${properties.claim},
-			h: ${properties.hydrate},
 			m: ${properties.mount},
 			p: ${properties.update},
 			d: ${properties.destroy}
@@ -311,7 +281,6 @@ export default class Block {
 			this.event_listeners.length > 0 ||
 			this.chunks.create.length > 0 ||
 			this.chunks.hydrate.length > 0 ||
-			this.chunks.claim.length > 0 ||
 			this.chunks.mount.length > 0 ||
 			this.chunks.update.length > 0 ||
 			this.chunks.destroy.length > 0;

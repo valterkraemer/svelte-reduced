@@ -192,23 +192,10 @@ export default class IfBlockWrapper extends Wrapper {
 			block.chunks.create.push(b`${name}.c();`);
 		}
 
-		if (parent_nodes && this.renderer.options.hydratable) {
-			if (if_exists_condition) {
-				block.chunks.claim.push(
-					b`if (${if_exists_condition}) ${name}.l(${parent_nodes});`
-				);
-			} else {
-				block.chunks.claim.push(
-					b`${name}.l(${parent_nodes});`
-				);
-			}
-		}
-
 		if (needs_anchor) {
 			block.add_element(
 				anchor as Identifier,
 				x`@empty()`,
-				parent_nodes && x`@empty()`,
 				parent_node
 			);
 		}

@@ -49,19 +49,17 @@ describe('runtime', () => {
 
 	const failed = new Set();
 
-	function runTest(dir, hydrate) {
+	function runTest(dir) {
 		if (dir[0] === '.') return;
 
 		const config = loadConfig(`${__dirname}/samples/${dir}/_config.js`);
 		const solo = config.solo || /\.solo/.test(dir);
 
-		if (hydrate && config.skip_if_hydrate) return;
-
 		if (solo && process.env.CI) {
 			throw new Error('Forgot to remove `solo: true` from test');
 		}
 
-		(config.skip ? it.skip : solo ? it.only : it)(`${dir} ${hydrate ? '(with hydration)' : ''}`, () => {
+		(config.skip ? it.skip : solo ? it.only : it)(dir, () => {
 			if (failed.has(dir)) {
 				// this makes debugging easier, by only printing compiled output once
 				throw new Error('skipping test, already failed');
@@ -76,7 +74,6 @@ describe('runtime', () => {
 			compileOptions = config.compileOptions || {};
 			compileOptions.format = 'cjs';
 			compileOptions.sveltePath = sveltePath;
-			compileOptions.hydratable = hydrate;
 			compileOptions.immutable = config.immutable;
 			compileOptions.accessors = 'accessors' in config ? config.accessors : true;
 
@@ -92,7 +89,7 @@ describe('runtime', () => {
 			glob('**/*.svelte', { cwd }).forEach(file => {
 				if (file[0] === '_') return;
 
-				const dir  = `${cwd}/_output/${hydrate ? 'hydratable' : 'normal'}`;
+				const dir  = `${cwd}/_output/normal`;
 				const out = `${dir}/${file.replace(/\.svelte$/, '.js')}`;
 
 				if (fs.existsSync(out)) {
@@ -158,7 +155,6 @@ describe('runtime', () => {
 
 					const options = Object.assign({}, {
 						target,
-						hydrate,
 						props: config.props,
 						intro: config.intro
 					}, config.options || {});
@@ -241,7 +237,6 @@ describe('runtime', () => {
 	}
 
 	fs.readdirSync(`${__dirname}/samples`).forEach(dir => {
-		runTest(dir, false);
-		runTest(dir, true);
+		runTest(dir);
 	});
 });

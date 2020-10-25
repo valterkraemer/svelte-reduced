@@ -88,48 +88,6 @@ export function to_number(value) {
 	return value === '' ? null : +value;
 }
 
-export function children(element) {
-	return Array.from(element.childNodes);
-}
-
-export function claim_element(nodes, name, attributes, svg) {
-	for (let i = 0; i < nodes.length; i += 1) {
-		const node = nodes[i];
-		if (node.nodeName === name) {
-			let j = 0;
-			const remove = [];
-			while (j < node.attributes.length) {
-				const attribute = node.attributes[j++];
-				if (!attributes[attribute.name]) {
-					remove.push(attribute.name);
-				}
-			}
-			for (let k = 0; k < remove.length; k++) {
-				node.removeAttribute(remove[k]);
-			}
-			return nodes.splice(i, 1)[0];
-		}
-	}
-
-	return svg ? svg_element(name) : element(name);
-}
-
-export function claim_text(nodes, data) {
-	for (let i = 0; i < nodes.length; i += 1) {
-		const node = nodes[i];
-		if (node.nodeType === 3) {
-			node.data = '' + data;
-			return nodes.splice(i, 1)[0];
-		}
-	}
-
-	return text(data);
-}
-
-export function claim_space(nodes) {
-	return claim_text(nodes, ' ');
-}
-
 export function set_data(text, data) {
 	data = '' + data;
 	if (text.wholeText !== data) text.data = data;

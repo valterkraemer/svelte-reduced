@@ -35,8 +35,8 @@ export default class Wrapper {
 			}
 		});
 
-		this.can_use_innerhtml = !renderer.options.hydratable;
-		this.is_static_content = !renderer.options.hydratable;
+		this.can_use_innerhtml = true;
+		this.is_static_content = true;
 
 		block.wrappers.push(this);
 	}
@@ -51,7 +51,7 @@ export default class Wrapper {
 		if (this.parent) this.parent.not_static_content();
 	}
 
-	get_or_create_anchor(block: Block, parent_node: Identifier, parent_nodes: Identifier) {
+	get_or_create_anchor(block: Block, parent_node: Identifier) {
 		// TODO use this in EachBlock and IfBlock — tricky because
 		// children need to be created first
 		const needs_anchor = this.next ? !this.next.is_dom_node() : !parent_node || !this.parent.is_dom_node();
@@ -63,7 +63,6 @@ export default class Wrapper {
 			block.add_element(
 				anchor,
 				x`@empty()`,
-				parent_nodes && x`@empty()`,
 				parent_node as Identifier
 			);
 		}

@@ -7,7 +7,7 @@ import FragmentWrapper from '../Fragment';
 import { escape_html, string_literal } from '../../../utils/stringify';
 import TextWrapper from '../Text';
 import fix_attribute_casing from './fix_attribute_casing';
-import { b, x, p } from 'code-red';
+import { b, x } from 'code-red';
 import { namespaces } from '../../../../utils/namespaces';
 import AttributeWrapper from './Attribute';
 import StyleAttributeWrapper from './StyleAttribute';
@@ -130,37 +130,16 @@ export default class ElementWrapper extends Wrapper {
 	}
 
 	render(block: Block, parent_node: Identifier, parent_nodes: Identifier) {
-		const { renderer } = this;
-
 		if (this.node.name === 'noscript') return;
 
 		const node = this.var;
 		const nodes = parent_nodes && block.get_unique_name(`${this.var.name}_nodes`); // if we're in unclaimable territory, i.e. <head>, parent_nodes is null
-		const children = x`@children(${this.node.name === 'template' ? x`${node}.content` : node})`;
 
 		block.add_variable(node);
 		const render_statement = this.get_render_statement();
 		block.chunks.create.push(
 			b`${node} = ${render_statement};`
 		);
-
-		if (renderer.options.hydratable) {
-			if (parent_nodes) {
-				block.chunks.claim.push(b`
-					${node} = ${this.get_claim_statement(parent_nodes)};
-				`);
-
-				if (!this.void && this.node.children.length > 0) {
-					block.chunks.claim.push(b`
-						var ${nodes} = ${children};
-					`);
-				}
-			} else {
-				block.chunks.claim.push(
-					b`${node} = ${render_statement};`
-				);
-			}
-		}
 
 		if (parent_node) {
 			block.chunks.mount.push(
@@ -225,12 +204,6 @@ export default class ElementWrapper extends Wrapper {
 		this.add_attributes(block);
 		this.add_directives_in_order(block);
 		this.add_classes(block);
-
-		if (nodes && this.renderer.options.hydratable && !this.void) {
-			block.chunks.claim.push(
-				b`${this.node.children.length > 0 ? nodes : children}.forEach(@detach);`
-			);
-		}
 	}
 
 	can_use_textcontent() {
@@ -249,20 +222,6 @@ export default class ElementWrapper extends Wrapper {
 		}
 
 		return x`@element("${name}")`;
-	}
-
-	get_claim_statement(nodes: Identifier) {
-		const attributes = this.node.attributes
-			.filter((attr) => attr.type === 'Attribute')
-			.map((attr) => p`${attr.name}: true`);
-
-		const name = this.node.namespace
-			? this.node.name
-			: this.node.name.toUpperCase();
-
-		const svg = this.node.namespace === namespaces.svg ? 1 : null;
-
-		return x`@claim_element(${nodes}, "${name}", { ${attributes} }, ${svg})`;
 	}
 
 	add_directives_in_order (block: Block) {

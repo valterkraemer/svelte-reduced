@@ -1,14 +1,11 @@
 import { add_render_callback, flush, schedule_update, dirty_components } from './scheduler';
 import { current_component, set_current_component } from './lifecycle';
 import { blank_object, is_empty, is_function, run, run_all, noop } from './utils';
-import { children, detach } from './dom';
 
 interface Fragment {
 	key: string|null;
 	first: null;
 	/* create  */ c: () => void;
-	/* claim   */ l: (nodes: any) => void;
-	/* hydrate */ h: () => void;
 	/* mount   */ m: (target: HTMLElement, anchor: any) => void;
 	/* update  */ p: (ctx: any, dirty: any) => void;
 	/* destroy */ d: (detaching: 0|1) => void;
@@ -37,10 +34,6 @@ export function bind(component, name, callback) {
 
 export function create_component(block) {
 	block && block.c();
-}
-
-export function claim_component(block, parent_nodes) {
-	block && block.l(parent_nodes);
 }
 
 export function mount_component(component, target, anchor) {
@@ -131,15 +124,8 @@ export function init(component, options, instance, create_fragment, not_equal, p
 	$$.fragment = create_fragment ? create_fragment($$.ctx) : false;
 
 	if (options.target) {
-		if (options.hydrate) {
-			const nodes = children(options.target);
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			$$.fragment && $$.fragment!.l(nodes);
-			nodes.forEach(detach);
-		} else {
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			$$.fragment && $$.fragment!.c();
-		}
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		$$.fragment && $$.fragment!.c();
 
 		mount_component(component, options.target, options.anchor);
 		flush();
