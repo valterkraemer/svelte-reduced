@@ -3,5 +3,5 @@
 </script>
 
 <Widget scope="foo">
-	<input autofocus>
+	<input autofocus />
 </Widget>

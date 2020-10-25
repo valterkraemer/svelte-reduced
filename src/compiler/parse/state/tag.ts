@@ -1,7 +1,7 @@
 import read_expression from '../read/expression';
 import read_script from '../read/script';
 import read_style from '../read/style';
-import { decode_character_references, closing_tag_omitted } from '../utils/html';
+import { decode_character_references } from '../utils/html';
 import { is_void } from '../../utils/names';
 import { Parser } from '../index';
 import { Directive, DirectiveType, TemplateNode, Text } from '../../interfaces';
@@ -37,7 +37,7 @@ const specials = new Map([
 export default function tag(parser: Parser) {
 	const start = parser.index++;
 
-	let parent = parser.current();
+	const parent = parser.current();
 
 	if (parser.eat('!--')) {
 		const data = parser.read_until(/-->/);
@@ -115,39 +115,18 @@ export default function tag(parser: Parser) {
 		parser.eat('>', true);
 
 		// close any elements that don't have their own closing tags, e.g. <div><p></div>
-		while (parent.name !== name) {
-			if (parent.type !== 'Element') {
-				const message = parser.last_auto_closed_tag && parser.last_auto_closed_tag.tag === name
-					? `</${name}> attempted to close <${name}> that was already automatically closed by <${parser.last_auto_closed_tag.reason}>`
-					: `</${name}> attempted to close an element that was not open`;
-				parser.error({
-					code: 'invalid-closing-tag',
-					message
-				}, start);
-			}
-
-			parent.end = start;
-			parser.stack.pop();
-
-			parent = parser.current();
+		if (parent.name !== name) {
+			const message = `</${name}> attempted to close an element that was not open`;
+			parser.error({
+				code: 'invalid-closing-tag',
+				message
+			}, start);
 		}
 
 		parent.end = parser.index;
 		parser.stack.pop();
 
-		if (parser.last_auto_closed_tag && parser.stack.length < parser.last_auto_closed_tag.depth) {
-			parser.last_auto_closed_tag = null;
-		}
-
 		return;
-	} else if (closing_tag_omitted(parent.name, name)) {
-		parent.end = start;
-		parser.stack.pop();
-		parser.last_auto_closed_tag = {
-			tag: parent.name,
-			reason: name,
-			depth: parser.stack.length
-		};
 	}
 
 	const unique_names: Set<string> = new Set();
