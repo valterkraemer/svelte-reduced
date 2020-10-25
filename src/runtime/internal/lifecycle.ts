@@ -11,16 +11,8 @@ export function get_current_component() {
 	return current_component;
 }
 
-export function beforeUpdate(fn) {
-	get_current_component().$$.before_update.push(fn);
-}
-
 export function onMount(fn) {
 	get_current_component().$$.on_mount.push(fn);
-}
-
-export function afterUpdate(fn) {
-	get_current_component().$$.after_update.push(fn);
 }
 
 export function onDestroy(fn) {

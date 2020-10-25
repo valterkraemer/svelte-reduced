@@ -1,8 +1,6 @@
 export {
 	onMount,
 	onDestroy,
-	beforeUpdate,
-	afterUpdate,
 	setContext,
 	getContext,
 	tick,

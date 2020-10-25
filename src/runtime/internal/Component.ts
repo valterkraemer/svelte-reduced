@@ -19,11 +19,9 @@ interface T$$ {
 	bound: any;
 	update: () => void;
 	callbacks: any;
-	after_update: any[];
 	props: Record<string, 0 | string>;
 	fragment: null|false|Fragment;
 	not_equal: any;
-	before_update: any[];
 	context: Map<any, any>;
 	on_mount: any[];
 	on_destroy: any[];
@@ -47,7 +45,7 @@ export function claim_component(block, parent_nodes) {
 }
 
 export function mount_component(component, target, anchor) {
-	const { fragment, on_mount, on_destroy, after_update } = component.$$;
+	const { fragment, on_mount, on_destroy } = component.$$;
 
 	fragment && fragment.m(target, anchor);
 
@@ -63,8 +61,6 @@ export function mount_component(component, target, anchor) {
 		}
 		component.$$.on_mount = [];
 	});
-
-	after_update.forEach(add_render_callback);
 }
 
 export function destroy_component(component, detaching) {
@@ -109,8 +105,6 @@ export function init(component, options, instance, create_fragment, not_equal, p
 		// lifecycle
 		on_mount: [],
 		on_destroy: [],
-		before_update: [],
-		after_update: [],
 		context: new Map(parent_component ? parent_component.$$.context : []),
 
 		// everything else
@@ -134,7 +128,6 @@ export function init(component, options, instance, create_fragment, not_equal, p
 
 	$$.update();
 	ready = true;
-	run_all($$.before_update);
 
 	// `false` as a special case of no DOM component
 	$$.fragment = create_fragment ? create_fragment($$.ctx) : false;
