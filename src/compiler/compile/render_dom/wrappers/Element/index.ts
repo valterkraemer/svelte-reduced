@@ -8,7 +8,6 @@ import { escape_html, string_literal } from '../../../utils/stringify';
 import TextWrapper from '../Text';
 import fix_attribute_casing from './fix_attribute_casing';
 import { b, x } from 'code-red';
-import { namespaces } from '../../../../utils/namespaces';
 import AttributeWrapper from './Attribute';
 import StyleAttributeWrapper from './StyleAttribute';
 import Binding from './Binding';
@@ -211,10 +210,6 @@ export default class ElementWrapper extends Wrapper {
 
 	get_render_statement() {
 		const { name, namespace } = this.node;
-
-		if (namespace === namespaces.svg) {
-			return x`@svg_element("${name}")`;
-		}
 
 		if (namespace) {
 			return x`@_document.createElementNS("${namespace}", "${name}")`;

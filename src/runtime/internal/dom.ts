@@ -14,10 +14,6 @@ export function element<K extends keyof HTMLElementTagNameMap>(name: K) {
 	return document.createElement<K>(name);
 }
 
-export function svg_element<K extends keyof SVGElementTagNameMap>(name: K): SVGElement {
-	return document.createElementNS<K>('http://www.w3.org/2000/svg', name);
-}
-
 export function text(data: string) {
 	return document.createTextNode(data);
 }
@@ -61,12 +57,6 @@ export function self(fn) {
 export function attr(node: Element, attribute: string, value?: string) {
 	if (value == null) node.removeAttribute(attribute);
 	else if (node.getAttribute(attribute) !== value) node.setAttribute(attribute, value);
-}
-
-export function set_svg_attributes(node: Element & ElementCSSInlineStyle, attributes: { [x: string]: string }) {
-	for (const key in attributes) {
-		attr(node, key, attributes[key]);
-	}
 }
 
 export function xlink_attr(node, attribute, value) {

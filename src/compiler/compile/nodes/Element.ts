@@ -5,7 +5,6 @@ import Binding from './Binding';
 import EventHandler from './EventHandler';
 import Class from './Class';
 import Text from './Text';
-import { namespaces } from '../../utils/namespaces';
 import map_children from './shared/map_children';
 import { dimensions } from '../../utils/patterns';
 import fuzzymatch from '../../utils/fuzzymatch';
@@ -13,8 +12,6 @@ import list from '../../utils/list';
 import TemplateScope from './shared/TemplateScope';
 import { INode } from './interfaces';
 import Component from '../Component';
-
-const svg = /^(?:altGlyph|altGlyphDef|altGlyphItem|animate|animateColor|animateMotion|animateTransform|circle|clipPath|color-profile|cursor|defs|desc|discard|ellipse|feBlend|feColorMatrix|feComponentTransfer|feComposite|feConvolveMatrix|feDiffuseLighting|feDisplacementMap|feDistantLight|feDropShadow|feFlood|feFuncA|feFuncB|feFuncG|feFuncR|feGaussianBlur|feImage|feMerge|feMergeNode|feMorphology|feOffset|fePointLight|feSpecularLighting|feSpotLight|feTile|feTurbulence|filter|font|font-face|font-face-format|font-face-name|font-face-src|font-face-uri|foreignObject|g|glyph|glyphRef|hatch|hatchpath|hkern|image|line|linearGradient|marker|mask|mesh|meshgradient|meshpatch|meshrow|metadata|missing-glyph|mpath|path|pattern|polygon|polyline|radialGradient|rect|set|solidcolor|stop|svg|switch|symbol|text|textPath|tref|tspan|unknown|use|view|vkern)$/;
 
 const aria_attributes = 'activedescendant atomic autocomplete busy checked colcount colindex colspan controls current describedby details disabled dropeffect errormessage expanded flowto grabbed haspopup hidden invalid keyshortcuts label labelledby level live modal multiline multiselectable orientation owns placeholder posinset pressed readonly relevant required roledescription rowcount rowindex rowspan selected setsize sort valuemax valuemin valuenow valuetext'.split(' ');
 const aria_attribute_set = new Set(aria_attributes);
@@ -89,16 +86,13 @@ const passive_events = new Set([
 	'touchcancel'
 ]);
 
-function get_namespace(parent: Element, element: Element, explicit_namespace: string) {
+function get_namespace(parent: Element, explicit_namespace: string) {
 	const parent_element = parent.find_nearest(/^Element/);
 
 	if (!parent_element) {
-		return explicit_namespace || (svg.test(element.name)
-			? namespaces.svg
-			: null);
+		return explicit_namespace || null;
 	}
 
-	if (svg.test(element.name.toLowerCase())) return namespaces.svg;
 	if (parent_element.name.toLowerCase() === 'foreignobject') return null;
 
 	return parent_element.namespace;
@@ -119,7 +113,7 @@ export default class Element extends Node {
 		super(component, parent, scope, info);
 		this.name = info.name;
 
-		this.namespace = get_namespace(parent, this, component.namespace);
+		this.namespace = get_namespace(parent, component.namespace);
 
 		if (this.name === 'textarea') {
 			if (info.children.length > 0) {
@@ -590,17 +584,7 @@ export default class Element extends Node {
 					});
 				}
 			} else if (dimensions.test(name)) {
-				if (this.name === 'svg' && (name === 'offsetWidth' || name === 'offsetHeight')) {
-					component.error(binding, {
-						code: 'invalid-binding',
-						message: `'${binding.name}' is not a valid binding on <svg>. Use '${name.replace('offset', 'client')}' instead`
-					});
-				} else if (svg.test(this.name)) {
-					component.error(binding, {
-						code: 'invalid-binding',
-						message: `'${binding.name}' is not a valid binding on SVG elements`
-					});
-				} else if (is_void(this.name)) {
+				if (is_void(this.name)) {
 					component.error(binding, {
 						code: 'invalid-binding',
 						message: `'${binding.name}' is not a valid binding on void elements like <${this.name}>. Use a wrapper element instead`
