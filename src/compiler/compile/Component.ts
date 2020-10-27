@@ -1,5 +1,4 @@
 import { walk } from 'estree-walker';
-import Stats from '../Stats';
 import { reserved, is_valid } from '../utils/names';
 import { namespaces } from '../utils/namespaces';
 import create_module from './create_module';
@@ -30,8 +29,6 @@ interface ComponentOptions {
 }
 
 export default class Component {
-	stats: Stats;
-
 	ast: Ast;
 	original_ast: Ast;
 	source: string;
@@ -82,12 +79,10 @@ export default class Component {
 		ast: Ast,
 		source: string,
 		name: string,
-		compile_options: CompileOptions,
-		stats: Stats
+		compile_options: CompileOptions
 	) {
 		this.name = { type: 'Identifier', name };
 
-		this.stats = stats;
 		this.ast = ast;
 		this.source = source;
 		this.compile_options = compile_options;
@@ -288,8 +283,7 @@ export default class Component {
 					reassigned: v.reassigned || false,
 					referenced: v.referenced || false,
 					writable: v.writable || false
-				})),
-			stats: this.stats.render()
+				}))
 		};
 	}
 
