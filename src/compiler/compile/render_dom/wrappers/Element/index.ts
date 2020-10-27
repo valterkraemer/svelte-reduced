@@ -38,7 +38,6 @@ const events = [
 	{
 		event_names: ['change'],
 		filter: (node: Element, _name: string) =>
-			node.name === 'select' ||
 			node.name === 'input' && /radio|checkbox|file/.test(node.get_static_attribute_value('type') as string)
 	},
 	{
@@ -62,8 +61,6 @@ export default class ElementWrapper extends Wrapper {
 	bindings: Binding[];
 	event_handlers: EventHandler[];
 	class_dependencies: string[];
-
-	select_binding_dependencies?: Set<string>;
 
 	var: any;
 	void: boolean;
@@ -115,8 +112,7 @@ export default class ElementWrapper extends Wrapper {
 		if (this.parent) {
 			if (node.bindings.length > 0 ||
 				node.classes.length > 0 ||
-				node.handlers.length > 0 ||
-				this.node.name === 'option'
+				node.handlers.length > 0
 			) {
 				this.parent.cannot_use_innerhtml(); // need to use add_location
 				this.parent.not_static_content();
@@ -317,7 +313,6 @@ export default class ElementWrapper extends Wrapper {
 			.reduce((lhs, rhs) => x`${lhs} || ${rhs}`);
 
 		const should_initialise = (
-			this.node.name === 'select' ||
 			binding_group.bindings.find(binding => {
 				return (
 					binding.node.name === 'indeterminate' ||

@@ -6,7 +6,6 @@ import get_object from '../../../utils/get_object';
 import replace_object from '../../../utils/replace_object';
 import Block from '../../Block';
 import { Node } from 'estree';
-import handle_select_value_binding from './handle_select_value_binding';
 
 export default class BindingWrapper {
 	node: Binding;
@@ -31,8 +30,6 @@ export default class BindingWrapper {
 		block.add_dependencies(dependencies);
 
 		// TODO does this also apply to e.g. `<input type='checkbox' bind:group='foo'>`?
-
-		handle_select_value_binding(this, dependencies);
 
 		this.object = get_object(this.node.expression.node).name;
 
@@ -150,14 +147,6 @@ function get_dom_updater(
 	element: ElementWrapper | InlineComponentWrapper,
 	binding: BindingWrapper
 ) {
-	const { node } = element;
-
-	if (node.name === 'select') {
-		return node.get_static_attribute_value('multiple') === true ?
-			b`@select_options(${element.var}, ${binding.snippet})` :
-			b`@select_option(${element.var}, ${binding.snippet})`;
-	}
-
 	if (binding.node.name === 'value') {
 		return b`@set_input_value(${element.var}, ${binding.snippet});`;
 	}
@@ -208,13 +197,6 @@ function get_value_from_dom(
 ) {
 	const { node } = element;
 	const { name } = binding.node;
-
-	// <select bind:value='selected>
-	if (node.name === 'select') {
-		return node.get_static_attribute_value('multiple') === true ?
-			x`@select_multiple_value(this)` :
-			x`@select_value(this)`;
-	}
 
 	const type = node.get_static_attribute_value('type');
 

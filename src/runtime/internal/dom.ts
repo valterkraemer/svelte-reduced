@@ -57,33 +57,6 @@ export function set_style(node, key, value, important) {
 	node.style.setProperty(key, value, important ? 'important' : '');
 }
 
-export function select_option(select, value) {
-	for (let i = 0; i < select.options.length; i += 1) {
-		const option = select.options[i];
-
-		if (option.__value === value) {
-			option.selected = true;
-			return;
-		}
-	}
-}
-
-export function select_options(select, value) {
-	for (let i = 0; i < select.options.length; i += 1) {
-		const option = select.options[i];
-		option.selected = ~value.indexOf(option.__value);
-	}
-}
-
-export function select_value(select) {
-	const selected_option = select.querySelector(':checked') || select.options[0];
-	return selected_option && selected_option.__value;
-}
-
-export function select_multiple_value(select) {
-	return [].map.call(select.querySelectorAll(':checked'), option => option.__value);
-}
-
 export function toggle_class(element, name, toggle) {
 	element.classList[toggle ? 'add' : 'remove'](name);
 }

@@ -62,22 +62,6 @@ export default class Element extends Node {
 			}
 		}
 
-		if (this.name === 'option') {
-			// Special case — treat these the same way:
-			//   <option>{foo}</option>
-			//   <option value={foo}>{foo}</option>
-			const value_attribute = info.attributes.find(attribute => attribute.name === 'value');
-
-			if (!value_attribute) {
-				info.attributes.push({
-					type: 'Attribute',
-					name: 'value',
-					value: info.children,
-					synthetic: true
-				});
-			}
-		}
-
 		// Binding relies on Attribute, defer its evaluation
 		const order = ['Binding']; // everything else is -1
 		info.attributes.sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type));
@@ -189,8 +173,7 @@ export default class Element extends Node {
 			if (name === 'value') {
 				if (
 					this.name !== 'input' &&
-					this.name !== 'textarea' &&
-					this.name !== 'select'
+					this.name !== 'textarea'
 				) {
 					component.error(binding, {
 						code: 'invalid-binding',
@@ -198,20 +181,7 @@ export default class Element extends Node {
 					});
 				}
 
-				if (this.name === 'select') {
-					const attribute = this.attributes.find(
-						(attribute: Attribute) => attribute.name === 'multiple'
-					);
-
-					if (attribute && !attribute.is_static) {
-						component.error(attribute, {
-							code: 'dynamic-multiple-attribute',
-							message: '\'multiple\' attribute cannot be dynamic if select uses two-way binding'
-						});
-					}
-				} else {
-					check_type_attribute();
-				}
+				check_type_attribute();
 			} else if (name === 'checked' || name === 'indeterminate') {
 				if (this.name !== 'input') {
 					component.error(binding, {

@@ -6,7 +6,6 @@ import { string_literal } from '../../../utils/stringify';
 import { b, x } from 'code-red';
 import Expression from '../../../nodes/shared/Expression';
 import Text from '../../../nodes/Text';
-import handle_select_value_binding from './handle_select_value_binding';
 import { Identifier, Node } from 'estree';
 
 export class BaseAttributeWrapper {
@@ -34,9 +33,7 @@ export default class AttributeWrapper extends BaseAttributeWrapper {
 	metadata: any;
 	name: string;
 	property_name: string;
-	is_indirectly_bound_value: boolean;
 	is_src: boolean;
-	is_select_value_attribute: boolean;
 	is_input_value: boolean;
 	should_cache: boolean;
 	last: Identifier;
@@ -44,43 +41,17 @@ export default class AttributeWrapper extends BaseAttributeWrapper {
 	constructor(parent: ElementWrapper, block: Block, node: Attribute) {
 		super(parent, block, node);
 
-		if (node.dependencies.size > 0) {
-			// special case — <option value={foo}> — see below
-			if (this.parent.node.name === 'option' && node.name === 'value') {
-				let select: ElementWrapper = this.parent;
-				while (select && (select.node.type !== 'Element' || select.node.name !== 'select'))
-					// @ts-ignore todo: doublecheck this, but looks to be correct
-					select = select.parent;
-
-				if (select && select.select_binding_dependencies) {
-					select.select_binding_dependencies.forEach(prop => {
-						this.node.dependencies.forEach((dependency: string) => {
-							this.parent.renderer.component.indirect_dependencies.get(prop).add(dependency);
-						});
-					});
-				}
-			}
-
-			if (node.name === 'value') {
-				handle_select_value_binding(this, node.dependencies);
-			}
-		}
-
 		this.name = fix_attribute_casing(this.node.name);
 		this.metadata = this.get_metadata();
-		this.is_indirectly_bound_value = is_indirectly_bound_value(this);
-		this.property_name = this.is_indirectly_bound_value
-			? '__value'
-			: this.metadata && this.metadata.property_name;
+		this.property_name = this.metadata && this.metadata.property_name;
 		this.is_src = this.name === 'src'; // TODO retire this exception in favour of https://github.com/sveltejs/svelte/issues/3750
-		this.is_select_value_attribute = this.name === 'value' && this.parent.node.name === 'select';
 		this.is_input_value = this.name === 'value' && this.parent.node.name === 'input';
 		this.should_cache = should_cache(this);
 	}
 
 	render(block: Block) {
 		const element = this.parent;
-		const { name, property_name, should_cache, is_indirectly_bound_value } = this;
+		const { name, property_name, should_cache } = this;
 
 		// xlink is a special case... we could maybe extend this to generic
 		// namespaced attributes but I'm not sure that's applicable in
@@ -95,20 +66,7 @@ export default class AttributeWrapper extends BaseAttributeWrapper {
 		let updater;
 		const init = this.get_init(block, value);
 
-		if (this.is_select_value_attribute) {
-			// annoying special case
-			const is_multiple_select = element.node.get_static_attribute_value('multiple');
-
-			if (is_multiple_select) {
-				updater = b`@select_options(${element.var}, ${value});`;
-			} else {
-				updater = b`@select_option(${element.var}, ${value});`;
-			}
-
-			block.chunks.mount.push(b`
-				${updater}
-			`);
-		} else if (this.is_src) {
+		if (this.is_src) {
 			block.chunks.hydrate.push(
 				b`if (${element.var}.src !== ${init}) ${method}(${element.var}, "${name}", ${this.last});`
 			);
@@ -123,16 +81,6 @@ export default class AttributeWrapper extends BaseAttributeWrapper {
 				b`${method}(${element.var}, "${name}", ${init});`
 			);
 			updater = b`${method}(${element.var}, "${name}", ${should_cache ? this.last : value});`;
-		}
-
-		if (is_indirectly_bound_value) {
-			const update_value = b`${element.var}.value = ${element.var}.__value;`;
-			block.chunks.hydrate.push(update_value);
-
-			updater = b`
-				${updater}
-				${update_value};
-			`;
 		}
 
 		if (dependencies.length > 0) {
@@ -277,7 +225,7 @@ const attribute_lookup = {
 	allowfullscreen: { property_name: 'allowFullscreen', applies_to: ['iframe'] },
 	allowpaymentrequest: { property_name: 'allowPaymentRequest', applies_to: ['iframe'] },
 	async: { applies_to: ['script'] },
-	autofocus: { applies_to: ['button', 'input', 'keygen', 'select', 'textarea'] },
+	autofocus: { applies_to: ['button', 'input', 'keygen', 'textarea'] },
 	checked: { applies_to: ['input'] },
 	default: { applies_to: ['track'] },
 	defer: { applies_to: ['script'] },
@@ -288,8 +236,6 @@ const attribute_lookup = {
 			'input',
 			'keygen',
 			'optgroup',
-			'option',
-			'select',
 			'textarea'
 		]
 	},
@@ -297,24 +243,21 @@ const attribute_lookup = {
 	hidden: {},
 	indeterminate: { applies_to: ['input'] },
 	ismap: { property_name: 'isMap', applies_to: ['img'] },
-	multiple: { applies_to: ['input', 'select'] },
+	multiple: { applies_to: ['input'] },
 	nomodule: { property_name: 'noModule', applies_to: ['script'] },
 	novalidate: { property_name: 'noValidate', applies_to: ['form'] },
 	open: { applies_to: ['details', 'dialog'] },
 	readonly: { property_name: 'readOnly', applies_to: ['input', 'textarea'] },
-	required: { applies_to: ['input', 'select', 'textarea'] },
+	required: { applies_to: ['input', 'textarea'] },
 	reversed: { applies_to: ['ol'] },
-	selected: { applies_to: ['option'] },
 	value: {
 		applies_to: [
 			'button',
-			'option',
 			'input',
 			'li',
 			'meter',
 			'progress',
 			'param',
-			'select',
 			'textarea'
 		]
 	}
@@ -356,15 +299,4 @@ const boolean_attribute = new Set([
 
 function should_cache(attribute: AttributeWrapper) {
 	return attribute.is_src || attribute.node.should_cache();
-}
-
-function is_indirectly_bound_value(attribute: AttributeWrapper) {
-	const element = attribute.parent;
-	return attribute.name === 'value' &&
-		(element.node.name === 'option' || // TODO check it's actually bound
-			(element.node.name === 'input' &&
-				element.node.bindings.some(
-					(binding) =>
-						/checked/.test(binding.name)
-				)));
 }

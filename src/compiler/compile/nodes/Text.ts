@@ -9,8 +9,7 @@ import { INode } from './interfaces';
 const elements_without_text = new Set([
 	'datalist',
 	'dl',
-	'optgroup',
-	'select'
+	'optgroup'
 ]);
 
 export default class Text extends Node {
