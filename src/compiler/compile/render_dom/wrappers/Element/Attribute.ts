@@ -1,6 +1,5 @@
 import Attribute from '../../../nodes/Attribute';
 import Block from '../../Block';
-import fix_attribute_casing from './fix_attribute_casing';
 import ElementWrapper from './index';
 import { string_literal } from '../../../utils/stringify';
 import { b, x } from 'code-red';
@@ -41,7 +40,7 @@ export default class AttributeWrapper extends BaseAttributeWrapper {
 	constructor(parent: ElementWrapper, block: Block, node: Attribute) {
 		super(parent, block, node);
 
-		this.name = fix_attribute_casing(this.node.name);
+		this.name = this.node.name;
 		this.metadata = this.get_metadata();
 		this.property_name = this.metadata && this.metadata.property_name;
 		this.is_src = this.name === 'src'; // TODO retire this exception in favour of https://github.com/sveltejs/svelte/issues/3750

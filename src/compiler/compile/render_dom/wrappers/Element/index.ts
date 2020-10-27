@@ -6,7 +6,6 @@ import { is_void } from '../../../../utils/names';
 import FragmentWrapper from '../Fragment';
 import { escape_html, string_literal } from '../../../utils/stringify';
 import TextWrapper from '../Text';
-import fix_attribute_casing from './fix_attribute_casing';
 import { b, x } from 'code-red';
 import AttributeWrapper from './Attribute';
 import StyleAttributeWrapper from './StyleAttribute';
@@ -410,7 +409,7 @@ function to_html(wrappers: Array<ElementWrapper | TextWrapper | MustacheTagWrapp
 			state.quasi.value.raw += `<${wrapper.node.name}`;
 
 			(wrapper as ElementWrapper).attributes.forEach((attr: AttributeWrapper) => {
-				state.quasi.value.raw += ` ${fix_attribute_casing(attr.node.name)}="`;
+				state.quasi.value.raw += ` ${attr.node.name}="`;
 
 				attr.node.chunks.forEach(chunk => {
 					if (chunk.type === 'Text') {
