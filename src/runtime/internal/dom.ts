@@ -31,29 +31,6 @@ export function listen(node: EventTarget, event: string, handler: EventListenerO
 	return () => node.removeEventListener(event, handler, options);
 }
 
-export function prevent_default(fn) {
-	return function(event) {
-		event.preventDefault();
-		// @ts-ignore
-		return fn.call(this, event);
-	};
-}
-
-export function stop_propagation(fn) {
-	return function(event) {
-		event.stopPropagation();
-		// @ts-ignore
-		return fn.call(this, event);
-	};
-}
-
-export function self(fn) {
-	return function(event) {
-		// @ts-ignore
-		if (event.target === this) fn.call(this, event);
-	};
-}
-
 export function attr(node: Element, attribute: string, value?: string) {
 	if (value == null) node.removeAttribute(attribute);
 	else if (node.getAttribute(attribute) !== value) node.setAttribute(attribute, value);

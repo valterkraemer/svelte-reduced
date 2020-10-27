@@ -225,8 +225,7 @@ export default class InlineComponentWrapper extends Wrapper {
 
 		const munged_handlers = this.node.handlers.map(handler => {
 			const event_handler = new EventHandler(handler, this);
-			let snippet = event_handler.get_snippet(block);
-			if (handler.modifiers.has('once')) snippet = x`@once(${snippet})`;
+			const snippet = event_handler.get_snippet(block);
 
 			return b`${name}.$on("${handler.name}", ${snippet});`;
 		});

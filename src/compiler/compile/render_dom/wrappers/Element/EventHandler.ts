@@ -1,10 +1,8 @@
 import EventHandler from '../../../nodes/EventHandler';
 import Wrapper from '../shared/Wrapper';
 import Block from '../../Block';
-import { b, x, p } from 'code-red';
+import { b, x } from 'code-red';
 import { Expression } from 'estree';
-
-const TRUE = x`true`;
 
 export default class EventHandlerWrapper {
 	node: EventHandler;
@@ -36,26 +34,9 @@ export default class EventHandlerWrapper {
 	}
 
 	render(block: Block, target: string | Expression) {
-		let snippet = this.get_snippet(block);
-
-		if (this.node.modifiers.has('preventDefault')) snippet = x`@prevent_default(${snippet})`;
-		if (this.node.modifiers.has('stopPropagation')) snippet = x`@stop_propagation(${snippet})`;
-		if (this.node.modifiers.has('self')) snippet = x`@self(${snippet})`;
+		const snippet = this.get_snippet(block);
 
 		const args = [];
-
-		const opts = ['nonpassive', 'passive', 'once', 'capture'].filter(mod => this.node.modifiers.has(mod));
-		if (opts.length) {
-			if (opts.length === 1 && opts[0] === 'capture') {
-				args.push(TRUE);
-			} else {
-				args.push(x`{ ${ opts.map(opt =>
-					opt === 'nonpassive'
-						? p`passive: false`
-						: p`${opt}: true`
-				) } }`);
-			}
-		}
 
 		block.event_listeners.push(
 			x`@listen(${target}, "${this.node.name}", ${snippet}, ${args})`

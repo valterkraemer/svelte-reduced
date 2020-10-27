@@ -260,7 +260,7 @@ function read_attribute(parser: Parser, unique_names: Set<string>) {
 	}
 
 	if (type) {
-		const [directive_name, ...modifiers] = name.slice(colon_index + 1).split('|');
+		const directive_name = name.slice(colon_index + 1);
 
 		if (type === 'Binding' && directive_name !== 'this') {
 			check_unique(directive_name);
@@ -282,7 +282,6 @@ function read_attribute(parser: Parser, unique_names: Set<string>) {
 			end,
 			type,
 			name: directive_name,
-			modifiers,
 			expression: (value[0] && value[0].expression) || null
 		};
 

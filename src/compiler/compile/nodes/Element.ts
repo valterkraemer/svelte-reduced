@@ -8,7 +8,6 @@ import Text from './Text';
 import map_children from './shared/map_children';
 import { dimensions } from '../../utils/patterns';
 import fuzzymatch from '../../utils/fuzzymatch';
-import list from '../../utils/list';
 import TemplateScope from './shared/TemplateScope';
 import { INode } from './interfaces';
 import Component from '../Component';
@@ -67,24 +66,6 @@ const a11y_labelable = new Set([
 ]);
 
 const invisible_elements = new Set(['meta', 'html', 'script', 'style']);
-
-const valid_modifiers = new Set([
-	'preventDefault',
-	'stopPropagation',
-	'capture',
-	'once',
-	'passive',
-	'nonpassive',
-	'self'
-]);
-
-const passive_events = new Set([
-	'wheel',
-	'touchstart',
-	'touchmove',
-	'touchend',
-	'touchcancel'
-]);
 
 function get_namespace(parent: Element, explicit_namespace: string) {
 	const parent_element = parent.find_nearest(/^Element/);
@@ -250,7 +231,6 @@ export default class Element extends Node {
 		this.validate_special_cases();
 		this.validate_bindings();
 		this.validate_content();
-		this.validate_event_handlers();
 	}
 
 	validate_attributes() {
@@ -631,56 +611,6 @@ export default class Element extends Node {
 				message: `A11y: <${this.name}> element should have child content`
 			});
 		}
-	}
-
-	validate_event_handlers() {
-		const { component } = this;
-
-		this.handlers.forEach(handler => {
-			if (handler.modifiers.has('passive') && handler.modifiers.has('preventDefault')) {
-				component.error(handler, {
-					code: 'invalid-event-modifier',
-					message: 'The \'passive\' and \'preventDefault\' modifiers cannot be used together'
-				});
-			}
-
-			if (handler.modifiers.has('passive') && handler.modifiers.has('nonpassive')) {
-				component.error(handler, {
-					code: 'invalid-event-modifier',
-					message: 'The \'passive\' and \'nonpassive\' modifiers cannot be used together'
-				});
-			}
-
-			handler.modifiers.forEach(modifier => {
-				if (!valid_modifiers.has(modifier)) {
-					component.error(handler, {
-						code: 'invalid-event-modifier',
-						message: `Valid event modifiers are ${list(Array.from(valid_modifiers))}`
-					});
-				}
-
-				if (modifier === 'passive') {
-					if (passive_events.has(handler.name)) {
-						if (handler.can_make_passive) {
-							component.warn(handler, {
-								code: 'redundant-event-modifier',
-								message: 'Touch event handlers that don\'t use the \'event\' object are passive by default'
-							});
-						}
-					} else {
-						component.warn(handler, {
-							code: 'redundant-event-modifier',
-							message: 'The passive modifier only works with wheel and touch events'
-						});
-					}
-				}
-			});
-
-			if (passive_events.has(handler.name) && handler.can_make_passive && !handler.modifiers.has('preventDefault') && !handler.modifiers.has('nonpassive')) {
-				// touch/wheel events should be passive by default
-				handler.modifiers.add('passive');
-			}
-		});
 	}
 
 	add_css_class() {

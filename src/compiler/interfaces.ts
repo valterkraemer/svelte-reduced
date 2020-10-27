@@ -32,7 +32,6 @@ interface BaseDirective extends BaseNode {
 	type: DirectiveType;
 	expression: null | Node;
 	name: string;
-	modifiers: string[];
 }
 
 export type Directive = BaseDirective;
