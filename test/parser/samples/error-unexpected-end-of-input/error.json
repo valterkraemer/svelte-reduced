@@ -1,10 +1,4 @@
 {
 	"code": "unclosed-element",
-	"message": "<div> was left open",
-	"start": {
-		"line": 1,
-		"column": 0,
-		"character": 0
-	},
-	"pos": 0
+	"message": "<div> was left open"
 }

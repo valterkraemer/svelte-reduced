@@ -52,21 +52,21 @@ export default function tag(parser: Parser) {
 				parser.error({
 					code: `invalid-${slug}-content`,
 					message: `<${name}> cannot have children`
-				}, parser.current().children[0].start);
+				});
 			}
 		} else {
 			if (name in parser.meta_tags) {
 				parser.error({
 					code: `duplicate-${slug}`,
 					message: `A component can only have one <${name}> tag`
-				}, start);
+				});
 			}
 
 			if (parser.stack.length > 1) {
 				parser.error({
 					code: `invalid-${slug}-placement`,
 					message: `<${name}> tags cannot be inside elements or blocks`
-				}, start);
+				});
 			}
 
 			parser.meta_tags[name] = true;
@@ -94,7 +94,7 @@ export default function tag(parser: Parser) {
 			parser.error({
 				code: 'invalid-void-content',
 				message: `<${name}> is a void element and cannot have children, or a closing tag`
-			}, start);
+			});
 		}
 
 		parser.eat('>', true);
@@ -105,7 +105,7 @@ export default function tag(parser: Parser) {
 			parser.error({
 				code: 'invalid-closing-tag',
 				message
-			}, start);
+			});
 		}
 
 		parent.end = parser.index;
@@ -164,8 +164,6 @@ export default function tag(parser: Parser) {
 }
 
 function read_tag_name(parser: Parser) {
-	const start = parser.index;
-
 	const name = parser.read_until(/(\s|\/|>)/);
 
 	if (meta_tags.has(name)) return name;
@@ -176,14 +174,14 @@ function read_tag_name(parser: Parser) {
 		parser.error({
 			code: 'invalid-tag-name',
 			message
-		}, start);
+		});
 	}
 
 	if (!valid_tag_name.test(name)) {
 		parser.error({
 			code: 'invalid-tag-name',
 			message: 'Expected valid tag name'
-		}, start);
+		});
 	}
 
 	return name;
@@ -197,7 +195,7 @@ function read_attribute(parser: Parser, unique_names: Set<string>) {
 			parser.error({
 				code: 'duplicate-attribute',
 				message: 'Attributes need to be unique'
-			}, start);
+			});
 		}
 		unique_names.add(name);
 	}
@@ -252,7 +250,7 @@ function read_attribute(parser: Parser, unique_names: Set<string>) {
 		parser.error({
 			code: 'unexpected-token',
 			message: 'Expected ='
-		}, parser.index);
+		});
 	}
 
 	if (type) {
@@ -269,7 +267,7 @@ function read_attribute(parser: Parser, unique_names: Set<string>) {
 				parser.error({
 					code: 'invalid-directive-value',
 					message: 'Directive value must be a JavaScript expression enclosed in curly braces'
-				}, value[0].start);
+				});
 			}
 		}
 

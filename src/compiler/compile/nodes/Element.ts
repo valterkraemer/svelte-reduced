@@ -44,7 +44,7 @@ export default class Element extends Node {
 			if (info.children.length > 0) {
 				const value_attribute = info.attributes.find(node => node.name === 'value');
 				if (value_attribute) {
-					component.error(value_attribute, {
+					component.error({
 						code: 'textarea-duplicate-value',
 						message: 'A <textarea> can have either a value attribute or (equivalently) child content, but not both'
 					});
@@ -114,7 +114,7 @@ export default class Element extends Node {
 			const name = attribute.name.toLowerCase();
 
 			if (/(^[0-9-.])|[\^$@%&#?!|()[\]{}^*+~;]/.test(name)) {
-				component.error(attribute, {
+				component.error({
 					code: 'illegal-attribute',
 					message: `'${name}' is not a valid attribute name`
 				});
@@ -135,7 +135,7 @@ export default class Element extends Node {
 			if (!attribute) return null;
 
 			if (!attribute.is_static) {
-				component.error(attribute, {
+				component.error({
 					code: 'invalid-type',
 					message: '\'type\' attribute cannot be dynamic if input uses two-way binding'
 				});
@@ -144,7 +144,7 @@ export default class Element extends Node {
 			const value = attribute.get_static_value();
 
 			if (value === true) {
-				component.error(attribute, {
+				component.error({
 					code: 'missing-type',
 					message: '\'type\' attribute must be specified'
 				});
@@ -161,7 +161,7 @@ export default class Element extends Node {
 					this.name !== 'input' &&
 					this.name !== 'textarea'
 				) {
-					component.error(binding, {
+					component.error({
 						code: 'invalid-binding',
 						message: `'value' is not a valid binding on <${this.name}> elements`
 					});
@@ -170,7 +170,7 @@ export default class Element extends Node {
 				check_type_attribute();
 			} else if (name === 'checked' || name === 'indeterminate') {
 				if (this.name !== 'input') {
-					component.error(binding, {
+					component.error({
 						code: 'invalid-binding',
 						message: `'${name}' is not a valid binding on <${this.name}> elements`
 					});
@@ -181,11 +181,11 @@ export default class Element extends Node {
 				if (type !== 'checkbox') {
 					let message = `'${name}' binding can only be used with <input type="checkbox">`;
 					if (type === 'radio') message += ' — for <input type="radio">, use \'group\' binding';
-					component.error(binding, { code: 'invalid-binding', message });
+					component.error({ code: 'invalid-binding', message });
 				}
 			} else if (name === 'files') {
 				if (this.name !== 'input') {
-					component.error(binding, {
+					component.error({
 						code: 'invalid-binding',
 						message: `'files' is not a valid binding on <${this.name}> elements`
 					});
@@ -194,7 +194,7 @@ export default class Element extends Node {
 				const type = check_type_attribute();
 
 				if (type !== 'file') {
-					component.error(binding, {
+					component.error({
 						code: 'invalid-binding',
 						message: '\'files\' binding can only be used with <input type="file">'
 					});
@@ -202,14 +202,14 @@ export default class Element extends Node {
 
 			} else if (name === 'open') {
 				if (this.name !== 'details') {
-					component.error(binding, {
+					component.error({
 						code: 'invalid-binding',
 						message: `'${name}' binding can only be used with <details>`
 					});
 				}
 			} else if (dimensions.test(name)) {
 				if (is_void(this.name)) {
-					component.error(binding, {
+					component.error({
 						code: 'invalid-binding',
 						message: `'${binding.name}' is not a valid binding on void elements like <${this.name}>. Use a wrapper element instead`
 					});
@@ -223,18 +223,18 @@ export default class Element extends Node {
 				);
 
 				if (!contenteditable) {
-					component.error(binding, {
+					component.error({
 						code: 'missing-contenteditable-attribute',
 						message: '\'contenteditable\' attribute is required for textContent and innerHTML two-way bindings'
 					});
 				} else if (contenteditable && !contenteditable.is_static) {
-					component.error(contenteditable, {
+					component.error({
 						code: 'dynamic-contenteditable-attribute',
 						message: '\'contenteditable\' attribute cannot be dynamic if element uses two-way binding'
 					});
 				}
 			} else {
-				component.error(binding, {
+				component.error({
 					code: 'invalid-binding',
 					message: `'${binding.name}' is not a valid binding`
 				});

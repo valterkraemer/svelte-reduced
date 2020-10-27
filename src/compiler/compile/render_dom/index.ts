@@ -19,7 +19,7 @@ export default function dom(
 
 	const body = [];
 
-	const css = component.stylesheet.render(options.filename, true);
+	const css = component.stylesheet.render(true);
 	const styles = css.code;
 
 	const add_css = component.get_unique_name('add_css');

@@ -103,14 +103,12 @@ export default [
 			{
 				file: 'compiler.js',
 				format: is_publish ? 'umd' : 'cjs',
-				name: 'svelte',
-				sourcemap: true,
+				name: 'svelte'
 			},
 			{
 				file: 'compiler.mjs',
 				format: 'esm',
-				name: 'svelte',
-				sourcemap: true,
+				name: 'svelte'
 			}
 		],
 		external: is_publish

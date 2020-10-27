@@ -5,7 +5,7 @@ import { Node, Program } from 'estree';
 
 const script_closing_tag = '</script>';
 
-function get_context(parser: Parser, attributes: any[], start: number): string {
+function get_context(parser: Parser, attributes: any[]): string {
 	const context = attributes.find(attribute => attribute.name === 'context');
 	if (!context) return 'default';
 
@@ -13,7 +13,7 @@ function get_context(parser: Parser, attributes: any[], start: number): string {
 		parser.error({
 			code: 'invalid-script',
 			message: 'context attribute must be static'
-		}, start);
+		});
 	}
 
 	const value = context.value[0].data;
@@ -22,7 +22,7 @@ function get_context(parser: Parser, attributes: any[], start: number): string {
 		parser.error({
 			code: 'invalid-script',
 			message: 'If the context attribute is supplied, its value must be "module"'
-		}, context.start);
+		});
 	}
 
 	return value;
@@ -56,7 +56,7 @@ export default function read_script(parser: Parser, start: number, attributes: N
 		type: 'Script',
 		start,
 		end: parser.index,
-		context: get_context(parser, attributes, start),
+		context: get_context(parser, attributes),
 		content: ast
 	};
 }

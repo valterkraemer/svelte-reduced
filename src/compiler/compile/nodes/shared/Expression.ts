@@ -75,7 +75,7 @@ export default class Expression {
 				}
 
 				if (is_reference(node, parent)) {
-					const { name, nodes } = flatten_reference(node);
+					const { name } = flatten_reference(node);
 					references.add(name);
 
 					if (scope.has(name)) return;
@@ -99,7 +99,7 @@ export default class Expression {
 						}
 
 						component.add_reference(name);
-						component.warn_if_undefined(name, nodes[0]);
+						component.warn_if_undefined(name);
 					}
 
 					this.skip();

@@ -31,7 +31,6 @@ interface ComponentOptions {
 export default class Component {
 	ast: Ast;
 	original_ast: Ast;
-	source: string;
 	name: Identifier;
 	compile_options: CompileOptions;
 	fragment: Fragment;
@@ -84,7 +83,6 @@ export default class Component {
 		this.name = { type: 'Identifier', name };
 
 		this.ast = ast;
-		this.source = source;
 		this.compile_options = compile_options;
 
 		// the instance JS gets mutated, so we park
@@ -254,17 +252,7 @@ export default class Component {
 
 			css = result.css;
 
-			js = print(program, {
-				sourceMapSource: compile_options.filename
-			});
-
-			js.map.sources = [
-				compile_options.filename ? get_relative_path(compile_options.outputFilename || '', compile_options.filename) : null
-			];
-
-			js.map.sourcesContent = [
-				this.source
-			];
+			js = print(program);
 		}
 
 		return {
@@ -333,10 +321,6 @@ export default class Component {
 	}
 
 	error(
-		pos: {
-			start: number;
-			end: number;
-		},
 		e: {
 			code: string;
 			message: string;
@@ -345,9 +329,6 @@ export default class Component {
 		error(e.message, {
 			name: 'ValidationError',
 			code: e.code,
-			source: this.source,
-			start: pos.start,
-			end: pos.end,
 			filename: this.compile_options.filename
 		});
 	}
@@ -358,7 +339,7 @@ export default class Component {
 
 	extract_exports(node) {
 		if (node.type === 'ExportDefaultDeclaration') {
-			this.error(node, {
+			this.error({
 				code: 'default-export',
 				message: 'A component cannot have a default export'
 			});
@@ -366,7 +347,7 @@ export default class Component {
 
 		if (node.type === 'ExportNamedDeclaration') {
 			if (node.source) {
-				this.error(node, {
+				this.error({
 					code: 'not-implemented',
 					message: 'A component currently cannot have an export ... from'
 				});
@@ -424,7 +405,7 @@ export default class Component {
 
 		scope.declarations.forEach((node, name) => {
 			if (name[0] === '$') {
-				this.error(node as any, {
+				this.error({
 					code: 'illegal-declaration',
 					message: 'The $ prefix is reserved, and cannot be used for variable and import names'
 				});
@@ -440,9 +421,9 @@ export default class Component {
 			});
 		});
 
-		globals.forEach((node, name) => {
+		globals.forEach((_node, name) => {
 			if (name[0] === '$') {
-				this.error(node as any, {
+				this.error({
 					code: 'illegal-subscription',
 					message: 'Cannot reference store value inside <script context="module">'
 				});
@@ -503,7 +484,7 @@ export default class Component {
 
 		instance_scope.declarations.forEach((node, name) => {
 			if (name[0] === '$') {
-				this.error(node as any, {
+				this.error({
 					code: 'illegal-declaration',
 					message: 'The $ prefix is reserved, and cannot be used for variable and import names'
 				});
@@ -522,7 +503,7 @@ export default class Component {
 			this.node_for_declaration.set(name, node);
 		});
 
-		globals.forEach((node, name) => {
+		globals.forEach((_node, name) => {
 			if (this.var_lookup.has(name)) return;
 
 			if (this.injected_reactive_declaration_vars.has(name)) {
@@ -540,7 +521,7 @@ export default class Component {
 				});
 			} else if (name[0] === '$') {
 				if (name === '$' || name[1] === '$') {
-					this.error(node as any, {
+					this.error({
 						code: 'illegal-global',
 						message: `${name} is an illegal variable name`
 					});
@@ -687,11 +668,11 @@ export default class Component {
 
 			if (name[0] === '$') {
 				if (!scope.has(name)) {
-					this.warn_if_undefined(name, object);
+					this.warn_if_undefined(name);
 				}
 
 				if (name[1] !== '$' && scope.has(name.slice(1)) && scope.find_owner(name.slice(1)) !== this.instance_scope) {
-					this.error(node, {
+					this.error({
 						code: 'contextual-store',
 						message: 'Stores must be declared at the top level of the component (this may change in a future version of Svelte)'
 					});
@@ -758,7 +739,7 @@ export default class Component {
 
 									if (variable.export_name) {
 										// TODO is this still true post-#3539?
-										component.error(declarator as any, {
+										component.error({
 											code: 'destructured-prop',
 											message: 'Cannot declare props in destructured declaration'
 										});
@@ -1089,9 +1070,7 @@ export default class Component {
 		}, []));
 
 		if (cycle && cycle.length) {
-			const declarationList = lookup.get(cycle[0]);
-			const declaration = declarationList[0];
-			this.error(declaration.node, {
+			this.error({
 				code: 'cyclical-reactive-declaration',
 				message: `Cyclical dependency detected: ${cycle.join(' → ')}`
 			});
@@ -1113,10 +1092,10 @@ export default class Component {
 		unsorted_reactive_declarations.forEach(add_declaration);
 	}
 
-	warn_if_undefined(name: string, node) {
+	warn_if_undefined(name: string) {
 		if (name[0] === '$') {
 			if (name === '$' || name[1] === '$' && !is_reserved_keyword(name)) {
-				this.error(node, {
+				this.error({
 					code: 'illegal-global',
 					message: `${name} is an illegal variable name`
 				});
@@ -1136,23 +1115,4 @@ function process_component_options(component: Component) {
 	};
 
 	return component_options;
-}
-
-function get_relative_path(from: string, to: string) {
-	const from_parts = from.split(/[/\\]/);
-	const to_parts = to.split(/[/\\]/);
-
-	from_parts.pop(); // get dirname
-
-	while (from_parts[0] === to_parts[0]) {
-		from_parts.shift();
-		to_parts.shift();
-	}
-
-	if (from_parts.length) {
-		let i = from_parts.length;
-		while (i--) from_parts[i] = '..';
-	}
-
-	return from_parts.concat(to_parts).join('/');
 }

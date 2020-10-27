@@ -23,7 +23,7 @@ export default function read_expression(parser: Parser): Node {
 				parser.error({
 					code: 'unexpected-token',
 					message: 'Expected )'
-				}, index);
+				});
 			}
 
 			index += 1;

@@ -1,10 +1,4 @@
 {
 	"code": "parse-error",
-	"message": "Assigning to rvalue",
-	"start": {
-		"line": 1,
-		"column": 1,
-		"character": 1
-	},
-	"pos": 1
+	"message": "Assigning to rvalue"
 }

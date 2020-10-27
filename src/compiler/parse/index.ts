@@ -52,7 +52,7 @@ export class Parser {
 			this.error({
 				code: `unclosed-${slug}`,
 				message: `${type} was left open`
-			}, current.start);
+			});
 		}
 
 		if (state !== fragment) {
@@ -84,15 +84,13 @@ export class Parser {
 		this.error({
 			code: 'parse-error',
 			message: err.message.replace(/ \(\d+:\d+\)$/, '')
-		}, err.pos);
+		});
 	}
 
-	error({ code, message }: { code: string; message: string }, index = this.index) {
+	error({ code, message }: { code: string; message: string }) {
 		error(message, {
 			name: 'ParseError',
 			code,
-			source: this.template,
-			start: index,
 			filename: this.filename
 		});
 	}
@@ -140,8 +138,6 @@ export class Parser {
 	}
 
 	read_identifier(allow_reserved = false) {
-		const start = this.index;
-
 		let i = this.index;
 
 		const code = full_char_code_at(this.template, i);
@@ -162,7 +158,7 @@ export class Parser {
 			this.error({
 				code: 'unexpected-reserved-word',
 				message: `'${identifier}' is a reserved word in JavaScript and cannot be used here`
-			}, start);
+			});
 		}
 
 		return identifier;
@@ -211,7 +207,7 @@ export default function parse(
 		parser.error({
 			code: 'duplicate-style',
 			message: 'You can only have one top-level <style> tag per component'
-		}, parser.css[1].start);
+		});
 	}
 
 	const instance_scripts = parser.js.filter(script => script.context === 'default');
@@ -221,14 +217,14 @@ export default function parse(
 		parser.error({
 			code: 'invalid-script',
 			message: 'A component can only have one instance-level <script> element'
-		}, instance_scripts[1].start);
+		});
 	}
 
 	if (module_scripts.length > 1) {
 		parser.error({
 			code: 'invalid-script',
 			message: 'A component can only have one <script context="module"> element'
-		}, module_scripts[1].start);
+		});
 	}
 
 	return {

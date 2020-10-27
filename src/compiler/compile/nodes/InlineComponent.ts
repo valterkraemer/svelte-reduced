@@ -22,7 +22,7 @@ export default class InlineComponent extends Node {
 		super(component, parent, scope, info);
 
 		const name = info.name.split('.')[0]; // accommodate namespaces
-		component.warn_if_undefined(name, info);
+		component.warn_if_undefined(name);
 		component.add_reference(name);
 
 		this.name = info.name;
@@ -41,7 +41,7 @@ export default class InlineComponent extends Node {
 					break;
 
 				case 'Class':
-					component.error(node, {
+					component.error({
 						code: 'invalid-class',
 						message: 'Classes can only be applied to DOM elements, not components'
 					});

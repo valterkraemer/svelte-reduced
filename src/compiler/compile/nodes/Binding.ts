@@ -18,7 +18,7 @@ export default class Binding extends Node {
 		super(component, parent, scope, info);
 
 		if (info.expression.type !== 'Identifier' && info.expression.type !== 'MemberExpression') {
-			component.error(info, {
+			component.error({
 				code: 'invalid-directive-value',
 				message: 'Can only bind to an identifier (e.g. `foo`) or a member expression (e.g. `foo.bar` or `foo[baz]`)'
 			});
@@ -34,7 +34,7 @@ export default class Binding extends Node {
 
 		// make sure we track this as a mutable ref
 		if (scope.is_let(name)) {
-			component.error(this, {
+			component.error({
 				code: 'invalid-binding',
 				message: 'Cannot bind to a variable declared with the let: directive'
 			});
@@ -48,14 +48,14 @@ export default class Binding extends Node {
 		} else {
 			const variable = component.var_lookup.get(name);
 
-			if (!variable || variable.global) component.error(this.expression.node, {
+			if (!variable || variable.global) component.error({
 				code: 'binding-undeclared',
 				message: `${name} is not declared`
 			});
 
 			variable[this.expression.node.type === 'MemberExpression' ? 'mutated' : 'reassigned'] = true;
 
-			if (info.expression.type === 'Identifier' && !variable.writable) component.error(this.expression.node, {
+			if (info.expression.type === 'Identifier' && !variable.writable) component.error({
 				code: 'invalid-binding',
 				message: 'Cannot bind to a variable which is not writable'
 			});

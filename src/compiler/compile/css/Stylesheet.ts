@@ -360,19 +360,12 @@ export default class Stylesheet {
 		});
 	}
 
-	render(file: string, should_transform_selectors: boolean) {
+	render(should_transform_selectors: boolean) {
 		if (!this.has_styles) {
 			return { code: null, map: null };
 		}
 
 		const code = new MagicString(this.source);
-
-		walk(this.ast.css as any, {
-			enter: (node: any) => {
-				code.addSourcemapLocation(node.start);
-				code.addSourcemapLocation(node.end);
-			}
-		});
 
 		if (should_transform_selectors) {
 			const max = Math.max(...this.children.map(rule => rule.get_max_amount_class_specificity_increased()));
@@ -393,12 +386,7 @@ export default class Stylesheet {
 		code.remove(c, this.source.length);
 
 		return {
-			code: code.toString(),
-			map: code.generateMap({
-				includeContent: true,
-				source: this.filename,
-				file
-			})
+			code: code.toString()
 		};
 	}
 

@@ -1,5 +1,4 @@
 import { Node, Program } from 'estree';
-import { SourceMap } from 'magic-string';
 
 interface BaseNode {
 	start: number;
@@ -86,8 +85,6 @@ export interface CompileOptions {
 	filename?: string;
 	generate?: 'dom' | false;
 
-	outputFilename?: string;
-	cssOutputFilename?: string;
 	sveltePath?: string;
 
 	accessors?: boolean;
@@ -124,5 +121,4 @@ export interface Var {
 
 export interface CssResult {
 	code: string;
-	map: SourceMap;
 }
