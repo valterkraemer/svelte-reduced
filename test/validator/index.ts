@@ -63,37 +63,4 @@ describe('validate', () => {
 			}
 		});
 	});
-
-	it('errors if options.name is illegal', () => {
-		assert.throws(() => {
-			svelte.compile('<div></div>', {
-				name: 'not.valid',
-				generate: false
-			});
-		}, /options\.name must be a valid identifier/);
-	});
-
-	it('warns if options.name is not capitalised', () => {
-		const { warnings } = svelte.compile('<div></div>', {
-			name: 'lowercase',
-			generate: false
-		});
-
-		assert.deepEqual(warnings.map(w => ({
-			code: w.code,
-			message: w.message
-		})), [{
-			code: 'options-lowercase-name',
-			message: 'options.name should be capitalised'
-		}]);
-	});
-
-	it('does not warn if options.name begins with non-alphabetic character', () => {
-		const { warnings } = svelte.compile('<div></div>', {
-			name: '_',
-			generate: false
-		});
-
-		assert.deepEqual(warnings, []);
-	});
 });
