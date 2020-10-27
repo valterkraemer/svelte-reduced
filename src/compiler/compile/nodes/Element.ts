@@ -7,65 +7,9 @@ import Class from './Class';
 import Text from './Text';
 import map_children from './shared/map_children';
 import { dimensions } from '../../utils/patterns';
-import fuzzymatch from '../../utils/fuzzymatch';
 import TemplateScope from './shared/TemplateScope';
 import { INode } from './interfaces';
 import Component from '../Component';
-
-const aria_attributes = 'activedescendant atomic autocomplete busy checked colcount colindex colspan controls current describedby details disabled dropeffect errormessage expanded flowto grabbed haspopup hidden invalid keyshortcuts label labelledby level live modal multiline multiselectable orientation owns placeholder posinset pressed readonly relevant required roledescription rowcount rowindex rowspan selected setsize sort valuemax valuemin valuenow valuetext'.split(' ');
-const aria_attribute_set = new Set(aria_attributes);
-
-const aria_roles = 'alert alertdialog application article banner blockquote button caption cell checkbox code columnheader combobox complementary contentinfo definition deletion dialog directory document emphasis feed figure form generic grid gridcell group heading img link list listbox listitem log main marquee math meter menu menubar menuitem menuitemcheckbox menuitemradio navigation none note option paragraph presentation progressbar radio radiogroup region row rowgroup rowheader scrollbar search searchbox separator slider spinbutton status strong subscript superscript switch tab table tablist tabpanel term textbox time timer toolbar tooltip tree treegrid treeitem'.split(' ');
-const aria_role_set = new Set(aria_roles);
-
-const a11y_required_attributes = {
-	a: ['href'],
-	area: ['alt', 'aria-label', 'aria-labelledby'],
-
-	// html-has-lang
-	html: ['lang'],
-
-	// iframe-has-title
-	iframe: ['title'],
-	img: ['alt'],
-	object: ['title', 'aria-label', 'aria-labelledby']
-};
-
-const a11y_distracting_elements = new Set([
-	'blink',
-	'marquee'
-]);
-
-const a11y_required_content = new Set([
-	// anchor-has-content
-	'a',
-
-	// heading-has-content
-	'h1',
-	'h2',
-	'h3',
-	'h4',
-	'h5',
-	'h6'
-]);
-
-const a11y_no_onchange = new Set([
-	'select',
-	'option'
-]);
-
-const a11y_labelable = new Set([
-	'button',
-	'input',
-	'keygen',
-	'meter',
-	'output',
-	'progress',
-	'select',
-	'textarea'
-]);
-
-const invisible_elements = new Set(['meta', 'html', 'script', 'style']);
 
 function get_namespace(parent: Element, explicit_namespace: string) {
 	const parent_element = parent.find_nearest(/^Element/);
@@ -180,57 +124,8 @@ export default class Element extends Node {
 			});
 		}
 
-		if (a11y_distracting_elements.has(this.name)) {
-			// no-distracting-elements
-			this.component.warn(this, {
-				code: 'a11y-distracting-elements',
-				message: `A11y: Avoid <${this.name}> elements`
-			});
-		}
-
-		if (this.name === 'figcaption') {
-			let { parent } = this;
-			let is_figure_parent = false;
-
-			while (parent) {
-				if ((parent as Element).name === 'figure') {
-					is_figure_parent = true;
-					break;
-				}
-				if (parent.type === 'Element') {
-					break;
-				}
-				parent = parent.parent;
-			}
-
-			if (!is_figure_parent) {
-				this.component.warn(this, {
-					code: 'a11y-structure',
-					message: 'A11y: <figcaption> must be an immediate child of <figure>'
-				});
-			}
-		}
-
-		if (this.name === 'figure') {
-			const children = this.children.filter(node => {
-				if (node.type === 'Text') return /\S/.test(node.data);
-				return true;
-			});
-
-			const index = children.findIndex(child => (child as Element).name === 'figcaption');
-
-			if (index !== -1 && (index !== 0 && index !== children.length - 1)) {
-				this.component.warn(children[index], {
-					code: 'a11y-structure',
-					message: 'A11y: <figcaption> must be first or last child of <figure>'
-				});
-			}
-		}
-
 		this.validate_attributes();
-		this.validate_special_cases();
 		this.validate_bindings();
-		this.validate_content();
 	}
 
 	validate_attributes() {
@@ -240,98 +135,6 @@ export default class Element extends Node {
 
 		this.attributes.forEach(attribute => {
 			const name = attribute.name.toLowerCase();
-
-			// aria-props
-			if (name.startsWith('aria-')) {
-				if (invisible_elements.has(this.name)) {
-					// aria-unsupported-elements
-					component.warn(attribute, {
-						code: 'a11y-aria-attributes',
-						message: `A11y: <${this.name}> should not have aria-* attributes`
-					});
-				}
-
-				const type = name.slice(5);
-				if (!aria_attribute_set.has(type)) {
-					const match = fuzzymatch(type, aria_attributes);
-					let message = `A11y: Unknown aria attribute 'aria-${type}'`;
-					if (match) message += ` (did you mean '${match}'?)`;
-
-					component.warn(attribute, {
-						code: 'a11y-unknown-aria-attribute',
-						message
-					});
-				}
-
-				if (name === 'aria-hidden' && /^h[1-6]$/.test(this.name)) {
-					component.warn(attribute, {
-						code: 'a11y-hidden',
-						message: `A11y: <${this.name}> element should not be hidden`
-					});
-				}
-			}
-
-			// aria-role
-			if (name === 'role') {
-				if (invisible_elements.has(this.name)) {
-					// aria-unsupported-elements
-					component.warn(attribute, {
-						code: 'a11y-misplaced-role',
-						message: `A11y: <${this.name}> should not have role attribute`
-					});
-				}
-
-				const value = attribute.get_static_value();
-				// @ts-ignore
-				if (value && !aria_role_set.has(value)) {
-					// @ts-ignore
-					const match = fuzzymatch(value, aria_roles);
-					let message = `A11y: Unknown role '${value}'`;
-					if (match) message += ` (did you mean '${match}'?)`;
-
-					component.warn(attribute, {
-						code: 'a11y-unknown-role',
-						message
-					});
-				}
-			}
-
-			// no-access-key
-			if (name === 'accesskey') {
-				component.warn(attribute, {
-					code: 'a11y-accesskey',
-					message: 'A11y: Avoid using accesskey'
-				});
-			}
-
-			// no-autofocus
-			if (name === 'autofocus') {
-				component.warn(attribute, {
-					code: 'a11y-autofocus',
-					message: 'A11y: Avoid using autofocus'
-				});
-			}
-
-			// scope
-			if (name === 'scope' && this.name !== 'th') {
-				component.warn(attribute, {
-					code: 'a11y-misplaced-scope',
-					message: 'A11y: The scope attribute should only be used with <th> elements'
-				});
-			}
-
-			// tabindex-no-positive
-			if (name === 'tabindex') {
-				const value = attribute.get_static_value();
-				// @ts-ignore todo is tabindex=true correct case?
-				if (!isNaN(value) && +value > 0) {
-					component.warn(attribute, {
-						code: 'a11y-positive-tabindex',
-						message: 'A11y: avoid tabindex values above zero'
-					});
-				}
-			}
-
 
 			if (/(^[0-9-.])|[\^$@%&#?!|()[\]{}^*+~;]/.test(name)) {
 				component.error(attribute, {
@@ -349,105 +152,6 @@ export default class Element extends Node {
 
 			attribute_map.set(attribute.name, attribute);
 		});
-	}
-
-	validate_special_cases() {
-		const { component, attributes, handlers } = this;
-		const attribute_map = new Map();
-		const handlers_map = new Map();
-
-		attributes.forEach(attribute => (
-			attribute_map.set(attribute.name, attribute)
-		));
-
-		handlers.forEach(handler => (
-			handlers_map.set(handler.name, handler)
-		));
-
-		if (this.name === 'a') {
-			const href_attribute = attribute_map.get('href') || attribute_map.get('xlink:href');
-			const id_attribute = attribute_map.get('id');
-			const name_attribute = attribute_map.get('name');
-
-			if (href_attribute) {
-				const href_value = href_attribute.get_static_value();
-
-				if (href_value === '' || href_value === '#' || /^\W*javascript:/i.test(href_value)) {
-					component.warn(href_attribute, {
-						code: 'a11y-invalid-attribute',
-						message: `A11y: '${href_value}' is not a valid ${href_attribute.name} attribute`
-					});
-				}
-			} else {
-				const id_attribute_valid = id_attribute && id_attribute.get_static_value() !== '';
-				const name_attribute_valid = name_attribute && name_attribute.get_static_value() !== '';
-
-				if (!id_attribute_valid && !name_attribute_valid) {
-					component.warn(this, {
-						code: 'a11y-missing-attribute',
-						message: 'A11y: <a> element should have an href attribute'
-					});
-				}
-			}
-		} else {
-			const required_attributes = a11y_required_attributes[this.name];
-			if (required_attributes) {
-				const has_attribute = required_attributes.some(name => attribute_map.has(name));
-
-				if (!has_attribute) {
-					should_have_attribute(this, required_attributes);
-				}
-			}
-		}
-
-		if (this.name === 'input') {
-			const type = attribute_map.get('type');
-			if (type && type.get_static_value() === 'image') {
-				const required_attributes = ['alt', 'aria-label', 'aria-labelledby'];
-				const has_attribute = required_attributes.some(name => attribute_map.has(name));
-
-				if (!has_attribute) {
-					should_have_attribute(this, required_attributes, 'input type="image"');
-				}
-			}
-		}
-
-		if (this.name === 'img') {
-			const alt_attribute = attribute_map.get('alt');
-			const aria_hidden_attribute = attribute_map.get('aria-hidden');
-
-			const aria_hidden_exist = aria_hidden_attribute && aria_hidden_attribute.get_static_value();
-
-			if (alt_attribute && !aria_hidden_exist) {
-				const alt_value = alt_attribute.get_static_value();
-
-				if (/\b(image|picture|photo)\b/i.test(alt_value)) {
-					component.warn(this, {
-						code: 'a11y-img-redundant-alt',
-						message: 'A11y: Screenreaders already announce <img> elements as an image.'
-					});
-				}
-			}
-		}
-
-		if (this.name === 'label') {
-			const has_input_child = this.children.some(i => (i instanceof Element && a11y_labelable.has(i.name) ));
-			if (!attribute_map.has('for') && !has_input_child) {
-				component.warn(this, {
-					code: 'a11y-label-has-associated-control',
-					message: 'A11y: A form label must be associated with a control.'
-				});
-			}
-		}
-
-		if (a11y_no_onchange.has(this.name)) {
-			if (handlers_map.has('change') && !handlers_map.has('blur')) {
-				component.warn(this, {
-					code: 'a11y-no-onchange',
-					message: 'A11y: on:blur must be used instead of on:change, unless absolutely necessary and it causes no negative consequences for keyboard only or screen reader users.'
-				});
-			}
-		}
 	}
 
 	validate_bindings() {
@@ -598,21 +302,6 @@ export default class Element extends Node {
 		});
 	}
 
-	validate_content() {
-		if (!a11y_required_content.has(this.name)) return;
-		if (
-			this.bindings
-				.some((binding) => ['textContent', 'innerHTML'].includes(binding.name))
-		) return;
-
-		if (this.children.length === 0) {
-			this.component.warn(this, {
-				code: 'a11y-missing-content',
-				message: `A11y: <${this.name}> element should have child content`
-			});
-		}
-	}
-
 	add_css_class() {
 		const { id } = this.component.stylesheet;
 
@@ -640,20 +329,4 @@ export default class Element extends Node {
 			);
 		}
 	}
-}
-
-function should_have_attribute(
-	node,
-	attributes: string[],
-	name = node.name
-) {
-	const article = /^[aeiou]/.test(attributes[0]) ? 'an' : 'a';
-	const sequence = attributes.length > 1 ?
-		attributes.slice(0, -1).join(', ') + ` or ${attributes[attributes.length - 1]}` :
-		attributes[0];
-
-	node.component.warn(node, {
-		code: 'a11y-missing-attribute',
-		message: `A11y: <${name}> element should have ${article} ${sequence} attribute`
-	});
 }
