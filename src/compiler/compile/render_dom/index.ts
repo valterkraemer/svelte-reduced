@@ -243,8 +243,6 @@ export default function dom(
 
 				${unknown_props_check}
 
-				${renderer.binding_groups.size > 0 && b`const $$binding_groups = [${[...renderer.binding_groups.keys()].map(_ => x`[]`)}];`}
-
 				${component.partly_hoisted}
 
 				${set && b`$$self.$$set = ${set};`}

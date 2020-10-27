@@ -365,6 +365,6 @@ function is_indirectly_bound_value(attribute: AttributeWrapper) {
 			(element.node.name === 'input' &&
 				element.node.bindings.some(
 					(binding) =>
-						/checked|group/.test(binding.name)
+						/checked/.test(binding.name)
 				)));
 }

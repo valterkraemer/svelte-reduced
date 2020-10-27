@@ -227,22 +227,6 @@ export default class Element extends Node {
 					if (type === 'radio') message += ' — for <input type="radio">, use \'group\' binding';
 					component.error(binding, { code: 'invalid-binding', message });
 				}
-			} else if (name === 'group') {
-				if (this.name !== 'input') {
-					component.error(binding, {
-						code: 'invalid-binding',
-						message: `'group' is not a valid binding on <${this.name}> elements`
-					});
-				}
-
-				const type = check_type_attribute();
-
-				if (type !== 'checkbox' && type !== 'radio') {
-					component.error(binding, {
-						code: 'invalid-binding',
-						message: '\'group\' binding can only be used with <input type="checkbox"> or <input type="radio">'
-					});
-				}
 			} else if (name === 'files') {
 				if (this.name !== 'input') {
 					component.error(binding, {
