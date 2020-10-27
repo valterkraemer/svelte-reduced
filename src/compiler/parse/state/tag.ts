@@ -5,7 +5,6 @@ import { decode_character_references } from '../utils/html';
 import { is_void } from '../../utils/names';
 import { Parser } from '../index';
 import { Directive, DirectiveType, TemplateNode, Text } from '../../interfaces';
-import fuzzymatch from '../../utils/fuzzymatch';
 import list from '../../utils/list';
 
 // eslint-disable-next-line no-useless-escape
@@ -172,10 +171,7 @@ function read_tag_name(parser: Parser) {
 	if (meta_tags.has(name)) return name;
 
 	if (name.startsWith('svelte:')) {
-		const match = fuzzymatch(name.slice(7), valid_meta_tags);
-
-		let message = `Valid <svelte:...> tag names are ${list(valid_meta_tags)}`;
-		if (match) message += ` (did you mean '${match}'?)`;
+		const message = `Valid <svelte:...> tag names are ${list(valid_meta_tags)}`;
 
 		parser.error({
 			code: 'invalid-tag-name',

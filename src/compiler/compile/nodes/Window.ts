@@ -2,7 +2,6 @@ import Node from './shared/Node';
 import Binding from './Binding';
 import EventHandler from './EventHandler';
 import flatten_reference from '../utils/flatten_reference';
-import fuzzymatch from '../../utils/fuzzymatch';
 import list from '../../utils/list';
 
 const valid_bindings = [
@@ -43,7 +42,7 @@ export default class Window extends Node {
 					const match = (
 						node.name === 'width' ? 'innerWidth' :
 							node.name === 'height' ? 'innerHeight' :
-								fuzzymatch(node.name, valid_bindings)
+								false
 					);
 
 					const message = `'${node.name}' is not a valid binding on <svelte:window>`;
