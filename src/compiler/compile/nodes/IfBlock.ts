@@ -17,7 +17,5 @@ export default class IfBlock extends AbstractBlock {
 		this.else = info.else
 			? new ElseBlock(component, this, scope, info.else)
 			: null;
-
-		this.warn_if_empty_block();
 	}
 }

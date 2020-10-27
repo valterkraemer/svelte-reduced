@@ -22,7 +22,7 @@ export default class InlineComponent extends Node {
 		super(component, parent, scope, info);
 
 		const name = info.name.split('.')[0]; // accommodate namespaces
-		component.warn_if_undefined(name, info, scope);
+		component.warn_if_undefined(name, info);
 		component.add_reference(name);
 
 		this.name = info.name;

@@ -1,7 +1,6 @@
 import { walk } from 'estree-walker';
-import { getLocator } from 'locate-character';
 import Stats from '../Stats';
-import { globals, reserved, is_valid } from '../utils/names';
+import { reserved, is_valid } from '../utils/names';
 import { namespaces } from '../utils/namespaces';
 import create_module from './create_module';
 import {
@@ -14,12 +13,10 @@ import Stylesheet from './css/Stylesheet';
 import { test } from '../config';
 import Fragment from './nodes/Fragment';
 import internal_exports from './internal_exports';
-import { Ast, CompileOptions, Var, Warning, CssResult } from '../interfaces';
+import { Ast, CompileOptions, Var, CssResult } from '../interfaces';
 import error from '../utils/error';
-import get_code_frame from '../utils/get_code_frame';
 import flatten_reference from './utils/flatten_reference';
 import is_reference from 'is-reference';
-import TemplateScope from './nodes/shared/TemplateScope';
 import get_object from './utils/get_object';
 import { Node, ImportDeclaration, Identifier, Program, ExpressionStatement, AssignmentExpression, Literal } from 'estree';
 import check_graph_for_cycles from './utils/check_graph_for_cycles';
@@ -34,7 +31,6 @@ interface ComponentOptions {
 
 export default class Component {
 	stats: Stats;
-	warnings: Warning[];
 
 	ast: Ast;
 	original_ast: Ast;
@@ -74,7 +70,6 @@ export default class Component {
 	indirect_dependencies: Map<string, Set<string>> = new Map();
 
 	file: string;
-	locate: (c: number) => { line: number; column: number };
 
 	elements: Element[] = [];
 	stylesheet: Stylesheet;
@@ -88,13 +83,11 @@ export default class Component {
 		source: string,
 		name: string,
 		compile_options: CompileOptions,
-		stats: Stats,
-		warnings: Warning[]
+		stats: Stats
 	) {
 		this.name = { type: 'Identifier', name };
 
 		this.stats = stats;
-		this.warnings = warnings;
 		this.ast = ast;
 		this.source = source;
 		this.compile_options = compile_options;
@@ -115,7 +108,6 @@ export default class Component {
 					.replace(process.cwd(), '')
 					.replace(/^[/\\]/, '')
 				: compile_options.filename);
-		this.locate = getLocator(this.source, { offsetLine: 1 });
 
 		// styles
 		this.stylesheet = new Stylesheet(
@@ -284,7 +276,7 @@ export default class Component {
 			js,
 			css,
 			ast: this.original_ast,
-			warnings: this.warnings,
+			warnings: [], // Keep REPL happy
 			vars: this.vars
 				.filter(v => !v.global && !v.internal)
 				.map(v => ({
@@ -366,35 +358,6 @@ export default class Component {
 		});
 	}
 
-	warn(
-		pos: {
-			start: number;
-			end: number;
-		},
-		warning: {
-			code: string;
-			message: string;
-		}
-	) {
-
-		const start = this.locate(pos.start);
-		const end = this.locate(pos.end);
-
-		const frame = get_code_frame(this.source, start.line - 1, start.column);
-
-		this.warnings.push({
-			code: warning.code,
-			message: warning.message,
-			frame,
-			start,
-			end,
-			pos: pos.start,
-			filename: this.compile_options.filename,
-			toString: () =>
-				`${warning.message} (${start.line}:${start.column})\n${frame}`
-		});
-	}
-
 	extract_imports(node) {
 		this.imports.push(node);
 	}
@@ -459,20 +422,8 @@ export default class Component {
 	}
 
 	walk_module_js() {
-		const component = this;
 		const script = this.ast.module;
 		if (!script) return;
-
-		walk(script.content, {
-			enter(node: Node) {
-				if (node.type === 'LabeledStatement' && node.label.name === '$') {
-					component.warn(node as any, {
-						code: 'module-script-reactive-declaration',
-						message: '$: has no effect in a module script'
-					});
-				}
-			}
-		});
 
 		const { scope, globals } = create_scopes(script.content);
 		this.module_scope = scope;
@@ -736,24 +687,13 @@ export default class Component {
 	}
 
 	warn_on_undefined_store_value_references(node, parent, scope: Scope) {
-		if (
-			node.type === 'LabeledStatement' &&
-			node.label.name === '$' &&
-			parent.type !== 'Program'
-		) {
-			this.warn(node as any, {
-				code: 'non-top-level-reactive-declaration',
-				message: '$: has no effect outside of the top-level'
-			});
-		}
-
 		if (is_reference(node as Node, parent as Node)) {
 			const object = get_object(node);
 			const { name } = object;
 
 			if (name[0] === '$') {
 				if (!scope.has(name)) {
-					this.warn_if_undefined(name, object, null);
+					this.warn_if_undefined(name, object);
 				}
 
 				if (name[1] !== '$' && scope.has(name.slice(1)) && scope.find_owner(name.slice(1)) !== this.instance_scope) {
@@ -1179,7 +1119,7 @@ export default class Component {
 		unsorted_reactive_declarations.forEach(add_declaration);
 	}
 
-	warn_if_undefined(name: string, node, template_scope: TemplateScope) {
+	warn_if_undefined(name: string, node) {
 		if (name[0] === '$') {
 			if (name === '$' || name[1] === '$' && !is_reserved_keyword(name)) {
 				this.error(node, {
@@ -1189,24 +1129,7 @@ export default class Component {
 			}
 
 			this.has_reactive_assignments = true; // TODO does this belong here?
-
-			if (is_reserved_keyword(name)) return;
-
-			name = name.slice(1);
 		}
-
-		if (this.var_lookup.has(name) && !this.var_lookup.get(name).global) return;
-		if (template_scope && template_scope.names.has(name)) return;
-		if (globals.has(name) && node.type !== 'InlineComponent') return;
-
-		let message = `'${name}' is not defined`;
-		if (!this.ast.instance)
-			message += `. Consider adding a <script> block with 'export let ${name}' to declare a prop`;
-
-		this.warn(node, {
-			code: 'missing-declaration',
-			message
-		});
 	}
 }
 

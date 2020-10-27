@@ -101,13 +101,6 @@ export default class Element extends Node {
 	}
 
 	validate() {
-		if (this.component.var_lookup.has(this.name) && this.component.var_lookup.get(this.name).imported) {
-			this.component.warn(this, {
-				code: 'component-name-lowercase',
-				message: `<${this.name}> will be treated as an HTML element unless it begins with a capital letter`
-			});
-		}
-
 		this.validate_attributes();
 		this.validate_bindings();
 	}
@@ -124,13 +117,6 @@ export default class Element extends Node {
 				component.error(attribute, {
 					code: 'illegal-attribute',
 					message: `'${name}' is not a valid attribute name`
-				});
-			}
-
-			if (name === 'is') {
-				component.warn(attribute, {
-					code: 'avoid-is',
-					message: 'The \'is\' attribute is not supported cross-browser and should be avoided'
 				});
 			}
 

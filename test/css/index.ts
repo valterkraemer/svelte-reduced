@@ -11,16 +11,6 @@ function try_require(file) {
 	}
 }
 
-function normalize_warning(warning) {
-	warning.frame = warning.frame
-		.replace(/^\n/, '')
-		.replace(/^\t+/gm, '')
-		.replace(/\s+$/gm, '');
-	delete warning.filename;
-	delete warning.toString;
-	return warning;
-}
-
 function create(code) {
 	const fn = new Function('module', 'exports', 'require', code);
 
@@ -58,16 +48,10 @@ describe('css', () => {
 				.replace(/\s+$/, '')
 				.replace(/\r/g, '');
 
-			const expected_warnings = (config.warnings || []).map(normalize_warning);
-
 			const dom = svelte.compile(
 				input,
 				Object.assign(config.compileOptions || {}, { format: 'cjs' })
 			);
-
-			const dom_warnings = dom.warnings.map(normalize_warning);
-
-			assert.deepEqual(dom_warnings.map(normalize_warning), expected_warnings);
 
 			fs.writeFileSync(`${__dirname}/samples/${dir}/_actual.css`, dom.css.code);
 			const expected = {

@@ -9,7 +9,6 @@ export default function compile(source: string, options: CompileOptions = {}) {
 	options = Object.assign({ generate: 'dom' }, options);
 
 	const stats = new Stats();
-	const warnings = [];
 
 	stats.start('parse');
 	const ast = parse(source, options);
@@ -21,8 +20,7 @@ export default function compile(source: string, options: CompileOptions = {}) {
 		source,
 		options.name || get_name_from_filename(options.filename) || 'Component',
 		options,
-		stats,
-		warnings
+		stats
 	);
 	stats.stop('create component');
 

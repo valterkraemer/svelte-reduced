@@ -16,25 +16,16 @@ describe('validate', () => {
 
 		(solo ? it.only : skip ? it.skip : it)(dir, () => {
 			const input = fs.readFileSync(`${__dirname}/samples/${dir}/input.svelte`, 'utf-8').replace(/\s+$/, '').replace(/\r/g, '');
-			const expected_warnings = tryToLoadJson(`${__dirname}/samples/${dir}/warnings.json`) || [];
 			const expected_errors = tryToLoadJson(`${__dirname}/samples/${dir}/errors.json`);
 			const options = tryToLoadJson(`${__dirname}/samples/${dir}/options.json`);
 
 			let error;
 
 			try {
-				const { warnings } = svelte.compile(input, {
+				svelte.compile(input, {
 					generate: false,
 					...options
 				});
-
-				assert.deepEqual(warnings.map(w => ({
-					code: w.code,
-					message: w.message,
-					pos: w.pos,
-					start: w.start,
-					end: w.end
-				})), expected_warnings);
 			} catch (e) {
 				error = e;
 			}

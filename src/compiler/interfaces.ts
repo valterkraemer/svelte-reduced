@@ -78,17 +78,6 @@ export interface Ast {
 	module: Script;
 }
 
-export interface Warning {
-	start?: { line: number; column: number; pos?: number };
-	end?: { line: number; column: number };
-	pos?: number;
-	code: string;
-	message: string;
-	filename?: string;
-	frame?: string;
-	toString: () => string;
-}
-
 export type ModuleFormat = 'esm' | 'cjs';
 
 export interface CompileOptions {
