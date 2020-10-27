@@ -1,5 +1,4 @@
 import Wrapper from '../shared/Wrapper';
-import BindingWrapper from '../Element/Binding';
 import Renderer from '../../Renderer';
 import Block from '../../Block';
 import InlineComponent from '../../../nodes/InlineComponent';
@@ -7,7 +6,6 @@ import FragmentWrapper from '../Fragment';
 import { sanitize } from '../../../../utils/names';
 import { b, x, p } from 'code-red';
 import Attribute from '../../../nodes/Attribute';
-import bind_this from '../shared/bind_this';
 import { Node, Identifier, ObjectExpression } from 'estree';
 import EventHandler from '../Element/EventHandler';
 import { string_to_member_expression } from '../../../utils/string_to_member_expression';
@@ -139,10 +137,6 @@ export default class InlineComponentWrapper extends Wrapper {
 
 		const munged_bindings = this.node.bindings.map(binding => {
 			component.has_reactive_assignments = true;
-
-			if (binding.name === 'this') {
-				return bind_this(component, block, new BindingWrapper(block, binding, this), this.var);
-			}
 
 			const id = component.get_unique_name(`${this.var.name}_${binding.name}_binding`);
 			renderer.add_to_context(id.name);

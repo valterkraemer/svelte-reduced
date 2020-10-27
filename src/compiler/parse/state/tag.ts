@@ -262,7 +262,7 @@ function read_attribute(parser: Parser, unique_names: Set<string>) {
 	if (type) {
 		const directive_name = name.slice(colon_index + 1);
 
-		if (type === 'Binding' && directive_name !== 'this') {
+		if (type === 'Binding') {
 			check_unique(directive_name);
 		} else if (type !== 'EventHandler') {
 			check_unique(name);

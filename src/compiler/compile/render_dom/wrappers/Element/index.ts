@@ -13,7 +13,6 @@ import StyleAttributeWrapper from './StyleAttribute';
 import Binding from './Binding';
 import add_to_set from '../../../utils/add_to_set';
 import { add_event_handler } from '../shared/add_event_handlers';
-import bind_this from '../shared/bind_this';
 import { Identifier } from 'estree';
 import EventHandler from './EventHandler';
 import MustacheTagWrapper from '../MustacheTag';
@@ -225,12 +224,9 @@ export default class ElementWrapper extends Wrapper {
 			.map(event => ({
 				events: event.event_names,
 				bindings: this.bindings
-					.filter(binding => binding.node.name !== 'this')
 					.filter(binding => event.filter(this.node, binding.node.name))
 			}))
 			.filter(group => group.bindings.length);
-
-		const this_binding = this.bindings.find(b => b.node.name === 'this');
 
 		function getOrder (item: OrderedAttribute) {
 			if (item instanceof EventHandler) {
@@ -244,16 +240,13 @@ export default class ElementWrapper extends Wrapper {
 
 		([
 			...binding_groups,
-			...this.event_handlers,
-			this_binding
-		] as OrderedAttribute[])
+			...this.event_handlers
+		])
 			.filter(Boolean)
 			.sort((a, b) => getOrder(a) - getOrder(b))
 			.forEach(item => {
 				if (item instanceof EventHandler) {
 					add_event_handler(block, this.var, item);
-				} else if (item instanceof Binding) {
-					this.add_this_binding(block, item);
 				} else {
 					this.add_bindings(block, item);
 				}
@@ -340,15 +333,6 @@ export default class ElementWrapper extends Wrapper {
 				b`if (${some_initial_state_is_undefined}) @add_render_callback(${callback});`
 			);
 		}
-	}
-
-	add_this_binding(block: Block, this_binding: Binding) {
-		const { renderer } = this;
-
-		renderer.component.has_reactive_assignments = true;
-
-		const binding_callback = bind_this(renderer.component, block, this_binding, this.var);
-		block.chunks.mount.push(binding_callback);
 	}
 
 	add_attributes(block: Block) {
