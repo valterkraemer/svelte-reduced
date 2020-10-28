@@ -1,7 +1,6 @@
 import read_expression from '../read/expression';
 import read_script from '../read/script';
 import read_style from '../read/style';
-import { decode_character_references } from '../utils/html';
 import { is_void } from '../../utils/names';
 import { Parser } from '../index';
 import { Directive, DirectiveType, TemplateNode, Text } from '../../interfaces';
@@ -334,7 +333,7 @@ function read_sequence(parser: Parser, done: () => boolean): TemplateNode[] {
 
 	function flush() {
 		if (current_chunk.raw) {
-			current_chunk.data = decode_character_references(current_chunk.raw);
+			current_chunk.data = current_chunk.raw;
 			current_chunk.end = parser.index;
 			chunks.push(current_chunk);
 		}
