@@ -31,6 +31,6 @@ export default class Text extends Node {
 
 		if (parent_element.type === 'InlineComponent') return parent_element.children.length === 1 && this === parent_element.children[0];
 
-		return parent_element.namespace || elements_without_text.has(parent_element.name);
+		return elements_without_text.has(parent_element.name);
 	}
 }

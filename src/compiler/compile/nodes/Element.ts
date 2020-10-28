@@ -11,18 +11,6 @@ import TemplateScope from './shared/TemplateScope';
 import { INode } from './interfaces';
 import Component from '../Component';
 
-function get_namespace(parent: Element, explicit_namespace: string) {
-	const parent_element = parent.find_nearest(/^Element/);
-
-	if (!parent_element) {
-		return explicit_namespace || null;
-	}
-
-	if (parent_element.name.toLowerCase() === 'foreignobject') return null;
-
-	return parent_element.namespace;
-}
-
 export default class Element extends Node {
 	type: 'Element';
 	name: string;
@@ -32,13 +20,10 @@ export default class Element extends Node {
 	classes: Class[] = [];
 	handlers: EventHandler[] = [];
 	children: INode[];
-	namespace: string;
 
 	constructor(component: Component, parent, scope, info: any) {
 		super(component, parent, scope, info);
 		this.name = info.name;
-
-		this.namespace = get_namespace(parent, component.namespace);
 
 		if (this.name === 'textarea') {
 			if (info.children.length > 0) {
@@ -69,9 +54,6 @@ export default class Element extends Node {
 		info.attributes.forEach(node => {
 			switch (node.type) {
 				case 'Attribute':
-					// special case
-					if (node.name === 'xmlns') this.namespace = node.value[0].data;
-
 					this.attributes.push(new Attribute(component, this, scope, node));
 					break;
 

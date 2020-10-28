@@ -148,7 +148,6 @@ export default class AttributeWrapper extends BaseAttributeWrapper {
 	}
 
 	get_metadata() {
-		if (this.parent.node.namespace) return null;
 		const metadata = attribute_lookup[this.name];
 		if (metadata && metadata.applies_to && !metadata.applies_to.includes(this.parent.node.name)) return null;
 		return metadata;

@@ -1,6 +1,5 @@
 import { walk } from 'estree-walker';
 import { reserved, is_valid } from '../utils/names';
-import { namespaces } from '../utils/namespaces';
 import create_module from './create_module';
 import {
 	create_scopes,
@@ -23,7 +22,6 @@ import { is_reserved_keyword } from './utils/reserved_keywords';
 import Element from './nodes/Element';
 
 interface ComponentOptions {
-	namespace?: string;
 	accessors?: boolean;
 }
 
@@ -37,7 +35,6 @@ export default class Component {
 	instance_scope_map: WeakMap<Node, Scope>;
 
 	component_options: ComponentOptions;
-	namespace: string;
 	accessors: boolean;
 
 	vars: Var[] = [];
@@ -110,9 +107,6 @@ export default class Component {
 		this.component_options = process_component_options(
 			this
 		);
-		this.namespace =
-			namespaces[this.component_options.namespace] ||
-			this.component_options.namespace;
 
 		this.walk_instance_js_pre_template();
 

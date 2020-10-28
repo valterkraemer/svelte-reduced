@@ -147,7 +147,7 @@ export default class ElementWrapper extends Wrapper {
 
 		// insert static children with textContent or innerHTML
 		const can_use_textcontent = this.can_use_textcontent();
-		if (!this.node.namespace && (this.can_use_innerhtml || can_use_textcontent) && this.fragment.nodes.length > 0) {
+		if ((this.can_use_innerhtml || can_use_textcontent) && this.fragment.nodes.length > 0) {
 			if (this.fragment.nodes.length === 1 && this.fragment.nodes[0].node.type === 'Text') {
 				block.chunks.create.push(
 					b`${node}.textContent = ${string_literal((this.fragment.nodes[0] as TextWrapper).data)};`
@@ -203,11 +203,7 @@ export default class ElementWrapper extends Wrapper {
 	}
 
 	get_render_statement() {
-		const { name, namespace } = this.node;
-
-		if (namespace) {
-			return x`@_document.createElementNS("${namespace}", "${name}")`;
-		}
+		const { name } = this.node;
 
 		return x`@element("${name}")`;
 	}
