@@ -1,4 +1,0 @@
-[{
-	"code": "invalid-script",
-	"message": "A component can only have one <script context=\"module\"> element"
-}]

@@ -5,7 +5,6 @@ export default {
 				name: '$$props',
 				export_name: null,
 				injected: true,
-				module: false,
 				mutated: false,
 				reassigned: false,
 				referenced: true,

@@ -5,7 +5,6 @@ export default {
 				name: 'NS',
 				export_name: null,
 				injected: false,
-				module: false,
 				mutated: false,
 				reassigned: false,
 				referenced: true,

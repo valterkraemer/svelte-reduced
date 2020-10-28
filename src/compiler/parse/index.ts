@@ -211,7 +211,6 @@ export default function parse(
 	}
 
 	const instance_scripts = parser.js.filter(script => script.context === 'default');
-	const module_scripts = parser.js.filter(script => script.context === 'module');
 
 	if (instance_scripts.length > 1) {
 		parser.error({
@@ -220,17 +219,9 @@ export default function parse(
 		});
 	}
 
-	if (module_scripts.length > 1) {
-		parser.error({
-			code: 'invalid-script',
-			message: 'A component can only have one <script context="module"> element'
-		});
-	}
-
 	return {
 		html: parser.html,
 		css: parser.css[0],
-		instance: instance_scripts[0],
-		module: module_scripts[0]
+		instance: instance_scripts[0]
 	};
 }

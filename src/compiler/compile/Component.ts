@@ -34,7 +34,6 @@ export default class Component {
 	name: Identifier;
 	compile_options: CompileOptions;
 	fragment: Fragment;
-	module_scope: Scope;
 	instance_scope: Scope;
 	instance_scope_map: WeakMap<Node, Scope>;
 
@@ -90,8 +89,7 @@ export default class Component {
 		this.original_ast = {
 			html: ast.html,
 			css: ast.css,
-			instance: ast.instance && JSON.parse(JSON.stringify(ast.instance)),
-			module: ast.module
+			instance: ast.instance && JSON.parse(JSON.stringify(ast.instance))
 		};
 
 		this.file =
@@ -117,7 +115,6 @@ export default class Component {
 			namespaces[this.component_options.namespace] ||
 			this.component_options.namespace;
 
-		this.walk_module_js();
 		this.walk_instance_js_pre_template();
 
 		this.fragment = new Fragment(this, ast.html);
@@ -241,13 +238,7 @@ export default class Component {
 				compile_options.sveltePath,
 				imported_helpers,
 				referenced_globals,
-				this.imports,
-				this.vars
-					.filter(variable => variable.module && variable.export_name)
-					.map(variable => ({
-						name: variable.name,
-						as: variable.export_name
-					}))
+				this.imports
 			);
 
 			css = result.css;
@@ -266,7 +257,6 @@ export default class Component {
 					name: v.name,
 					export_name: v.export_name || null,
 					injected: v.injected || false,
-					module: v.module || false,
 					mutated: v.mutated || false,
 					reassigned: v.reassigned || false,
 					referenced: v.referenced || false,
@@ -394,66 +384,6 @@ export default class Component {
 				return false;
 			return true;
 		});
-	}
-
-	walk_module_js() {
-		const script = this.ast.module;
-		if (!script) return;
-
-		const { scope, globals } = create_scopes(script.content);
-		this.module_scope = scope;
-
-		scope.declarations.forEach((node, name) => {
-			if (name[0] === '$') {
-				this.error({
-					code: 'illegal-declaration',
-					message: 'The $ prefix is reserved, and cannot be used for variable and import names'
-				});
-			}
-
-			const writable = node.type === 'VariableDeclaration' && (node.kind === 'var' || node.kind === 'let');
-
-			this.add_var({
-				name,
-				module: true,
-				hoistable: true,
-				writable
-			});
-		});
-
-		globals.forEach((_node, name) => {
-			if (name[0] === '$') {
-				this.error({
-					code: 'illegal-subscription',
-					message: 'Cannot reference store value inside <script context="module">'
-				});
-			} else {
-				this.add_var({
-					name,
-					global: true,
-					hoistable: true
-				});
-			}
-		});
-
-		const { body } = script.content;
-		let i = body.length;
-		while (--i >= 0) {
-			const node = body[i];
-			if (node.type === 'ImportDeclaration') {
-				this.extract_imports(node);
-				body.splice(i, 1);
-			}
-
-			if (/^Export/.test(node.type)) {
-				const replacement = this.extract_exports(node);
-				if (replacement) {
-					body[i] = replacement;
-				} else {
-					body.splice(i, 1);
-				}
-			}
-		}
 	}
 
 	walk_instance_js_pre_template() {
@@ -623,7 +553,7 @@ export default class Component {
 
 		const component = this;
 		const { content } = script;
-		const { instance_scope, module_scope, instance_scope_map: map } = this;
+		const { instance_scope, instance_scope_map: map } = this;
 
 		let scope = instance_scope;
 
@@ -642,9 +572,7 @@ export default class Component {
 					names.forEach(name => {
 						const scope_owner = scope.find_owner(name);
 						if (
-							scope_owner !== null
-								? scope_owner === instance_scope
-								: module_scope && module_scope.has(name)
+							scope_owner !== null && scope_owner === instance_scope
 						) {
 							const variable = component.var_lookup.get(name);
 							variable[deep ? 'mutated' : 'reassigned'] = true;
@@ -830,12 +758,6 @@ export default class Component {
 					if (v.export_name) return false;
 
 					if (this.var_lookup.get(name).reassigned) return false;
-					if (
-						this.vars.find(
-							variable => variable.name === name && variable.module
-						)
-					)
-						return false;
 
 					return true;
 				});

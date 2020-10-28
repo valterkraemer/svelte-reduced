@@ -53,7 +53,7 @@ export default function dom(
 
 	const uses_props = component.var_lookup.has('$$props');
 	const $$props = uses_props ? '$$new_props' : '$$props';
-	const props = component.vars.filter(variable => !variable.module && variable.export_name);
+	const props = component.vars.filter(variable => variable.export_name);
 	const writable_props = props.filter(variable => variable.writable);
 
 	const set = (uses_props || writable_props.length > 0)
@@ -167,8 +167,6 @@ export default function dom(
 	}
 
 	body.push(b`
-		${component.extract_javascript(component.ast.module)}
-
 		${component.fully_hoisted}
 	`);
 
@@ -271,7 +269,7 @@ export default function dom(
 	}
 
 	const prop_indexes = x`{
-		${props.filter(v => v.export_name && !v.module).map(v => p`${v.export_name}: ${renderer.context_lookup.get(v.name).index}`)}
+		${props.filter(v => v.export_name).map(v => p`${v.export_name}: ${renderer.context_lookup.get(v.name).index}`)}
 	}` as ObjectExpression;
 
 	let dirty;

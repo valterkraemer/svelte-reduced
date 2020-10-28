@@ -4,7 +4,6 @@ export default {
 			{
 				export_name: null,
 				injected: false,
-				module: false,
 				mutated: false,
 				name: 'Bar',
 				reassigned: false,
@@ -14,7 +13,6 @@ export default {
 			{
 				export_name: null,
 				injected: false,
-				module: false,
 				mutated: false,
 				name: 'foo',
 				reassigned: false,
@@ -24,7 +22,6 @@ export default {
 			{
 				export_name: null,
 				injected: false,
-				module: false,
 				mutated: false,
 				name: 'baz',
 				reassigned: false,

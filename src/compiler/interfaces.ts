@@ -74,7 +74,6 @@ export interface Ast {
 	html: TemplateNode;
 	css: Style;
 	instance: Script;
-	module: Script;
 }
 
 export type ModuleFormat = 'esm' | 'cjs';

@@ -18,7 +18,6 @@ export function invalidate(renderer: Renderer, scope: Scope, node: Node, names: 
 			return variable && (
 				!variable.hoistable &&
 				!variable.global &&
-				!variable.module &&
 				(
 					variable.referenced ||
 					variable.is_reactive_dependency ||

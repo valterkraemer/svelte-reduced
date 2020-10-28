@@ -40,7 +40,7 @@ export default class Renderer {
 		this.component = component;
 		this.options = options;
 
-		component.vars.filter(v => !v.hoistable || (v.export_name && !v.module)).forEach(v => this.add_to_context(v.name));
+		component.vars.filter(v => !v.hoistable || v.export_name).forEach(v => this.add_to_context(v.name));
 
 		reserved_keywords.forEach(keyword => {
 			if (component.var_lookup.has(keyword)) {
@@ -156,12 +156,10 @@ export default class Renderer {
 
 		if (
 			variable && (
-				variable.module || (
-					!variable.referenced &&
-					!variable.is_reactive_dependency &&
-					!variable.export_name &&
-					!name.startsWith('$$')
-				)
+				!variable.referenced &&
+				!variable.is_reactive_dependency &&
+				!variable.export_name &&
+				!name.startsWith('$$')
 			)
 		) {
 			return value || name;
