@@ -9,7 +9,6 @@ export default function create_module(
 	program: any,
 	format: ModuleFormat,
 	name: Identifier,
-	banner: string,
 	sveltePath = 'svelte',
 	helpers: Array<{ name: string; alias: Identifier }>,
 	globals: Array<{ name: string; alias: Identifier }>,
@@ -21,10 +20,10 @@ export default function create_module(
 	globals.sort((a, b) => (a.name < b.name) ? -1 : 1);
 
 	if (format === 'esm') {
-		return esm(program, name, banner, sveltePath, internal_path, helpers, globals, imports);
+		return esm(program, name, sveltePath, internal_path, helpers, globals, imports);
 	}
 
-	if (format === 'cjs') return cjs(program, name, banner, sveltePath, internal_path, helpers, globals, imports);
+	if (format === 'cjs') return cjs(program, name, sveltePath, internal_path, helpers, globals, imports);
 
 	throw new Error(`options.format is invalid (must be ${list(Object.keys(wrappers))})`);
 }
@@ -64,7 +63,6 @@ function get_internal_globals(
 function esm(
 	program: any,
 	name: Identifier,
-	banner: string,
 	sveltePath: string,
 	internal_path: string,
 	helpers: Array<{ name: string; alias: Identifier }>,
@@ -89,8 +87,6 @@ function esm(
 	});
 
 	program.body = b`
-		/* ${banner} */
-
 		${import_declaration}
 		${internal_globals}
 		${imports}
@@ -104,7 +100,6 @@ function esm(
 function cjs(
 	program: any,
 	name: Identifier,
-	banner: string,
 	sveltePath: string,
 	internal_path: string,
 	helpers: Array<{ name: string; alias: Identifier }>,
@@ -164,8 +159,6 @@ function cjs(
 	});
 
 	program.body = b`
-		/* ${banner} */
-
 		"use strict";
 		${internal_requires}
 		${internal_globals}
