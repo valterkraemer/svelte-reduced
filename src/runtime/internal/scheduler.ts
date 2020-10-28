@@ -16,11 +16,6 @@ export function schedule_update() {
 	}
 }
 
-export function tick() {
-	schedule_update();
-	return resolved_promise;
-}
-
 export function add_render_callback(fn) {
 	render_callbacks.push(fn);
 }
