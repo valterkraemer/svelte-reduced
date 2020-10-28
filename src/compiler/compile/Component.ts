@@ -18,7 +18,6 @@ import flatten_reference from './utils/flatten_reference';
 import is_reference from 'is-reference';
 import get_object from './utils/get_object';
 import { Node, ImportDeclaration, Identifier, Program, ExpressionStatement, AssignmentExpression, Literal } from 'estree';
-import check_graph_for_cycles from './utils/check_graph_for_cycles';
 import { print, x, b } from 'code-red';
 import { is_reserved_keyword } from './utils/reserved_keywords';
 import Element from './nodes/Element';
@@ -979,24 +978,6 @@ export default class Component {
 				lookup.get(name).push(declaration);
 			});
 		});
-
-		const cycle = check_graph_for_cycles(unsorted_reactive_declarations.reduce((acc, declaration) => {
-			declaration.assignees.forEach(v => {
-				declaration.dependencies.forEach(w => {
-					if (!declaration.assignees.has(w)) {
-						acc.push([v, w]);
-					}
-				});
-			});
-			return acc;
-		}, []));
-
-		if (cycle && cycle.length) {
-			this.error({
-				code: 'cyclical-reactive-declaration',
-				message: `Cyclical dependency detected: ${cycle.join(' → ')}`
-			});
-		}
 
 		const add_declaration = declaration => {
 			if (this.reactive_declarations.includes(declaration)) return;
