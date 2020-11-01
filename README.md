@@ -1,84 +1,196 @@
-<p>
-  <a href="https://svelte.dev">
-	<img alt="Cybernetically enhanced web apps: Svelte" src="https://sveltejs.github.io/assets/banner.png">
-  </a>
-  <a href="https://www.npmjs.com/package/svelte">
-    <img src="https://img.shields.io/npm/v/svelte.svg" alt="npm version">
-  </a>
-  <a href="https://github.com/sveltejs/svelte/blob/master/LICENSE">
-    <img src="https://img.shields.io/npm/l/svelte.svg" alt="license">
-  </a>
-  <a href="https://svelte.dev/chat">
-    <img src="https://img.shields.io/badge/chat-on%20discord-7289da.svg" alt="Chat">
-  </a>
-</p>
+<img alt="Svelte reduced" src="site/static/svelte-logo-horizontal.svg" width="200">
 
+# svelte-reduced
 
-## What is Svelte?
+https://svelte-reduced.netlify.app
 
-Svelte is a new way to build web applications. It's a compiler that takes your declarative components and converts them into efficient JavaScript that surgically updates the DOM.
+## Introduction
 
-Learn more at the [Svelte website](https://svelte.dev), or stop by the [Discord chatroom](https://svelte.dev/chat).
+I find [Svelte](https://svelte.dev) really cool and wanted to know how it works. Found some good [articles](https://lihautan.com/the-svelte-compiler-handbook/) and [code examples](https://github.com/joshnuss/micro-svelte-compiler) but wanted more. I got lost in the [codebase](https://github.com/sveltejs/svelte) so decided to fork it and simplify it by removing features.
 
+## Code reduction
 
-## Supporting Svelte
+About half is removed
 
-Svelte is an MIT-licensed open source project with its ongoing development made possible entirely by the support of awesome volunteers. If you'd like to support their efforts, please consider:
+|        | Before | After  |
+| :----- | :----- | :----- |
+| Files  | ~180   | ~90    |
+| Lines  | ~20000 | ~9000  |
 
-- [Becoming a backer on Open Collective](https://opencollective.com/svelte).
+## Some of the removed features
 
-Funds donated via Open Collective will be used for compensating expenses related to Svelte's development such as hosting costs. If sufficient donations are received, funds may also be used to support Svelte's development more directly.
+- `{#each ...}`
+- `{#key ...}`
+- `{#await ...}`
+- `use:action`
+- `{@html ...}`
+- `{@debug ...}`
+- `<slot>`
+- `<svelte:x>` elements
+- `<script context="module">`
+- `<select>` support
+- `bind:this`
+- `bind:group`
+- `$$restProps`
+- `getContext` / `setContext`
+- `beforeUpdate` / `afterUpdate`
+- `svelte/store`
+- Spread {...} on attributes
+- Transitions and animations
+- Comments
+- Sourcemaps
+- Warnings
+- SSR
 
+For a more or less complete list check the [Git history](https://github.com/valterkraemer/svelte-reduced/commits/master).
 
-## Development
+## Running
 
-Pull requests are encouraged and always welcome. [Pick an issue](https://github.com/sveltejs/svelte/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) and help us out!
+`npm run dev:site`
 
-To install and work on Svelte locally:
+This will compile the codebase and serve the site.
 
-```bash
-git clone https://github.com/sveltejs/svelte.git
-cd svelte
-npm install
+The site is heavily modified to better support playing around with this codebase (and be able to be exported). It now contains only a subset of the examples and the REPL.
+
+The site hosted on https://svelte-reduced.netlify.app. Don't really know why you would want to use it, but it's there anyway.
+
+## Tests
+
+While removing features I used the existing tests to ensure that I didn't break other features. Number of tests went from ~3000 to ~500.
+
+`npm run test`
+
+## Folder structure
+
 ```
-
-> Do not use Yarn to install the dependencies, as the specific package versions in `package-lock.json` are used to build and test Svelte.
-
-To build the compiler, and all the other modules included in the package:
-
-```bash
-npm run build
+src
+│
+│  # Code used to compile the Svelte components
+└──compiler
+│  │  config.ts
+│  │  index.ts
+│  │  interfaces.ts
+│  │
+│  └──compile
+│  │  │  Component.ts
+│  │  │  create_module.ts
+│  │  │  index.ts
+│  │  │  internal_exports.ts
+│  │  │
+│  │  └──css
+│  │  │    gather_possible_values.ts
+│  │  │    interfaces.ts
+│  │  │    Selector.ts
+│  │  │    Stylesheet.ts
+│  │  │
+│  │  └──nodes
+│  │  │  │  Attribute.ts
+│  │  │  │  Binding.ts
+│  │  │  │  Class.ts
+│  │  │  │  Element.ts
+│  │  │  │  ElseBlock.ts
+│  │  │  │  EventHandler.ts
+│  │  │  │  Fragment.ts
+│  │  │  │  IfBlock.ts
+│  │  │  │  InlineComponent.ts
+│  │  │  │  interfaces.ts
+│  │  │  │  MustacheTag.ts
+│  │  │  │  Text.ts
+│  │  │  │  Window.ts
+│  │  │  │
+│  │  │  └──shared
+│  │  │       AbstractBlock.ts
+│  │  │       Expression.ts
+│  │  │       map_children.ts
+│  │  │       Node.ts
+│  │  │       Tag.ts
+│  │  │       TemplateScope.ts
+│  │  │
+│  │  └──render_dom
+│  │  │  │  Block.ts
+│  │  │  │  index.ts
+│  │  │  │  invalidate.ts
+│  │  │  │  Renderer.ts
+│  │  │  │
+│  │  │  └──wrappers
+│  │  │     │  Fragment.ts
+│  │  │     │  IfBlock.ts
+│  │  │     │  MustacheTag.ts
+│  │  │     │  Text.ts
+│  │  │     │  Window.ts
+│  │  │     │
+│  │  │     └──Element
+│  │  │     │    Attribute.ts
+│  │  │     │    Binding.ts
+│  │  │     │    EventHandler.ts
+│  │  │     │    index.ts
+│  │  │     │    StyleAttribute.ts
+│  │  │     │
+│  │  │     └──InlineComponent
+│  │  │     │    index.ts
+│  │  │     │
+│  │  │     └──shared
+│  │  │          add_event_handlers.ts
+│  │  │          is_dynamic.ts
+│  │  │          Tag.ts
+│  │  │          Wrapper.ts
+│  │  │
+│  │  └──utils
+│  │       add_to_set.ts
+│  │       flatten_reference.ts
+│  │       get_name_from_filename.ts
+│  │       get_object.ts
+│  │       hash.ts
+│  │       replace_object.ts
+│  │       reserved_keywords.ts
+│  │       scope.ts
+│  │       string_to_member_expression.ts
+│  │       stringify.ts
+│  │
+│  │  # Parses a .svelte component into html, css and script
+│  └──parse
+│  │  │  acorn.ts
+│  │  │  index.ts
+│  │  │
+│  │  └──read
+│  │  │    expression.ts
+│  │  │    script.ts
+│  │  │    style.ts
+│  │  │
+│  │  └──utils
+│  │  │    node.ts
+│  │  │
+│  │  └──state
+│  │       fragment.ts
+│  │       mustache.ts
+│  │       tag.ts
+│  │       text.ts
+│  │
+│  └──utils
+│       error.ts
+│       full_char_code_at.ts
+│       link.ts
+│       list.ts
+│       names.ts
+│       nodes_match.ts
+│       patterns.ts
+│       trim.ts
+│
+│  # Functions used in the browser.
+│  # Meaning that its possible to see these functions imported in the REPL's "JS output" tab
+└──runtime
+   │  index.ts
+   │
+   └──internal
+        Component.ts
+        dom.ts
+        environment.ts
+        globals.ts
+        index.ts
+        lifecycle.ts
+        scheduler.ts
+        utils.ts
 ```
-
-To watch for changes and continually rebuild the package (this is useful if you're using [npm link](https://docs.npmjs.com/cli/link.html) to test out changes in a project locally):
-
-```bash
-npm run dev
-```
-
-The compiler is written in [TypeScript](https://www.typescriptlang.org/), but don't let that put you off — it's basically just JavaScript with type annotations. You'll pick it up in no time. If you're using an editor other than [Visual Studio Code](https://code.visualstudio.com/) you may need to install a plugin in order to get syntax highlighting and code hints etc.
-
-
-### Running Tests
-
-```bash
-npm run test
-```
-
-To filter tests, use `-g` (aka `--grep`). For example, to only run tests involving transitions:
-
-```bash
-npm run test -- -g transition
-```
-
-
-## svelte.dev
-
-The source code for https://svelte.dev, including all the documentation, lives in the [site](site) directory. The site is built with [Sapper](https://sapper.svelte.dev).
-
-### Is svelte.dev down?
-
-Probably not, but it's possible. If you can't seem to access any `.dev` sites, check out [this SuperUser question and answer](https://superuser.com/q/1413402).
 
 ## License
 
